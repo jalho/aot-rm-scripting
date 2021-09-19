@@ -1,0 +1,1331 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\froman\fprq2\fcharset0 Times New Roman;}{\f1\fswiss\fprq2\fcharset0 Arial;}{\f2\froman\fprq2\fcharset2 Symbol;}{\f3\fswiss\fprq2\fcharset128 Arial Unicode MS;}{\f4\fswiss\fcharset0 Arial;}}
+{\colortbl ;\red0\green0\blue0;}
+{\stylesheet{ Normal;}{\s1 heading 1;}{\s2 heading 2;}{\s3 heading 3;}}
+\viewkind4\uc1\pard\qc\b\f0\fs32 Random Map Help File Document\par
+\i Age of Mythology\i0\'99\par
+\pard\b0\fs24\par
+\b\'a9 2002, Microsoft Corporation. All rights reserved.\b0\par
+\b\par
+Important:\b0  \i Age of Mythology\i0  allows you to create your own random map scripts. You may share these custom random map scripts for the purposes of gameplay, but you may not sell or make other commercial uses of the custom random map scripts. Microsoft\'ae reserves all other rights to the editors and files.\par
+\par
+\pard\keepn\s3\sb240\sa60\b\f1\fs26 Random Map Help File Document\par
+I. INTRODUCTION\par
+\pard\b0\fs20\par
+\ul\b 1) How to Script\par
+\ulnone\b0\par
+The Random Map scripts are more like an actual programming language than were the RM scripts from \i Age of Kings\i0 : The Conquerors. This gives the AoM RM scripts a great deal of power, but also a potentially steeper learning curve.  However, users with any familiarity with programming should have an easier time because many of the conventions are similar.\par
+\par
+Some conventions to keep in mind:\par
+\par
+\pard\fi-360\li360\tx360\f2\'b7\tab\f1 The script is case-sensitive.\par
+\f2\'b7\tab\f1 All variables (such as integers and floats) must be defined the first time they are used. If they are redefined after that, you must leave out the \ldblquote int\rdblquote  of \ldblquote float\rdblquote .\par
+\pard\par
+\pard\li720 Original: int numGoats = 0;\par
+Subsequent: numGoats = 2;\par
+\par
+\pard\fi-360\li360\tx360\f2\'b7\tab\f1 There are many shortcuts for making scripts, and some are shown at the end of this file. Conditional statements can make use of \ldblquote if\rdblquote , \ldblquote else\rdblquote  and \ldblquote if else\rdblquote .  Do loops can run through a list of commands multiple times, and is particularly useful for duplicating areas or objects for each player.\par
+\pard\fi-360\li360\f2\'b7\tab\f1 Comments can be specified by inserting // at the beginning of a line or enclosing text in /* and */. Comments can remind you (and anyone else reading your map) what each section is trying to do, and commenting out sections of a map script can help in debugging problems.\par
+\pard\li720\par
+\pard\ul\b 2) Script Order\par
+\ulnone\b0\par
+Order of the scripts is important. You must build land before you can place objects on it. Objects will only respect the constraints of areas and objects that are already placed. You can\rquote t use a variable that you haven\rquote t defined.\par
+\par
+\ul\b 3) Map Grid\par
+\ulnone\b0\par
+Maps are oriented along an X, Z grid. Y is elevation. The origin of the grid, 0,0, is located at the bottom of the screen. When using fractions, 0.5, 0.5 is the middle of the map, and 1, 1 is the top of the map, at 12 o\rquote clock. The grid uses 2m square tiles.  A 4-player map is probably about 400 m along one side. Small buildings occupy 2m and small units occupy 1m of space.\par
+\par
+\ul\b 4) Unit names\par
+\ulnone\b0\par
+All object names refer to a protounit name. What\rquote s the difference between a unit and a protounit? Unit names in the game are a friendlier version of the protounit name. For example, the protounit name for \ldblquote Laborer\rdblquote  is \ldblquote Villager Egyptian\rdblquote . The protounit name for \ldblquote Town Center\rdblquote  is \ldblquote Settlement Level 1.\rdblquote\par
+\par
+\ul\b 5) XML files\par
+\par
+\ulnone\b0 Map scripts use the file extension RMS but are text files and can be edited with any text editor. However, in order to play on a new map, you must also create an XML file with the same name as your RMS. XML is a markup language similar to HTML used by Web pages. Most Web browsers can view XML files, but you may need to open the file in another application, such as an XML editor or even a text editor. The only things you need in your XML file are shown below in bold: the map\rquote s name and description, plus a screenshot icon if you want. XML files for random maps look like this:\par
+\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 <?xml version = "1.0" encoding = "UTF-8"?>\par
+\pard\fi-360\li720\f2\'b7\tab\f1 <mapinfo details = "\b Goatunheim: Fight your way through evil Goats to reach the enemy player\b0 " imagepath = "\b ui\\ui map goatunheim 256x256\b0 " displayNameID="\b Goatunheim\b0 " cannotReplace=""/>\par
+\pard\par
+\ul\b 6) How to get help\par
+\ulnone\b0\par
+Some ways to get help:\par
+\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 Look at Ensemble Studios official RM scripts to learn conventions and shortcuts.  An annotated version of Mediterranean is included below.\par
+\pard\fi-360\li720\f2\'b7\tab\f1 Use the XS debugger. \cf1 If you put debugRandomMaps into your user.cfg or +debugRandomMaps on the command line, it will enable the XS debugger to pop up when an error is detected.\cf0\par
+\f2\'b7\tab\f1 Using the console, you can get help for any command by typing: help(\ldblquote command\rdblquote )\rdblquote .\par
+\f2\'b7\tab\f1 Look online. Fan sites are often a great source of information on random map scripting.\par
+\f2\'b7\tab\f1 Keep it simple. If something in your script seems to be breaking, try and isolate the problem.\par
+\pard\li720\par
+\pard\keepn\s3\sb240\sa60\b\fs26 II. RANDOM MAP SCRIPTING COMMANDS\par
+\pard\b0\fs20\par
+\pard\keepn\s1\ul\b 1) General Purpose\par
+\pard\ulnone\b0\par
+\par
+\b rmEchoInfo( string echoString, int level ): Random map echo.\par
+\pard\fi720\b0 Use this to spit out information while debugging a script. It is not shown to the player.\par
+\pard\par
+\b rmRandFloat(float min, float max): Returns a random float between min and max.\par
+\b0\tab This is a random number generator useful for determining random events. Because it is a float, it can handle decimals.\par
+\par
+\b rmRandInt(int min, int max): Returns a random integer between min and max.\par
+\pard\fi720\b0 This is a random number generator useful for determining random events. Because it is a integer, it cannot handle decimals, but that makes it useful for placing down numbers of objects.\par
+\pard\par
+\b rmSetMapSize( int x, int z ): Sets the size of the map.\par
+\b0\tab X and Z are in meters. They do not need to be the same if you want to create a rectangular map. All ES maps scale map size by number of players.\par
+\par
+\b rmSetSeaLevel(): Sets the sea level for the map.\par
+\par
+rmGetSeaLevel(): Gets the sea level for the map.\par
+\par
+rmSetSeaType(string name): Sets the sea type for the map.  This is used if terrain is initialized to water.\par
+\tab\b0 You must use this command before you place water on a map. The sea type must be a valid water type from the random map editor.\par
+\par
+\b rmAreaFractionToTiles(float fraction): Converts an area from fraction of the map to tile count.\par
+\b0\tab Fractions are relative to map size, so sometimes you may want to use them.\par
+\par
+\b rmAreaTilesToFraction(int tiles): Converts area tile count to fraction of map.\par
+rmXFractionToTiles(float fraction): Converts an fraction of the map in the x direction to tile count.\par
+rmXTilesToFraction(int tiles): Converts tile count in the x direction to fraction of map.\par
+rmZFractionToTiles(float fraction): Converts an fraction of the map in the z direction to tile count.\par
+rmZTilesToFraction(int tiles): Converts tile count in the z direction to fraction of map.\par
+rmMetersToTiles(float meters): Converts a distance in meters to a number of tiles.\par
+rmTilesToMeters(int tiles): Converts a number of tiles to a distance in meters.\par
+rmXMetersToFraction(float meters): Converts meters into a fraction of the map in the x direction.\par
+rmZMetersToFraction(float meters): Converts meters into a fraction of the map in the z direction.\par
+rmXFractionToMeters(float meters): Converts a fraction of the map in the x direction to meters.\par
+rmZFractionToMeters(float meters): Converts meters a fraction of the map in the z direction to meters.\par
+\pard\fi720\b0 Fractions are relative to map size, so sometimes you may want to use them instead of distances in meters.\par
+\pard\par
+\b rmDegreesToRadians(float degrees): Converts an angle in degrees to radians.\par
+\pard\fi720\b0 Particularly useful when players are placed in a circle.\par
+\par
+\pard\b rmTerrainInitialize( string baseTerrain, float height ): Initializes the terrain to the base type and height.\par
+\b0\tab Specifies the base terrain to use for a map. If set to water, sea type needs to be defined. Initial terrain is usually grass, sand, snow or water. \par
+\par
+\b rmSetLightingSet(string name) : Sets a lighting set\par
+\b0\tab You can specify a lighting set from the scenario editor to be used for your RMS. This command must be placed \i after\i0  terrain is initialized.\par
+\par
+\b rmSetGaiaCiv(long civ) : Sets Gaia's civilization\par
+\b0\tab This is only useful if you place Gaia objects that vary by culture, such as many buildings.\tab\par
+\par
+\b rmSetStatusText(status, progress) : Sets the friendly cool loading screen text.\par
+\b0\tab This text will be seen by players while the map is generating. If you do not at least specify percentages in the progress parameter, the \ldblquote loading bar\rdblquote  will not advance during map generation.\tab\par
+\b\par
+rmDefineConstant(string name, int value)\par
+\b0\par
+\ul\b 2) Players\par
+\ulnone\b0\par
+Player locations need to be determined so that objects and area can be placed \ldblquote by player.\rdblquote  Player areas must still be created as individual areas.\par
+\par
+\b rmGetPlayerCiv(int playerID): Gets the civilization the specified player is on.\par
+rmGetPlayerCulture(int playerID): Gets the culture the specified player is on.\par
+\b0\tab Civilization is the same as major god, e.g., Thor or Isis. Culture is Norse, Greek, or Egyptian. These commands are useful for placing specific objects (such as Dwarves for Thor) or varying starting resources. They are also useful for triggers that fire or prohibit specific improvements.\par
+\b\par
+rmGetNumberPlayersOnTeam(int teamID): Gets the number of players on the given team.\par
+\b0\tab Useful for scaling area or resources in a team area based on number of players on that team.\par
+\par
+\b rmSetTeamSpacingModifier(float modifier): Sets the team spacing modifier.\par
+\tab\b0 Normally, all players are placed equidistant. This command allows you to force team members closer together. Values of 0.3-0.5 return the best results. Values less than 0.25 may not provide enough space for starting resources.\par
+\b\par
+rmPlacePlayersCircular(float minFraction, float maxFraction, float angleVariation): Makes a circle of player locations.\par
+\b0\tab Places players in a circle. Variation is determined by the difference between the min and max. Angle variation determines whether players are equidistant or can be slightly closer or farther apart. Circular placement is generally the most versatile, but will not work on all map types, such as non-square maps.\par
+\par
+\b rmPlacePlayersSquare(float dist, float distVariation, float spacingVariationfloat): Makes a square of player locations.\par
+\b0\tab Places players in a square, which automatically adjusts to a rectangle for rectangular maps. Unlike the circle, variance here is determined by a plus or minus (the distVariation) off of the mean distance. SpacingVariation determines whether players are equidistant or can be slightly closer or farther apart.\par
+\par
+\b rmPlacePlayersLine(float x1, float z1, float x2, float z2, float distVariation, float spacingVariation): Makes a line of player locations.\par
+\b0\tab Sometimes you will want players to be placed in a line. Anatolia places each time in a line, while Vinlandsaga places all players in a line. Using a line placement is not easy because there may not be enough room for player areas or resources. X and Z determine the starting and ending locations of the line. DistVariation determines how far from the line player areas can vary, and spacingVariation determines how much space there is among points along the line where players are placed.\par
+\par
+\b rmSetPlacementSection(float fromPercent, float toPercent)\f3\par
+\b0\f1\tab When placing players in a circle or square, this command allows you to skip part of the circle or square, in essence removing a slice from the pie (maybe you want to fit an ocean in there like in Sea of Worms). The default for fromPercent is 0, and the default for toPercent is 1. That means use the whole circle or square. You can pass in something like 0.25 and 0.50 to have the players placed from 25% in to 50% in along the circle or square. For circular placement, 0 is at 9:00, 0.25 is at 12:00, 0.5 is at 3:00, and 0.75 is at 6:00. For square placement (think of the square as a line that follows a square), 0 is at 6:00, 0.25 is at 9:00, 0.5 is at 12:00, and 0.75 is at 3:00.\par
+\par
+\b rmSetPlacementTeam(long teamID): Sets the team to place. \par
+\pard\fi720\b0 Use this before calling the various rmPlacePlayers functions, and only players on the specified team will get placed. The first team is number 0, the second is number 1, etc. Pass in -1 for the teamID to place all teams (or actually all players that haven't been placed yet).\f3\par
+\pard\f1  \par
+\b rmPlacePlayer(int playerID, float xFraction, float zFraction): Sets one player location.\par
+\pard\fi720\b0 You can use this to place players anywhere. Once a player is placed, it won't be repositioned by any future calls to the various rmPlacePlayers functions. This can be tricky since you often do not know how many players will be placed on the map, since from 2-12 players can play any map.\par
+\pard  \par
+Here are a few examples of things you can do: \par
+ \par
+Put the first team in the center of the map and all other teams around the outside: \par
+ \par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 rmSetPlacementTeam(0);\par
+\pard\fi-360\li720\f2\'b7\tab\f1 rmSetPlayerPlacementArea(0.3, 0.3, 0.7, 0.7);\par
+\f2\'b7\tab\f1 rmPlacePlayersCircular(0.4,0.3,rmDegreesToRadians(5.0));\par
+\pard\fi60\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 rmSetPlacementTeam(-1);\par
+\pard\fi-360\li720\f2\'b7\tab\f1 rmSetPlayerPlacementArea(0, 0, 1, 1);\par
+\f2\'b7\tab\f1 rmPlacePlayersCircular(0.4,0.3,rmDegreesToRadians(5.0));\par
+\pard  \par
+Put player one in the bottom corner, player two in the right corner, and the rest of the players in a line from the left corner to the top corner (9:00 to 12:00):\par
+\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 rmPlacePlayer(1, 0.2, 0.2);\par
+\pard\fi-360\li720\f2\'b7\tab\f1 rmPlacePlayer(2, 0.8, 0.2);\par
+\f2\'b7\tab\f1 rmPlacePlayersLine(0.2, 0.8, 0.8, 0.8, 20, 10);\par
+\pard\fi60\par
+\pard\b rmSetPlayerPlacementArea(float minX, float minZ, float maxX, float maxZ): Sets the area of the map to use for player placement.\par
+\tab\b0 Use this command if, for example, you want to place players in one quadrant of a map.\par
+\par
+\b rmSetPlayerArea(int playerID, int areaID): Sets a player's 'official' area.\par
+rmSetTeamArea(int teamID, int areaID): Sets a team's 'official' area.\par
+\b0\tab When you want an area to belong to a player (i.e. this is the location from which you will place player resources) assign it to a player. Teams work the same way. Usually you want to iterate through number of players using for(i=1; <cNumberPlayers).\par
+\par
+\b rmPlayerLocXFraction(int playerID): Gets a player's start location x fraction.\par
+rmPlayerLocZFraction(int playerID): Gets a player's start location z fraction.\par
+\tab\b0 Use these commands when you don\rquote t know where a player\rquote s starting location is and you need the values to place other areas or resources.\par
+\par
+\ul\b 3) Areas\par
+\par
+\ulnone\b0 Areas are regions on a map. They are often irregular in shape, but can be rectangular as well. Some areas are used for placing specific terrain, like a cliff or ocean, while others are just used as boundaries for other areas. Special types of areas are player areas, which belong to a certain player, or team areas, which belong to a team. Saying these areas \ldblquote belong\rdblquote  is just a convenient method of making sure other areas or objects are placed in that area.\par
+\par
+\b rmCreateArea(string name, int parentAreaID): Creates an area.\par
+\b0\tab Creates an area and lets you name it. Areas without a parentArea use the entire map as their parentArea. You can also make existing areas the parentArea, in order to place a sub-area within a player area, for example. Areas will generally try to place several times and will return an error message if they fail. To ignore this error message, use setAreaWarnFailure below.\par
+\par
+\b rmSetAreaSize(float minFraction, float maxFraction): Set the area size to a min/max fraction of the map.\par
+\tab\b0 The min and max can be set to the same value if you want no size variation. Experiment with different values to make sure your area is not too large or too small to be seen. Even if your area does not place special terrain, it can be helpful to temporarily paint the area with a distinct texture, such as black or snow, to see where and if it is actually getting placed. \par
+\b\par
+rmSetAreaLocation(int areaID, float xFraction, float zFraction): Set the area location.\par
+\b0\tab Sometimes you want to place an area in a specific location, such as 0.5, 0.5, the center of the map.\par
+\par
+\b rmSetAreaLocPlayer(int areaID, int playerID): Set the area location to player's location.\par
+\b0\tab This is a shortcut for placing an area at the player\rquote s location. Generally, this is used when tiny player areas are first placed as placeholders, then SetAreaLocPlayer can be used to make larger player areas later or to place a sub-area (such as a terrain patch) near the player\rquote s Town Center.\par
+\par
+\b rmSetAreaLocTeam(int areaID, int teamID): Set the area location to team's location.\par
+\b0\tab Just like SetAreaLocPlayer except it applies to team areas.\par
+\par
+\b rmBuildArea(int areaID): Builds the specified area.\par
+\b0\tab Actually builds the area. Choosing when to use this command can have a big effect on your map. For example, if you define a lake area and then build it, land that is placed later can stick into the lake or be placed as islands. On the other hand, if the land and water are built at the same time, they will try to avoid each other (if the proper constraints are set). Generally, player areas should all be built at the same time to make sure there is enough space for ever player. \par
+\par
+\b rmBuildAllAreas(): Simulatenously builds all unbuilt areas.\par
+\b0\tab Does not include connections.\tab\par
+\par
+\b rmSetAreaTerrainType(int areaID, string terrainTypeName): Sets the terrain type for an area.\par
+\tab\b0 Often, you want to paint in an area with a certain terrain. Use the terrain names from the scenario editor. Forests, cliffs, and water are handled differently. Use AreaTerrainType for terrains such as grass, snow, ice, and sand.\par
+\par
+\b rmPaintAreaTerrain(int areaID): Paints the terrain for a specified area.\par
+\par
+rmSetAreaBaseHeight(int areaID, float height): Sets the base height for an area.\par
+\tab\b0 If not specified, the area will adopt the height of the parent area, including the base height of the map if no parent area is specified. Make sure to place land higher than water if you want to place land objects (such as Town Centers) later.\par
+\b\par
+rmSetAreaWarnFailure(int areaID, bool warn): Sets whether the area build process will warn if it fails.\par
+\tab\b0 It is very easy to over-constrain areas to the point where there is no room for them. This can cause two problems: the map may take a long time to generate, or if you are in debug mode (see above), the debugger will pop up and generation will stop. Sometimes you want to catch these errors, but when you are done with your map it is a good idea to set SetAreaWarnFailure to false.\par
+\par
+\b rmSetAreaForestType(int areaID, string forestName): Sets the forest type for an area.\par
+\tab\b0 Paints the area with a forest type. Use the forest types from the scenario editor.\par
+\b\par
+rmSetAreaWaterType(int areaID, string waterName): Sets the water type for an area.\par
+\b0\tab Paints the area with a water type. Use the water types from the scenario editor. Because water types automatically change elevation and can place objects, they tend to affect areas a little larger than specified. Just allow plenty of room.\par
+\par
+\b rmSetAreaCliffType(int areaID, string cliffName): Sets the cliff type for an area.\par
+\tab\b0 Cliffs are handled differently from other terrain in order to allow you to handle features like ramps. However, you can use setAreaTerrainType to place an impassable cliff-texture as a normal area as well. CliffName should use a cliff type from the Editor, such as Greek, Norse, or Egyptian.\par
+\par
+\b rmSetAreaCliffPainting(int areaID, bool paintGround, bool paintOutsideEdge, bool paintSide, float minSideHeight, bool paintInsideEdge): Set cliff painting options for an area.\par
+\pard\fi720\b0 Determines how a cliff is painted with impassable and passable textures. PaintGround - Specifies if the ground should be painted or just left whatever it already is. Defaults true. PaintSide - Specifies if the cliff sides should be painted. Defaults true. PaintEdge - Specifies if the cliff edge should be painted. This is the area between the cliff side and the ground. Defaults true. MinSideHeight - Specifies the minimum height that a cliff tile must be sloped before treating it as a cliff side. Set to 0 to have the minimum amount of cliff sides painted. Defaults to 1.5.\f0\par
+\pard\b\f1\par
+rmSetAreaCliffEdge(int areaID, int count, float size, float variance, float spacing, int mapEdge): Set cliff edge parameters for an area.\par
+\b0\f0\fs24\tab\f1\fs20 Determines whether there should be pathable ramps or not connecting the top of the cliff to the surrounding area. Count - Number of cliff edges to create. The count times the size should not be more than 1.0. Defaults to 1. size - This specifies how much of the area's outline should be turned into cliff edges. It should be between 0.0 and 1.0. Set to 1.0 to make the whole area surrounded. Defaults to 0.5. Variance - The variance to use for the size. Defaults to 0.0. Spacing - Spacing modifier. This should be between 0.0 and 1.0. The smaller this is, the closer together the cliff edges will be. Defaults to 1.0. MapEdge - Specifies where the cliff edge should be in relation to the map edge. Set to 0 for any, 1 to be away from the map edge, or 2 to be close to the map edge. Defaults to 0.\f0\fs24\par
+\b\f1\fs20\par
+rmSetAreaCliffHeight(int areaID, float val, float variance, float ramp): Set an area's cliff height.\par
+\tab\b0 Val - Make positive for raised cliffs and negative for lowered cliffs. Defaults to 4.0.\f3\fs24\par
+\f1\fs20 Variance - The variance to use for the height. Ramp - This is used to determine how quickly the height ramps up to the cliff height (it refers to steepness in this context, not pathable ramps to reach the top of a cliff). Defaults to 0.5.\f0\par
+\b\f1\par
+rmAddAreaCliffEdgeAvoidClass(int areaID, int avoidID, float minDist): Adds a class for an area's cliff edge to avoid.\par
+\tab\b0 You can tell a cliff edge to avoid a certain class, such as a connection. Remember that connections must be created before the cliff (see below).\par
+\b\par
+rmAddAreaTerrainLayer(int areaID, string terrain, float minDist, float maxDist): Adds a terrain layer to an area.\par
+\tab\b0 Terrain layers allow you to place a border of one or more textures around an area. For example, you can have grassDirt50 and grassDirt75 around an area of grass. You can specify multiple layers for an area, as long as the minDistance for one starts where the maxDistance for another leaves off. Because different textures overlap one another you may need to experiment with distances to get the correct effect. Here is an example:\par
+\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 rmSetAreaTerrainType(bonusIslandID, "GrassA");\par
+\pard\fi-360\li720\f2\'b7\tab\f1 rmAddAreaTerrainLayer(bonusIslandID, "SnowGrass75", 13, 20);\par
+\f2\'b7\tab\f1 rmAddAreaTerrainLayer(bonusIslandID, "SnowGrass50", 6, 13);\par
+\f2\'b7\tab\f1 rmAddAreaTerrainLayer(bonusIslandID, "SnowGrass25", 0, 6);\par
+\pard\b\par
+rmSetAreaTerrainLayerVariance(int areaID, bool variance): Specifies if the area should vary the terrain layer edges.\par
+\tab\b0 Usually, variance in terrain layers looks better, but sometimes you might want to turn it off. Defaults to true.\par
+\b\par
+rmSetAreaMinBlobs(int areaID, int blobs): Sets minimum number of area blobs.\par
+rmSetAreaMaxBlobs(int areaID, int blobs): Sets maximum number of area blobs.\par
+\tab\b0 An area can be placed with multiple blobs. Blobs are placed independently, using the minimum and maximum distances below. Areas made with a single blob will be circular. Areas made with multiple blobs can be come long and sinuous.\par
+\b\par
+rmSetAreaMinBlobDistance(int areaID, float dist): Sets minimum blob distance.\par
+rmSetAreaMaxBlobDistance(int areaID, float dist): Sets maximum blob distance.\par
+\b0\tab Specifies how far apart blobs can be from each other. The greater the distance, the more the area will tend towards serpentine instead of circular (envision a chain of beads). However, if you specify many blobs, this variation may become obscured as more and more blobs are placed for the area.\par
+\par
+\b rmSetAreaCoherence(int areaID, float coherence): Sets area coherence (0-1).\par
+\tab\b0 Coherent areas tend to stay together more. The effect is harder to notice on smaller areas.\par
+\b\par
+rmSetAreaSmoothDistance(int areaID, int smoothDistance): Sets area edge smoothing distance.\par
+\pard\fi720\b0 Distance is number of neighboring points to consider in each direction. Water areas benefit from more smoothness as it eliminates small bumps and indentations.\par
+\pard\par
+\b rmSetAreaHeightBlend(int areaID, int heightBlend): Sets how smoothly area height blends into surroundings.\par
+\tab\b0 Corresponds to the smooth tool in the Scenario Editor. Usually a heightBlend of 0 will leave geometric-looking jagged edges. A heightBlend of 1 will smooth smaller areas. A heightBlend of 2 will smooth larger areas or areas of disproportionate heights. Anything above 2 may flatten an area completely.\par
+\par
+\b rmAreaID(string name): Gets area ID for given area name.\par
+\b0\par
+\b rmAddAreaInfluencePoint(int areaID, float xFraction, float zFraction): Adds an area influence point.\par
+rmAddAreaInfluenceSegment(int areaID, float xFraction1, float zFraction1, float xFraction2, float zFraction2): Adds an area influence segment.\par
+\tab\b0 You may want an area to grow towards specific points or lines. A circular area placed at the center of the map with an influence point of 1, 1 will produce a peninsula that protrudes towards 12 o\rquote clock. Influence points and segments can be useful in getting areas, such as rivers, to extend beyond the edge of the map.\par
+\b\par
+rmAddAreaRemoveType(int areaID, string typeName): Add an unit type that the specified area removes.\par
+\b0\tab Sometimes you may want an area to clean itself of objects, such as removing trees from ice. This will only work if the objects are already placed before the area, which is the reverse of how most ES maps are generated. You can reference specific units or abstract types, such as \ldblquote unit\rdblquote  and \ldblquote building.\rdblquote\tab\par
+\par
+\b rmAddAreaTerrainReplacement(int areaID, string terrainTypeName, string newTypeName): Adds a terrain replacement rule to the area.\par
+\b0\tab If you place an area with no terrain specified, it will use the terrain of the parent area (including the base map). However, specifying terrain replacement will paint an area only when another texture is present. This command is most useful with connections, where you want to replace water with land where a connection goes across a river, or replace rock with snow for mountain passes.\par
+\par
+\b bool rmAddAreaToClass(int areaID, int classID): Add given area to specified class.\par
+\b0\tab The reason to add areas to classes is so you can refer to the entire class later on instead of the individual areas. This is most useful when placing objects (you can say just place in a class) or constraints (you can say to avoid a certain class).\par
+\par
+\b int rmDefineClass(string className): Define a class with the given name.\par
+\b0\tab Like any variable, Classes must be defined before they can be used the first time.\par
+\b\par
+rmClassID(string name): Gets class ID for given class name.\par
+\b0\par
+\ul\b 4) Connections\par
+\ulnone\b0\par
+Connections are special areas that are used to connect other areas. They are typically used to place land-bridges or mountain-passes among players. Connections must be placed after the areas they are trying to connect, but often need to be defined before those areas if the area needs the rmAddConnectionArea command.\par
+\par
+\b rmCreateConnection(string name): Creates an connection.\par
+\b0\tab Defines a new connection.\par
+\par
+\b rmSetConnectionType(int connectionID, int connectionType, bool connectAll, float connectPercentage): Sets the connection type.\par
+\pard\fi720\b0 This command determines which players are connected. The valid values for connectionType are: \par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 cConnectAreas: This is the default that is used if you don't call rmSetConnectionType. You have to specify each area to be connected by calling rmAddConnectionArea. \f0\fs24\par
+\pard\fi-360\li720\f2\fs20\'b7\tab\f1 cConnectPlayers: Connect all player areas. \f0\fs24\par
+\f2\fs20\'b7\tab\f1 cConnectAllies: Connect all ally player areas. \f0\fs24\par
+\f2\fs20\'b7\tab\f1 cConnectEnemies: Connect enemy player areas. Currently this one ignores the connectAll parameter (it treats it as true no matter what). Just let me know if you think it's important for it to work a certain way when connectAll is false... one thing I thought of is connecting each player to its closest enemy.\f0\fs24\par
+\pard\f1\fs20  \f0\fs24\par
+\f1\fs20 Set the connectAll parameter to true if you want all of the areas to get connected to all of the other areas. Set it to false to have the areas connected sequentially where the first area gets connected to the second area, the second area gets connected to the third area, etc.\f0\fs24\par
+\f1\fs20  \f0\fs24\par
+\f1\fs20 You can use the connectPercentage parameter to reduce the number of connections that are generated. For example, if you set it to 0.5, then half of the connections will get generated. The ones that are generated are randomly chosen. Some ES maps with connections connect all players when player number is small (<6) and uses a connection percentage on larger maps, otherwise so many connections can get placed that the barrier (like water or rock) is obscured.\f0\fs24\par
+\f1\fs20\par
+\b rmAddConnectionArea(int connectionID, int areaID): Adds an area to the connection.\par
+\b0\tab This is only valid if you set the connection type is set to cConnectAreas. You must specify this while defining the area, after the connection is defined, and before building the connection.\b\par
+\b0\par
+\b rmSetConnectionPositionVariance(int connectionID, float variance): Sets the position variance of a connection.\par
+\pard\fi720\b0 The connection will normally start at the area's position, but this allows it to vary from that position. You can set this to -1 for it to pick completely random positions within the starting and ending areas. This command is often needed when specifying multiple connections (for example, one within a team and another between teams) so that the connections do not overlap.\par
+\par
+\pard\b bool rmAddConnectionStartConstraint(int connectionID, int constraintID): Add specified constraint for a connection start point.\par
+bool rmAddConnectionEndConstraint(int connectionID, int constraintID): Add specified constraint for a connection end point.\par
+\b0\tab If setConnectionPositionVariance isn\rquote t working out, you can also specify constaints for the endpoints of the connection itself. This way you can have connection endpoints avoid impassable land or player areas, for instance.\par
+\pard\fi720\par
+\pard\b rmSetConnectionWidth(int connectionID, float width, float variance): Sets the width of a connection.\par
+\b0\tab Because connections are often the only pathable area over a barrier such as water or rock, set this wide enough to prevent pathing problems, typically > 8.\par
+\par
+\b rmSetConnectionBaseHeight(int connectionID, float width): Sets the base height of a connection.\par
+rmSetConnectionCoherence(int connectionID, float width): Sets area coherence (0-1).\par
+rmSetConnectionWarnFailure(int connectionID, bool warn): Sets whether a connection warns on failure.\par
+rmSetConnectionHeightBlend(int connectionID, float width): Sets how smoothly connection height blends into surroundings.\par
+rmSetConnectionSmoothDistance(int connectionID, float width): Sets connection edge smoothing distance (distance is number of neighboring points to consider in each direction).\par
+rmAddConnectionTerrainReplacement(int connectionID, string terrainTypeName, string newTypeName): Adds a terrain replacement rule to the connection.\b0\par
+\tab These commands all work exactly as they do for areas, but must be called out specifically for connections.\par
+\par
+\b rmSetConnectionTerrainCost(int connectionID, string terrainTypeName, float cost): Sets the terrain cost for a connection.\par
+\b0\tab When you need a connection to avoid a type of terrain, set this value. If you place roads between players, you might want them to avoid forests or cliffs. The cost must be greater than or equal to 1, or set to -1 to specify a terrain is impassable.\par
+\par
+\b rmSetConnectionBaseTerrainCost(int connectionID, float cost): Sets the base terrain cost for a connection.\par
+\pard\fi720\b0 This is the cost that will be used for all terrains that don't have a cost set with rmSetConnectionTerrainCost. The default cost for each terrain type is 1 if this is not called.\par
+\pard\par
+\b rmBuildConnection(int connectionID): Builds the given connection.\par
+\tab\b0 Make sure the areas are built first. RmBuildAllAreas does not include connections.\par
+\par
+\b rmAddConnectionToClass(int connectionID, int classID): Adds the connection to specified class.\par
+\b0\tab Useful with constraints for areas or objects placed after the connection.\par
+\par
+\b bool rmAddConnectionConstraint(int connectionID, int constraintID): Add specified constraint to a connection.\par
+\b0\tab Useful when the constraint is applied to the connection. As with all constraints, the connection can only avoid areas or objects that are placed before it is placed.\par
+\par
+\ul\b 5) Objects\par
+\ulnone\b0\par
+Objects include anything placed on a map that is not a terrain. Buildings, units and resources are all objects. Objects can even be collections of many different units. Just remember that objects are always placed as clusters and sometimes it might be easier to place 2 different objects than to add different types of units to one object.\par
+\par
+\b bool rmAddObjectDefToClass(int objectDefID, int classID): Add given object def to specified class.\par
+\tab\b0 Useful for using class constraints.\par
+\b rmCreateObjectDef(string name): Creates an object definition.\par
+\b0\tab Used to define a new object.\par
+\b rmSetObjectDefMinDistance(int defID, float dist): Set the minimum distance for the object definition (in meters).\par
+rmSetObjectDefMaxDistance(int defID, float dist): Set the maximum distance for the object definition (in meters).\par
+\b0\tab These distances apply to the object location. If the object location equals a player\rquote s location, then these are the min and max from the player starting area (usually the Town Center). A useful approach is to place the object at location 0.5, 0.5 (the center of the map) and assign a maxDistance of half of the map. See the annotated Mediterranean below for an example.\par
+\par
+\b rmAddObjectDefItem(int defID, string unitName, int count, float clusterDistance): Add item to object definition.\par
+\b0\tab Objects are defined in the random map script and can be named anything. Units, on the other hand, use specific names from the game, such as Villager Greek, Palm or Settlement Level 1 (the game\rquote s name for a Town Center). Cluster distance is only the maximum that the object can be placed from the location, and is applied after the min and max distance are applied (i.e. a maxDistance of 10 and a clusterDistance of 5 could actually place an object 15 m from the location). When placing a single unit, clusterDistance can be 0. If multiple units are added to the object, they should use a clusterDistance > 0 or they will place on top of each other. Here are two examples:\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 int farGoatsID=rmCreateObjectDef("far goats");\par
+\pard\fi-360\li720\f2\'b7\tab\f1 rmAddObjectDefItem(farGoatsID, "goat", 1, 0.0);\par
+\pard\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 int rock2ID=rmCreateObjectDef("rock2");\par
+\pard\fi-360\li720\f2\'b7\tab\f1 rmAddObjectDefItem(rock2ID, "rock limestone small", 1, 1.0);\par
+\f2\'b7\tab\f1 rmAddObjectDefItem(rock2ID, "rock limestone sprite", 3, 3.0);\par
+\pard\par
+\b rmPlaceObjectDefAtLoc(int defID, int playerID, float xFraction, float zFraction, long placeCount): Place object definition at specific location for given player.\par
+\tab\b0 Placing objects this way is useful when you don\rquote t want to place them for every player, as in the case where you place different units for different civilizations. You can set int playerID to 0 to make sure nobody owns the object. Here\rquote s a nice shortcut:\par
+\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 for(i=0; <cNumberPlayers)\par
+\pard\fi-360\li720\f2\'b7\tab\f1\{\par
+\f2\'b7\tab\f1 if(rmGetPlayerCulture(i) == cCultureGreek)\par
+\f2\'b7\tab\f1 rmPlaceObjectDefAtLoc(transportGreekID, i, rmPlayerLocXFraction(i), rmPlayerLocZFraction(i));\par
+\f2\'b7\tab\f1 else if(rmGetPlayerCulture(i) == cCultureNorse)\par
+\f2\'b7\tab\f1 rmPlaceObjectDefAtLoc(transportNorseID, i, rmPlayerLocXFraction(i), rmPlayerLocZFraction(i));\par
+\f2\'b7\tab\f1 else if(rmGetPlayerCulture(i) == cCultureEgyptian)\par
+\f2\'b7\tab\f1 rmPlaceObjectDefAtLoc(transportEgyptianID, i, rmPlayerLocXFraction(i), rmPlayerLocZFraction(i));\par
+\f2\'b7\tab\f1\}\par
+\pard\par
+\b rmPlaceObjectDefPerPlayer(int defID, bool playerOwned, long placeCount): Place object definition per player.\par
+\tab\b0 This command is often the fastest way to place objects, particularly when compared to doinf for loops over player number. However, it isn\rquote t applicable when you don\rquote t want to place the object at least once for every player. Return playerOwned as false if you want the object to belong to gaia.\par
+\b\par
+rmPlaceObjectDefAtAreaLoc(int defID, int playerID, int areaID, long placeCount): Place object definition for the player at the given area's location.\par
+\b0\tab The difference between this and placeObjectDefAtLoc is that the latter needs an X, Z coordinate, while this command just finds the area\rquote s center location.\par
+\par
+\b rmPlaceObjectDefInArea(int defID, int playerID, int areaID, long placeCount): Place object definition for the player in the given area.\par
+\b0\tab Places the object randomly within the entire area (as apposed to the center location).\par
+\par
+\b rmPlaceObjectDefAtRandomAreaOfClass(int defID, int playerID, int classID, long placeCount): Place object definition for the player at the location of a random area in the given class.\par
+rmPlaceObjectDefInRandomAreaOfClass(int defID, int playerID, int classID, long placeCount): Place object definition for the player in a random area in the given class.\par
+\b0\tab The difference between these two is that the first uses the area\rquote s location while the second just finds a random location within an area. Return playerID as 0 to place an object not owned.\par
+\par
+\b rmGetNumberUnitsPlaced(int objectDefID)\par
+rmGetUnitPlaced(int objectDefID, int index)\par
+rmGetUnitPlacedOfPlayer(int objectDefID, int playerID)\par
+\b0\tab These three commands can be used to detect failed cases of object placement. Perhaps you want to try and place an object a second time with fewer constraints if it fails the first time. Here is an example from Acropolis:\par
+\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 for(i=1; <cNumberPlayers)\par
+\pard\fi-360\li720\f2\'b7\tab\f1\{\par
+\f2\'b7\tab\f1 int startingTowerID=rmCreateObjectDef("Starting tower"+i);\par
+\f2\'b7\tab\f1 int towerRampConstraint=rmCreateCliffRampConstraint("onCliffRamp"+i, rmAreaID("player"+i));\par
+\f2\'b7\tab\f1 int towerRampEdgeConstraint=rmCreateCliffEdgeMaxDistanceConstraint("nearCliffEdge"+i, rmAreaID("player"+i), 2);\par
+\f2\'b7\tab\f1 rmAddObjectDefItem(startingTowerID, "tower", 1, 0.0);\par
+\f2\'b7\tab\f1 rmAddObjectDefConstraint(startingTowerID, avoidTower);\par
+\f2\'b7\tab\f1 rmAddObjectDefConstraint(startingTowerID, towerRampConstraint);\par
+\f2\'b7\tab\f1 rmAddObjectDefConstraint(startingTowerID, towerRampEdgeConstraint);\par
+\f2\'b7\tab\f1 rmAddObjectDefToClass(startingTowerID, classTower);\par
+\f2\'b7\tab\f1 rmPlaceObjectDefInArea(startingTowerID, i, rmAreaID("player"+i), 6);\par
+\pard\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 /* backup to try again */\par
+\pard\fi-360\li720\f2\'b7\tab\f1 if(rmGetNumberUnitsPlaced(startingTowerID) < 4)\par
+\f2\'b7\tab\f1\{\par
+\f2\'b7\tab\f1 int startingTowerID2=rmCreateObjectDef("Less Optimal starting tower"+i);\par
+\f2\'b7\tab\f1 rmAddObjectDefItem(startingTowerID2, "tower", 1, 0.0);\par
+\f2\'b7\tab\f1 rmAddObjectDefConstraint(startingTowerID2, avoidTower);\par
+\f2\'b7\tab\f1 rmAddObjectDefConstraint(startingTowerID2, towerRampConstraint);\par
+\f2\'b7\tab\f1 rmAddObjectDefToClass(startingTowerID2, classTower);\par
+\f2\'b7\tab\f1 rmPlaceObjectDefInArea(startingTowerID2, i, rmAreaID("player"+i), 1);\par
+\pard\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1\}\par
+\pard\fi-360\li720\f2\'b7\tab\f1\}\par
+\pard\par
+\b rmSetIgnoreForceToGaia(bool val)\par
+\b0\tab Can be used to force any placed object, even resources, to belong to a player.\par
+\par
+\ul\b 6) Fair Objects\par
+\ulnone\b0\par
+These special commands are designed to place critical resources, such as Settlements and sometimes Gold Mines. They are expensive and slow, so should not be used for many objects, but can insure that objects that \ldblquote must place\rdblquote  are present on a map.\par
+\par
+\b int rmAddFairLoc(string unitName, bool forward, bool inside, float minPlayerDist, float maxPlayerDist, float locDist, float edgeDist, bool playerArea, bool teamArea): Adds some fairLoc placement info.\par
+\b0\tab For each fairLoc you specify the following settings: optional object name to use (for check placement), forward or back (forward means towards the enemy), inside or outside (inside means towards an ally), min/max distance from the player, min distance from other locations, and min distance from the edge of the map. You can also add regular constraints to it. Specifying playerArea or teamArea forces the location to that area, providing these areas are defined. Useful for keeping a Settlement on a player\rquote s island rather than across a river.\par
+\par
+\b bool rmPlaceFairLocs(): Sets fairLoc placement locations.\par
+\b0\tab After each fairLoc is created, you call rmPlaceFairLocs which will calculate the actual positions, one per player per fairLoc. These are just positions (or locations) so you can use them for anything such as placing units or creating areas.\par
+\par
+\b rmResetFairLocs(): Resets fairLoc placment info.\par
+\pard\fi720\b0 Once you are done with a set of fairLocs and want to create another set, you should call rmResetFairLocs. This clears out any fairLocs you previously added.\par
+\pard\par
+\b int rmGetNumberFairLocs(int playerID): Gets a player's number of fairLocs.\par
+float rmFairLocXFraction(int playerID, int index): Gets a player's fairLoc x fraction.\par
+float rmFairLocZFraction(int playerID, int index): Gets a player's fairLoc z fraction.\par
+\par
+\b0 Fair Loc example for Settlements:\par
+\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 id=rmAddFairLoc("Settlement", true, false, 70, 120, 60, 40); /* forward outside */\par
+\pard\fi-360\li720\f2\'b7\tab\f1 rmAddObjectDefConstraint(id, SettlementAvoidImpassableLand);\par
+\f2\'b7\tab\f1 rmAddObjectDefConstraint(id, playerConstraint);\par
+\pard\par
+\pard\fi-360\li720\tx720\f2\'b7\tab\f1 if(rmPlaceFairLocs())\par
+\f2\'b7\tab\f1\{\par
+\pard\fi-360\li720\f2\'b7\tab\f1 id=rmCreateObjectDef("far settlement2");\par
+\f2\'b7\tab\f1 rmAddObjectDefItem(id, "Settlement", 1, 0.0);\par
+\f2\'b7\tab\f1 for(i=1; <cNumberPlayers)\par
+\f2\'b7\tab\f1\{\par
+\f2\'b7\tab\f1 for(j=0; <rmGetNumberFairLocs(i))\par
+\f2\'b7\tab\f1 rmPlaceObjectDefAtLoc(id, i, rmFairLocXFraction(i, j), rmFairLocZFraction(i, j), 1);\par
+\f2\'b7\tab\f1\}\par
+\f2\'b7\tab\f1\}\b\par
+\pard\b0\par
+\ul\b 7) Constraints\par
+\ulnone\par
+\b0 Constraints are used for areas, connections, and objects. They make sure that objects avoid other objects, that objects are placed near certain areas and similar restrictions.\par
+\par
+\b int rmCreateBoxConstraint(string name, float startX, float startZ, float endX, float endZ, float bufferFraction): Make a box constraint.\par
+\b0\tab Box constraints are simply four line segments that subdivide the map. Creating a box constraint can be used to keep areas or objects from getting too close to the center\par
+\b\par
+int rmCreateAreaOverlapConstraint(string name, int areaID): Make an area overlap constraint.\par
+\b0\tab Prevents areas from overlapping.\par
+\par
+\b int rmCreateAreaConstraint(string name, int areaID): Make a constraint that forces something to remain within an area.\par
+\tab\b0 You can\rquote t specify distance, only that an object or area must remain within the area.\par
+\par
+\b int rmCreateAreaDistanceConstraint(string name, int areaID, float distance): Make an area distance constraint.\par
+\b0\tab Specifies a minimum distance that an object or area can be from an area. Useful for keeping resources from getting too close to a TC or other resources.\par
+\par
+\b int rmCreateAreaMaxDistanceConstraint(string name, int areaID, float distance): Make an area max distance constraint.\par
+\b0\tab Specifies a maximum distance that an object or area can be from an area. Useful for keeping resources from getting too far away from a player.\par
+\par
+\b int rmCreateEdgeConstraint(string name, int areaID): Make a constraint that forces something to remain within an area's edge.\par
+\b0\tab Area edges are not large, so this can be tricky.\par
+\par
+\b int rmCreateEdgeDistanceConstraint(string name, int areaID, float distance): Make an area edge distance constraint.\par
+\b0\tab The minimum distance an area or object can be to an edge.\par
+\par
+\b int rmCreateEdgeMaxDistanceConstraint(string name, int areaID, float distance): Make an area edge max distance constraint.\par
+\b0\tab The maximum distance an area or object can be from an edge.\par
+\par
+\b int rmCreateCliffEdgeConstraint(string name, int areaID): Make a constraint that forces something to remain within an area's cliff edge.\par
+int rmCreateCliffEdgeDistanceConstraint(string name, int areaID, float distance): Make an area cliff edge distance constraint.\par
+int rmCreateCliffEdgeMaxDistanceConstraint(string name, int areaID, float distance): Make an area cliff edge max distance constraint.\par
+\pard\fi720\b0 Cliff edges are handled differently from other areas and need their own constraint. You are often better off telling an object or area to avoid impassable land.\par
+\pard\par
+\b int rmCreateCliffRampConstraint(string name, int areaID): Make a constraint that forces something to remain within an area's cliff ramp edge.\par
+int rmCreateCliffRampDistanceConstraint(string name, int areaID, float distance): Make an area cliff ramp edge distance constraint.\par
+int rmCreateCliffRampMaxDistanceConstraint(string name, int areaID, float distance): Make an area cliff ramp edge max distance constraint.\b0\par
+\tab Ramps are the areas of cliffs that have pathable terrain, typically for reaching the top of a cliff. Acropolis has ramps that have towers on the edges of the ramps.\par
+\par
+\b int rmCreateClassDistanceConstraint(string name, int classID, float distance): Make a class distance constraint.\par
+\b0\tab Once you define a class of objects or areas, you can then set a constraint to it.\par
+\pard\fi-360\li893\tx893\f2\'b7\tab\f1 int playerConstraint=rmCreateClassDistanceConstraint("stay away from players", classPlayer, 20);\par
+\pard\par
+\b int rmCreateTypeDistanceConstraint(string name, int classID, float distance): Make a type distance constraint.\par
+\b0\tab Types can be specific units, such as Chicken, or abstract types, such as Huntable.\par
+\par
+\b int rmCreateTerrainDistanceConstraint(string name, string type, bool passable, float distance): Make a constraint to avoid terrain with certain a passability.\par
+\tab\b0 This is a useful constraint because you can have land objects avoid impassable land, such as water or cliffs, or have water objects avoid the shore.\par
+\pard\fi-360\li893\tx893\f2\'b7\tab\f1 int avoidImpassableLand=rmCreateTerrainDistanceConstraint("avoid impassable land", "land", false, 10.0);\par
+\pard\par
+\b int rmCreateTerrainMaxDistanceConstraint(string name, string type, bool passable, float distance): Make a constraint to be close to terrain with certain a passability.\par
+\b0\tab Useful for keeping seaweed or transports in the water but near a beach, or Hippos or Crocodiles on the beach near the water.\par
+\par
+\b bool rmAddAreaConstraint(int areaID, int constraintID): Add specified constraint to an area.\par
+\b0\tab Once you have a constraint defined, this is how you make an area adhere to it.\par
+\par
+\b bool rmAddFairLocConstraint(int fairLocID, int constraintID): Add specified constraint to a fairLoc placement.\par
+\b0\tab Once you have a constraint defined, this is how you make a Fair Loc adhere to it.\par
+\par
+\b bool rmAddObjectDefConstraint(int defID, int constraintID): Add specified constraint to given object def.\par
+\b0\tab Once you have a constraint defined, this is how you make an object adhere to it.\tab\par
+\par
+\b rmConstraintID(string name): Gets constraint ID for given constraint name.\par
+\b0\par
+\ul\b 8) Triggers\par
+\ulnone\b0\par
+These commands are used to incorporate triggers from the scenario editor into a random map script. Triggers can get complicated quickly and can also create an unfair map, so they must be used with caution. A full explanation of all the triggers is beyond the scope of this article, but you can generate a random map script within the scenario editor to see how the triggers are created-just look at the triggers as if you had set them up manually. You can also look at the triggertemp.xs file in your Triggers directory for help with debugging RMS triggers.\par
+\par
+\b rmCreateTrigger(string triggerName)\par
+\b0\tab Used to create a new trigger.\par
+\par
+\b rmSwitchToTrigger(int triggerID)\par
+\b0\tab This command is useful for setting up triggers by player. You need to define all the triggers first, but then you can switch to different ones to specify their conditions and effects.\par
+\par
+\b rmTriggerID(string triggerName)\par
+\b0\tab Like areas and objects, triggers must be defined before they can be used.\par
+\par
+\b rmSetTriggerPriority(int priority)\par
+rmSetTriggerActive(bool active)\par
+rmSetTriggerRunImmediately(bool runImmediately)\par
+rmSetTriggerLoop(bool loop)\par
+\b0\par
+\b rmAddTriggerCondition(string conditionType)\par
+rmSetTriggerConditionParam(string paramName, string value, bool add)\par
+rmSetTriggerConditionParamInt(string paramName, int value, bool add)\par
+rmSetTriggerConditionParamFloat(string paramName, float value, bool add)\par
+rmSetTriggerConditionParamArmy(string paramName, int playerID, int armyID, bool add)\par
+\pard\fi720\b0 Refer to triggertype.xml for lists of available conditions and their parameters.\par
+\pard\par
+\b rmAddTriggerEffect(string effectType)\par
+rmSetTriggerEffectParam(string paramName, string value, bool add)\par
+rmSetTriggerEffectParamInt(string paramName, int value, bool add)\par
+rmSetTriggerEffectParamFloat(string paramName, float value, bool add)\b0\par
+\pard\fi720 Refer to triggertype.xml for lists of available effects and their parameters.\par
+\pard\par
+\b rmSetTriggerEffectParamArmy(string paramName, int playerID, int armyID, bool add)\par
+rmCreateArmy(int playerID, string armyName)\par
+rmAddUnitsToArmy(int playerID, int armyID, int objectDefID)\b0\par
+\pard\fi720 Triggers that affect armies require that the armies be defined first.\par
+\pard\par
+\b rmSetVCFile(string filename)\par
+\pard\fi720\b0 You can set up alternate victory condition files for your RMS. This feature is fairly complex and should only be attempted by an advanced user.\par
+\pard\par
+\pard\keepn\s3\sb240\sa60\b\fs26 III. ANNOTATED MEDITERRANEAN.RMS\par
+\pard\b0\fs20\par
+\pard\keepn\s2 The rest of this article contains a line by line copy of the Mediterranean random map. While this map is not as complicated as some, it provides examples of how many of the above commands can be used.\par
+\pard\par
+// MEDITERRANEAN\par
+\par
+// Main entry point for random map script. All scripts need to void out all previous commands, so always start with a void.\par
+\par
+void main(void)\par
+\{\par
+\par
+  // Text. The status text is useful only in displaying the progress bar. You can also provide information inside the quotations, such as \ldblquote generating seas.\rdblquote\par
+\par
+   rmSetStatusText("",0.01);\par
+\par
+   // Set size. This map defaults to placing 7500 tiles per player. If the map is generated as a large map by the user, then it uses 9750 tiles instead. The integer for size is just converting tiles to square meters and then reporting how large the map is.\par
+\par
+   int playerTiles=7500;\par
+   if(cMapSize == 1)\par
+   \{\par
+      playerTiles = 9750;\par
+      rmEchoInfo("Large map");\par
+   \}\par
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);\par
+   rmEchoInfo("Map size="+size+"m x "+size+"m");\par
+   rmSetMapSize(size, size);\par
+\par
+   // Set up default water. We want the water level to be at 0 meters.\par
+   rmSetSeaLevel(0.0);\par
+\par
+   // Init map. We want the base water type to be Mediterranean Sea, but want the base texture that is placed on the map to be not water, but land, using grassDirt25. If nothing else was done in this script, we would have a large square of grassDirt25.\par
+   rmSetSeaType("mediterranean sea");\par
+   rmTerrainInitialize("GrassDirt25");\par
+\par
+   // Define some classes. Most of these classes will be used later for constraints, but keeping them all in one location will make them easier to find later. Some are defined as integers, as a shortcut for those cases where we reference the classes a lot, but classes can be done either way.\par
+   int classPlayer=rmDefineClass("player");\par
+   int classPlayerCore=rmDefineClass("player core");\par
+   rmDefineClass("corner");\par
+   rmDefineClass("classHill");\par
+   rmDefineClass("center");\par
+   rmDefineClass("starting settlement");\par
+\par
+\par
+   // -------------Define constraints. We\rquote re done with the basics and ready to get into placing areas and objects. I broke this section out with the ----- marks just so it is easier to find when scrolling through a large file. Next, we will set up the constraints. Again, keeping them all in one place makes it easier to see what has been defined and if there are any constraints that can serve double duty.\par
+   \par
+   // Create a edge of map constraint. This constraint is necessary on many maps. It sets up a box around the edge of the map, in this case 4m from the edges. Player areas and many objects will use this constraint to keep from being placed to close to the map edge. Other areas, such as forests, will NOT use this constraint, or else there would be a pathable strip all the way around the edge of the map, which makes attacking too easy.\par
+\par
+   int edgeConstraint=rmCreateBoxConstraint("edge of map", rmXTilesToFraction(4), rmZTilesToFraction(4), 1.0-rmXTilesToFraction(4), 1.0-rmZTilesToFraction(4));\par
+   \par
+// The player constraints are used to tell players and other objects to keep away from players. Remember that player areas can be quite large-on some maps there is no land but player areas, so you may need to use object constraints from the player\rquote s Town Center on some maps rather than just avoiding a player area completely. Note that you can have multiple constraints that do similar things (in this case avoid player areas) as long as they have different string names (\ldblquote stay away from players\rdblquote  and \ldblquote stay away from players a lot.\rdblquote ) The content of the strings don\rquote t matter, but naming them something you\rquote ll remember makes it easier.\par
+\par
+   int playerConstraint=rmCreateClassDistanceConstraint("stay away from players", classPlayer, 30.0);\par
+   int smallMapPlayerConstraint=rmCreateClassDistanceConstraint("stay away from players a lot", classPlayer, 70.0);\par
+ \par
+   // Center constraint. Because we want a large ocean in the center, we want to make sure player areas don\rquote t get too close to the center. We don\rquote t have anything in classID(\ldblquote center\rdblquote ) yet, but later we will add the central ocean to this class.\par
+\par
+   int centerConstraint=rmCreateClassDistanceConstraint("stay away from center", rmClassID("center"), 15.0);\par
+   int wideCenterConstraint=rmCreateClassDistanceConstraint("elevation avoids center", rmClassID("center"), 50.0);\par
+\par
+   // corner constraint. Because maps are square but players are placed in circles on many maps, it is possible for a lot of objects to get shoved into corners. Corner constraints try and avoid that possibility. These constraints are not actually used for this RMS, but I left them in as an example of the kind of thing you can do.\par
+\par
+   int cornerConstraint=rmCreateClassDistanceConstraint("stay away from corner", rmClassID("corner"), 15.0);\par
+   int cornerOverlapConstraint=rmCreateClassDistanceConstraint("don't overlap corner", rmClassID("corner"), 2.0);\par
+\par
+   // Settlement constraints. These are among the most important object constraints, since maps can be unfair if too many good resources are near Settlements, or Settlements are too close to each other. In this map, there are three Settlement constraints, one to avoid by a short distance (20m) a long distance (40m) and a really long distance (60m). Note that the 60m constraint is used only to avoid \ldblquote starting settlements,\rdblquote  meaning the TC (which always has a Settlement beneath it) that each player starts with. You could defined dozens of Settlement constraints if you needed them.\par
+\par
+   int shortAvoidSettlement=rmCreateTypeDistanceConstraint("objects avoid TC by short distance", "AbstractSettlement", 20.0);\par
+   int farAvoidSettlement=rmCreateTypeDistanceConstraint("TCs avoid TCs by long distance", "AbstractSettlement", 40.0);\par
+   int farStartingSettleConstraint=rmCreateClassDistanceConstraint("objects avoid player TCs", rmClassID("starting settlement"), 60.0);\par
+       \par
+   // Tower constraint. These constraints are used to make sure the starting towers avoid each other by a reasonable distance. The constraints could be larger, but then there is the risk that a player won\rquote t get all 4 of their towers.\par
+\par
+   int avoidTower=rmCreateTypeDistanceConstraint("towers avoid towers", "tower", 20.0);\par
+   int avoidTower2=rmCreateTypeDistanceConstraint("objects avoid towers", "tower", 22.0);\par
+\par
+   // Gold. Gold isn\rquote t quite as important as Settlements, but you may want to avoid gold being placed too close to other gold, or have super resource piles of gold and good in the same small area.\par
+\par
+   int avoidGold=rmCreateTypeDistanceConstraint("avoid gold", "gold", 30.0);\par
+   int shortAvoidGold=rmCreateTypeDistanceConstraint("short avoid gold", "gold", 10.0);\par
+\par
+   // Food.  These constraints will mostly be used to make sure all the herd animals and predators aren\rquote t located in one portion of the map.\par
+\par
+   int avoidHerdable=rmCreateTypeDistanceConstraint("avoid herdable", "herdable", 30.0);\par
+   int avoidPredator=rmCreateTypeDistanceConstraint("avoid predator", "animalPredator", 20.0);\par
+   int avoidFood=rmCreateTypeDistanceConstraint("avoid other food sources", "food", 6.0);\par
+\par
+   // Avoid impassable land. Constraints that avoid passable or impassable land are very useful for a variety of objects. These constraints will be used to keep everything from hills to trees out of the water.\par
+\par
+   int avoidImpassableLand=rmCreateTerrainDistanceConstraint("avoid impassable land", "land", false, 10.0);\par
+   int shortHillConstraint=rmCreateClassDistanceConstraint("patches vs. hill", rmClassID("classHill"), 10.0);\par
+  \par
+   // -------------Define objects. Okay, we are all done with most of the constraints (there are a few more down below where it just made more sense to keep them with their objects). Now we will define the objects. They don\rquote t actually get placed here, but just defined. Remember that an \ldblquote object\rdblquote  in this sense could be a single building, like a Settlement, or a pile of rocks that including large and small rocks, grass, or even gold.\par
+\par
+   // Close Objects.  Calling objects close, medium or far is just a shorthand note for me to keep them straight. Close objects are those that \ldblquote belong\rdblquote  to a certain player and are generally used right away. Medium objects are still placed per player, but are far enough away that they might be ignored, missed, or stolen. Far objects are placed randomly on the map, but ignore player areas, and are generally up for grabs. In general, I make close objects more predictable than far objects.\par
+\par
+// This first object is the Town Center. Note that it has to be called by its protounit name, which is \ldblquote Settlement Level 1,\rdblquote  not \ldblquote Town Center.\rdblquote  First, startingSettlementID is defined so I can reference it later. Then, a Settlement Level 1 is added to the object with a distance of 0.0, meaning that it must be in the center. Since there is only one thing added to this object, 0.0 makes sense. The object is then added to the \ldblquote starting settlement\rdblquote  class. It could be added to any classes as necessary. Then, the min and max distance are both set to 0 to make sure the Town Center is always placed in the exact middle of a players\rquote s area. You could make a map where the Town Centers are anywhere on the map, but without starting resources around the TC, players may not want to play your map.\par
+\par
+   int startingSettlementID=rmCreateObjectDef("starting settlement");\par
+   rmAddObjectDefItem(startingSettlementID, "Settlement Level 1", 1, 0.0);\par
+   rmAddObjectDefToClass(startingSettlementID, rmClassID("starting settlement"));\par
+   rmSetObjectDefMinDistance(startingSettlementID, 0.0);\par
+   rmSetObjectDefMaxDistance(startingSettlementID, 0.0);\par
+\par
+   // towers avoid other towers. Next, we define the starting towers. You can see only 1 tower is defined in startingTowerID, but we will end up placing 4 of them per player. If we changed 0.0 to 4.0 then we could place all 4 at once, but they might not avoid each other and the Town Center might be vulnerable on one side. Of course, you don\rquote t have to have starting towers at all, but remember that sometimes a game can be determined in the opening seconds if a player can\rquote t see all his starting resources right away. We also tell the towers to avoid impassable land, which on this map means the center ocean and cliffs. It probably isn\rquote t necessary to include this constraint since player areas avoid impassable land too, but as we get to resources that are placed farther than 28 m from the player\rquote s center, it will become more of a risk.\par
+\par
+   int startingTowerID=rmCreateObjectDef("Starting tower");\par
+   rmAddObjectDefItem(startingTowerID, "tower", 1, 0.0);\par
+   rmSetObjectDefMinDistance(startingTowerID, 22.0);\par
+   rmSetObjectDefMaxDistance(startingTowerID, 28.0);\par
+   rmAddObjectDefConstraint(startingTowerID, avoidTower);\par
+   rmAddObjectDefConstraint(startingTowerID, avoidImpassableLand);\par
+   \par
+   // gold avoids gold. By placing the gold so close to the Town Center, I ensure that an early attack won\rquote t completely deny a player of gold.\par
+\par
+   int startingGoldID=rmCreateObjectDef("Starting gold");\par
+   rmAddObjectDefItem(startingGoldID, "Gold mine small", 1, 0.0);\par
+   rmSetObjectDefMinDistance(startingGoldID, 20.0);\par
+   rmSetObjectDefMaxDistance(startingGoldID, 25.0);\par
+   rmAddObjectDefConstraint(startingGoldID, avoidGold);\par
+   rmAddObjectDefConstraint(startingGoldID, avoidImpassableLand);\par
+\par
+   // pigs. Notice that I place a random number of pigs, from 2-4. PigNumber should technically be an integer, but since there is no such thing as 2.3 pigs, the fractions are just dropped. Note also that by defining closePigsID once, we make sure that every player gets the same number of pigs, though that number may be different if the map is played again. If different players on the same map had different numbers of pigs, there might be a serious balance problem.\par
+\par
+   float pigNumber=rmRandFloat(2, 4);\par
+   int closePigsID=rmCreateObjectDef("close pigs");\par
+   rmAddObjectDefItem(closePigsID, "pig", pigNumber, 2.0);\par
+   rmSetObjectDefMinDistance(closePigsID, 25.0);\par
+   rmSetObjectDefMaxDistance(closePigsID, 30.0);\par
+   rmAddObjectDefConstraint(closePigsID, avoidImpassableLand);\par
+   rmAddObjectDefConstraint(closePigsID, avoidFood);\par
+\par
+// Berries and Chickens are often used interchangeably. However, they do provide different levels of Food, so you need to make sure one player doesn\rquote t have more Food than another player. In this case, we determine once whether closeChickensID actually includes chickens (which happens 0.8 of the time) or has berries instead. From 6-10 chickens are placed in a 5m radius, or 4-6 berries are placed in a 4m radius. Because pigs are type \ldblquote Food\rdblquote , both chickens and berries will avoid them. We could have made an avoidPig constraint just as easily.\par
+\par
+   int closeChickensID=rmCreateObjectDef("close Chickens");\par
+   if(rmRandFloat(0,1)<0.8)\par
+      rmAddObjectDefItem(closeChickensID, "chicken", rmRandInt(6,10), 5.0);\par
+   else\par
+      rmAddObjectDefItem(closeChickensID, "berry bush", rmRandInt(4,6), 4.0);\par
+   rmSetObjectDefMinDistance(closeChickensID, 20.0);\par
+   rmSetObjectDefMaxDistance(closeChickensID, 25.0);\par
+   rmAddObjectDefConstraint(closeChickensID, avoidImpassableLand);\par
+   rmAddObjectDefConstraint(closeChickensID, avoidFood); \par
+\par
+// Most of the time we get 1-3 Boar, but sometimes we get 1-2 Aurochs instead. Like all of the previous objects, we will place the closeBoarID object once per player, so if one player gets 2 Aurochs, every player will get 2 Aurochs. Another, less fair method, would be to do a loop over the number of players and determine the animals every time.\par
+\par
+   int closeBoarID=rmCreateObjectDef("close Boar");\par
+   if(rmRandFloat(0,1)<0.7)\par
+      rmAddObjectDefItem(closeBoarID, "boar", rmRandInt(1,3), 4.0);\par
+   else\par
+      rmAddObjectDefItem(closeBoarID, "aurochs", rmRandInt(1,2), 2.0);\par
+   rmSetObjectDefMinDistance(closeBoarID, 30.0);\par
+   rmSetObjectDefMaxDistance(closeBoarID, 50.0);\par
+   rmAddObjectDefConstraint(closeBoarID, avoidImpassableLand);\par
+\par
+   int stragglerTreeID=rmCreateObjectDef("straggler tree");\par
+   rmAddObjectDefItem(stragglerTreeID, "oak tree", 1, 0.0);\par
+   rmSetObjectDefMinDistance(stragglerTreeID, 12.0);\par
+   rmSetObjectDefMaxDistance(stragglerTreeID, 15.0);\par
+\par
+\par
+   // Medium Objects\par
+\par
+   // gold avoids gold and Settlements. Notice that this gold mine uses a larger type of gold than the starting gold mine. It not only avoids gold (which includes both the starting gold mine and other medium gold mines) but it avoids Settelments, the starting Settelement (TC), the edge of the map and impassable land (cliffs or water).\par
+\par
+\par
+   int mediumGoldID=rmCreateObjectDef("medium gold");\par
+   rmAddObjectDefItem(mediumGoldID, "Gold mine", 1, 0.0);\par
+   rmSetObjectDefMinDistance(mediumGoldID, 40.0);\par
+   rmSetObjectDefMaxDistance(mediumGoldID, 60.0);\par
+   rmAddObjectDefConstraint(mediumGoldID, avoidGold);\par
+   rmAddObjectDefConstraint(mediumGoldID, edgeConstraint);\par
+   rmAddObjectDefConstraint(mediumGoldID, shortAvoidSettlement);\par
+   rmAddObjectDefConstraint(mediumGoldID, avoidImpassableLand);\par
+   rmAddObjectDefConstraint(mediumGoldID, farStartingSettleConstraint);\par
+\par
+   int mediumPigsID=rmCreateObjectDef("medium pigs");\par
+   rmAddObjectDefItem(mediumPigsID, "pig", 2, 4.0);\par
+   rmSetObjectDefMinDistance(mediumPigsID, 50.0);\par
+   rmSetObjectDefMaxDistance(mediumPigsID, 70.0);\par
+   rmAddObjectDefConstraint(mediumPigsID, avoidImpassableLand);\par
+   rmAddObjectDefConstraint(mediumPigsID, avoidHerdable);\par
+   rmAddObjectDefConstraint(mediumPigsID, farStartingSettleConstraint);\par
+\par
+   // player fish. We want to make sure every player has some fish close by, so we will place playerFishID for each player. However, we need two new constraints first: one that keeps fish groups away from each other, and one that keeps fish from being placed on top of land. Because fish are harder to place (since they are avoiding land) we allow them to be up to 100m from a player\rquote s center. Remember, this distance includes both the land and water. If a player\rquote s Town Center is 70m from shore, then there is only 30m left to place the fish group in. PlayerFishID is actually a group of 3 mahi mahi, which just makes the water look more interesting.\par
+\par
+   int fishVsFishID=rmCreateTypeDistanceConstraint("fish v fish", "fish", 18.0);\par
+   int fishLand = rmCreateTerrainDistanceConstraint("fish land", "land", true, 6.0);\par
+\par
+   int playerFishID=rmCreateObjectDef("owned fish");\par
+   rmAddObjectDefItem(playerFishID, "fish - mahi", 3, 10.0);\par
+   rmSetObjectDefMinDistance(playerFishID, 0.0);\par
+   rmSetObjectDefMaxDistance(playerFishID, 100.0);\par
+   rmAddObjectDefConstraint(playerFishID, fishVsFishID);\par
+   rmAddObjectDefConstraint(playerFishID, fishLand);\par
+   \par
+   // Far Objects\par
+         \par
+   // gold avoids gold, Settlements and TCs. Far objects are handled differently on this map (and most ES maps) from close and medium objects, but they don\rquote t have to be. The difference comes in how these objects are placed, below. Close and medium objects are placed per player. Some far objects, like gold, are placed per player, but others are just placed randomly across the map, with a few constraints.  It is important to remember that the randomly placed objects will not avoid a player\rquote s starting area by the minDistance. The difference between the minimum and maximum has grown, to account for all the variation in land and water; if the min and max were both 70, farGoldID might fail several times.\par
+\par
+   int farGoldID=rmCreateObjectDef("far gold");\par
+   rmAddObjectDefItem(farGoldID, "Gold mine", 1, 0.0);\par
+   rmSetObjectDefMinDistance(farGoldID, 70.0);\par
+   rmSetObjectDefMaxDistance(farGoldID, 160.0);\par
+   rmAddObjectDefConstraint(farGoldID, avoidGold);\par
+   rmAddObjectDefConstraint(farGoldID, avoidImpassableLand);\par
+   rmAddObjectDefConstraint(farGoldID, shortAvoidSettlement);\par
+   rmAddObjectDefConstraint(farGoldID, farStartingSettleConstraint);\par
+\par
+   // pigs avoid TCs and other herds, since this map places a lot of pigs. Mediterranean is a pig-heavy map, so it needs extra constraints that other maps might not need. It aways places pigs in pairs. You could make a random number of 0-2 pigs; 0 of any object is just ignored.\par
+\par
+   int farPigsID=rmCreateObjectDef("far pigs");\par
+   rmAddObjectDefItem(farPigsID, "pig", 2, 4.0);\par
+   rmSetObjectDefMinDistance(farPigsID, 80.0);\par
+   rmSetObjectDefMaxDistance(farPigsID, 150.0);\par
+   rmAddObjectDefConstraint(farPigsID, avoidImpassableLand);\par
+   rmAddObjectDefConstraint(farPigsID, avoidHerdable);\par
+   rmAddObjectDefConstraint(farPigsID, farStartingSettleConstraint);\par
+   \par
+   // pick lions or bears as predators. Placing predators is tricky, because a player with too many predators nearby has an unfair advantage. To make sure this doesn\rquote t happen, we tell predators to avoid starting areas.\par
+\par
+   // avoid TCs\par
+   int farPredatorID=rmCreateObjectDef("far predator");\par
+   float predatorSpecies=rmRandFloat(0, 1);\par
+   if(predatorSpecies<0.5)   \par
+      rmAddObjectDefItem(farPredatorID, "lion", 2, 4.0);\par
+   else\par
+      rmAddObjectDefItem(farPredatorID, "bear", 1, 4.0);\par
+   rmSetObjectDefMinDistance(farPredatorID, 50.0);\par
+   rmSetObjectDefMaxDistance(farPredatorID, 100.0);\par
+   rmAddObjectDefConstraint(farPredatorID, avoidPredator);\par
+   rmAddObjectDefConstraint(farPredatorID, farStartingSettleConstraint);\par
+   rmAddObjectDefConstraint(farPredatorID, avoidImpassableLand);\par
+   \par
+   // Berries avoid TCs  \par
+   int farBerriesID=rmCreateObjectDef("far berries");\par
+   rmAddObjectDefItem(farBerriesID, "berry bush", 10, 4.0);\par
+   rmSetObjectDefMinDistance(farBerriesID, 0.0);\par
+   rmSetObjectDefMaxDistance(farBerriesID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(farBerriesID, avoidImpassableLand);\par
+   rmAddObjectDefConstraint(farBerriesID, farStartingSettleConstraint);\par
+   \par
+   // This map will either use boar or deer as the extra huntable food. We set up two new class constraints to make sure the bonus animals are distributed evenly. Hunted animals are placed randomly, not per player as farGoldID was placed. The difference is that the minDistance of 0 below does not mean 0m from a player\rquote s starting area, but 0m from the random location where bonusHundableID was placed. This will make more sense in the placement section below areas.\par
+\par
+   int classBonusHuntable=rmDefineClass("bonus huntable");\par
+   int avoidBonusHuntable=rmCreateClassDistanceConstraint("avoid bonus huntable", classBonusHuntable, 40.0);\par
+   int avoidHuntable=rmCreateTypeDistanceConstraint("avoid huntable", "huntable", 20.0);\par
+\par
+   // hunted avoids hunted and TCs\par
+   int bonusHuntableID=rmCreateObjectDef("bonus huntable");\par
+   float bonusChance=rmRandFloat(0, 1);\par
+   if(bonusChance<0.5)   \par
+      rmAddObjectDefItem(bonusHuntableID, "boar", rmRandInt(2,3), 4.0);\par
+   else if(bonusChance<0.8)\par
+      rmAddObjectDefItem(bonusHuntableID, "deer", rmRandInt(6,8), 8.0);\par
+   else\par
+      rmAddObjectDefItem(bonusHuntableID, "aurochs", rmRandInt(1,3), 4.0);\par
+   rmSetObjectDefMinDistance(bonusHuntableID, 0.0);\par
+   rmSetObjectDefMaxDistance(bonusHuntableID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(bonusHuntableID, avoidBonusHuntable);\par
+   rmAddObjectDefConstraint(bonusHuntableID, avoidHuntable);\par
+   rmAddObjectDefToClass(bonusHuntableID, classBonusHuntable);\par
+   rmAddObjectDefConstraint(bonusHuntableID, farStartingSettleConstraint);\par
+   rmAddObjectDefConstraint(bonusHuntableID, avoidImpassableLand);\par
+\par
+   int randomTreeID=rmCreateObjectDef("random tree");\par
+   rmAddObjectDefItem(randomTreeID, "oak tree", 1, 0.0);\par
+   rmSetObjectDefMinDistance(randomTreeID, 0.0);\par
+   rmSetObjectDefMaxDistance(randomTreeID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(randomTreeID, rmCreateTypeDistanceConstraint("random tree", "all", 4.0));\par
+   rmAddObjectDefConstraint(randomTreeID, shortAvoidSettlement);\par
+   rmAddObjectDefConstraint(randomTreeID, avoidImpassableLand);\par
+\par
+    // Birds. These don\rquote t have any effect on gameplay, and they move around, so there is no point assigning constraints to them. In fact, we specify that the min distance is 0 and the max distance is half the map, meaning they can be placed anywhere.\par
+\par
+\par
+   int farhawkID=rmCreateObjectDef("far hawks");\par
+   rmAddObjectDefItem(farhawkID, "hawk", 1, 0.0);\par
+   rmSetObjectDefMinDistance(farhawkID, 0.0);\par
+   rmSetObjectDefMaxDistance(farhawkID, rmXFractionToMeters(0.5));\par
+\par
+   // Relics avoid TCs\par
+   int relicID=rmCreateObjectDef("relic");\par
+   rmAddObjectDefItem(relicID, "relic", 1, 0.0);\par
+   rmSetObjectDefMinDistance(relicID, 60.0);\par
+   rmSetObjectDefMaxDistance(relicID, 150.0);\par
+   rmAddObjectDefConstraint(relicID, edgeConstraint);\par
+   rmAddObjectDefConstraint(relicID, rmCreateTypeDistanceConstraint("relic vs relic", "relic", 70.0));\par
+   rmAddObjectDefConstraint(relicID, farStartingSettleConstraint);\par
+   rmAddObjectDefConstraint(relicID, avoidImpassableLand);\par
+\par
+   // -------------Done defining objects. That\rquote s it for objects. Next we will not only define, but place some areas, and then we will add all of the above defined objects to the areas. Then the map will be done.\par
+\par
+  // Text\par
+   rmSetStatusText("",0.20);\par
+\par
+   // Cheesy "circular" placement of players. Through trial and error, we found that when there were fewer than 4 players, the players were too close to the center, which meant the ocean was very small. So, we place players at 0.4 to 0.43 on smaller, 2-3 player maps, and from closer to the center (by a small amount) for larger, 4-12 player maps. Teams are placed slightly closer together than enemies.\par
+\par
+   rmSetTeamSpacingModifier(0.75);\par
+   if(cNumberNonGaiaPlayers <4)\par
+      rmPlacePlayersCircular(0.4, 0.43, rmDegreesToRadians(5.0));\par
+   else\par
+      rmPlacePlayersCircular(0.43, 0.45, rmDegreesToRadians(5.0));\par
+\par
+   // Create a center water area -- the Mediterranean part. This is the first area. It is the central ocean that gives the map its name. We name the area (centerID), pick a size for it (more than a third of the map), place it in the center of the map, specify a water type for it, add it to the center class (since it is the only area in this class, we could have just had areas avoid centerID), give the area a height of 0 so that it is underwater, provide some variation by setting more than 1 blob and letting the blobs move a part a little, smooth the outer perimeter so it looks more like an ocean, add coherence to keep the ocean from looking too much like an amoeba, and then build the area. Building the ocean now is important, because much of the Mediterranean look comes the fact that player areas spill over into the ocean.\par
+\par
+   int centerID=rmCreateArea("center");\par
+   rmSetAreaSize(centerID, 0.35, 0.35);\par
+   rmSetAreaLocation(centerID, 0.5, 0.5);\par
+   rmSetAreaWaterType(centerID, "mediterranean sea");\par
+   rmAddAreaToClass(centerID, rmClassID("center"));\par
+   rmSetAreaBaseHeight(centerID, 0.0);\par
+   rmSetAreaMinBlobs(centerID, 8);\par
+   rmSetAreaMaxBlobs(centerID, 10);\par
+   rmSetAreaMinBlobDistance(centerID, 10);\par
+   rmSetAreaMaxBlobDistance(centerID, 20);\par
+   rmSetAreaSmoothDistance(centerID, 50);\par
+   rmSetAreaCoherence(centerID, 0.25);\par
+   rmBuildArea(centerID); \par
+\par
+   // monkey island. Just to be silly, and to make the map more random, there is a chance of placing a monkey island in the middle. I found that the island connects to other land too often on smaller maps, so there is only a chance to place the island on maps with more than 3 players, and even then there is only a 66% chance. \par
+\par
+   float monkeyChance=rmRandFloat(0, 1);\par
+   if(cNumberPlayers > 3)\par
+   \{\par
+      if(monkeyChance < 0.66)   \par
+         \{\par
+            int monkeyIslandID=rmCreateArea("monkeyisland");\par
+            rmSetAreaSize(monkeyIslandID, rmAreaTilesToFraction(300), rmAreaTilesToFraction(300));\par
+            rmSetAreaLocation(monkeyIslandID, 0.5, 0.5);\par
+            rmSetAreaTerrainType(monkeyIslandID, "shorelinemediterraneanb");\par
+            rmSetAreaBaseHeight(monkeyIslandID, 2.0);\par
+            rmSetAreaSmoothDistance(monkeyIslandID, 10);\par
+            rmSetAreaHeightBlend(monkeyIslandID, 2);\par
+            rmSetAreaCoherence(monkeyIslandID, 1.0);\par
+            rmBuildArea(monkeyIslandID);\par
+\par
+\tab // Here is our first object. Normally, the monkeyID would be defined above with the other objects and placed below with the other objects, but I left it here to indicate that certain things don\rquote t have to go in a certain order. I knew the monkey would not interact much with other objects, since it is placed in the center and many objects avoid the center or avoid water. All the defining is done as above, but notice that 3 different units are added to monkeyID. The final command actually places the monkey at location 0.5, 0.5 which is also where monkey island gets placed. If you stopped the map generating here, you would get a big field of grassDirt25, an ocean, an island in the ocean, and a monkey, palm tree and gold on the island. That\rquote s it.\par
+            \par
+int monkeyID=rmCreateObjectDef("monkey");\par
+            rmAddObjectDefItem(monkeyID, "baboon", 1, 2.0);\par
+            rmAddObjectDefItem(monkeyID, "palm", 1, 2.0);\par
+            rmAddObjectDefItem(monkeyID, "gold mine", 1, 8.0);\par
+            rmSetObjectDefMinDistance(monkeyID, 0.0);\par
+            rmSetObjectDefMinDistance(monkeyID, 20.0);\par
+            rmPlaceObjectDefAtLoc(monkeyID, 0, 0.5, 0.5);\par
+         \}\par
+   \}\par
+\par
+  // Set up player areas. With the center ocean (and ludicrous monkey island out of the way) we set out placing the player areas. Note that the area is set up much like the ocean, except that instead of placing a set fraction, I place a number of tiles per player. I used to place more tiles on smaller maps, but decided that wasn\rquote t necessary and commented it out-instead I add a new constraint on small maps only. Also notice that here is our first loop. We generate an area once for each player in the game, and then call these areas \ldblquote Player\rdblquote  plus the player number. You have to change the string ID of the area or you will get an error message. \par
+\par
+   float playerFraction=rmAreaTilesToFraction(3200);\par
+/*   if(cNumberNonGaiaPlayers < 4)\par
+      playerFraction=rmAreaTilesToFraction(3000); */\par
+\par
+   for(i=1; <cNumberPlayers)\par
+   \{\par
+      // Create the area.\par
+      int id=rmCreateArea("Player"+i);\par
+\par
+      // Assign to the player. Without this, you won\rquote t be able to associate this area with the player location determined above in the player placement section.\par
+      rmSetPlayerArea(i, id);\par
+\par
+      // Set the size.\par
+      rmSetAreaSize(id, 0.9*playerFraction, 1.1*playerFraction);\par
+\par
+      rmAddAreaToClass(id, classPlayer);\par
+\par
+      rmSetAreaMinBlobs(id, 4);\par
+      rmSetAreaMaxBlobs(id, 5);\par
+      rmSetAreaWarnFailure(id, false);\par
+      rmSetAreaMinBlobDistance(id, 30.0);\par
+      rmSetAreaMaxBlobDistance(id, 50.0);\par
+      rmSetAreaSmoothDistance(id, 20);\par
+      rmSetAreaCoherence(id, 0.20);\par
+      rmSetAreaBaseHeight(id, 0.0); \par
+      rmSetAreaHeightBlend(id, 2);\par
+      rmAddAreaConstraint(id, playerConstraint);\par
+      if(cNumberNonGaiaPlayers < 4)\par
+         rmAddAreaConstraint(id, smallMapPlayerConstraint); \par
+      rmSetAreaLocPlayer(id, i);\par
+      rmSetAreaTerrainType(id, "grassDirt25");\par
+   \}\par
+\par
+   // Build the areas. We already built the ocean and monkey island, so this command will just build all the player areas at once. If buildAreas was inside of the loop, then player 1\rquote s land would get build before other players, and some players might run out of space. \par
+\par
+   rmBuildAllAreas();\par
+\par
+   // Because the player areas used the same terrain as the base map (grassDirt25) the map is going to look pretty boring. To remedy this, we add sub-areas. These areas have no effect on gameplay, though they could if we placed certain objects in these areas. This loop just sets up a small patch of GrassDirt50 within each player\rquote s area. Notice that a parentID is specified here-the lands of each player.\par
+\par
+   for(i=1; <cNumberPlayers)\par
+   \{\par
+      // Beautification sub area.\par
+      int id2=rmCreateArea("Player inner"+i, rmAreaID("player"+i));\par
+      rmSetAreaSize(id2, rmAreaTilesToFraction(400), rmAreaTilesToFraction(600));\par
+      rmSetAreaLocPlayer(id2, i);\par
+      rmSetAreaTerrainType(id2, "GrassDirt50");\par
+\par
+      rmSetAreaMinBlobs(id2, 1);\par
+      rmSetAreaMaxBlobs(id2, 5);\par
+      rmSetAreaWarnFailure(id2, false);\par
+      rmSetAreaMinBlobDistance(id2, 16.0);\par
+      rmSetAreaMaxBlobDistance(id2, 40.0);\par
+      rmSetAreaCoherence(id2, 0.0);\par
+\par
+      rmBuildArea(id2);\par
+   \}\par
+\par
+   for(i=1; <cNumberPlayers*8)\par
+   \{\par
+      // Beautification sub area.\par
+      int id3=rmCreateArea("Grass patch"+i);\par
+      rmSetAreaSize(id3, rmAreaTilesToFraction(50), rmAreaTilesToFraction(100));\par
+      rmSetAreaTerrainType(id3, "GrassA");\par
+      rmAddAreaConstraint(id3, centerConstraint);\par
+      rmSetAreaMinBlobs(id3, 1);\par
+      rmSetAreaMaxBlobs(id3, 5);\par
+      rmSetAreaWarnFailure(id3, false);\par
+      rmSetAreaMinBlobDistance(id3, 16.0);\par
+      rmSetAreaMaxBlobDistance(id3, 40.0);\par
+      rmSetAreaCoherence(id3, 0.0);\par
+\par
+      rmBuildArea(id3);\par
+   \}\par
+\par
+// I defined another object here that I wanted to always place in id4, an object called flowerID that contains flowers and grass. I use a special constraint called an edgeDistanceConstraint to keep the flowerID within the area of id4. I also place the flowerID in id4. The 0 parameter indicates that the object belongs to Gaia-we don\rquote t want the player to own any flowers.\par
+\par
+   int flowerID =0;\par
+   int id4 = 0;\par
+   int stayInPatch=rmCreateEdgeDistanceConstraint("stay in patch", id4, 4.0);\par
+   for(i=1; <cNumberPlayers*6)\par
+   \{\par
+      // Beautification sub area.\par
+      id4=rmCreateArea("Grass patch 2"+i);\par
+      rmSetAreaSize(id4, rmAreaTilesToFraction(5), rmAreaTilesToFraction(20));\par
+      rmSetAreaTerrainType(id4, "GrassB");\par
+      rmAddAreaConstraint(id4, centerConstraint);\par
+      rmSetAreaMinBlobs(id4, 1);\par
+      rmSetAreaMaxBlobs(id4, 5);\par
+      rmSetAreaWarnFailure(id4, false);\par
+      rmSetAreaMinBlobDistance(id4, 16.0);\par
+      rmSetAreaMaxBlobDistance(id4, 40.0);\par
+      rmSetAreaCoherence(id4, 0.0);\par
+\par
+      rmBuildArea(id4);\par
+\par
+      flowerID=rmCreateObjectDef("grass"+i);\par
+      rmAddObjectDefItem(flowerID, "grass", rmRandFloat(2,4), 5.0);\par
+      rmAddObjectDefItem(flowerID, "flowers", rmRandInt(0,6), 5.0);\par
+      rmAddObjectDefConstraint(flowerID, stayInPatch);\par
+      rmSetObjectDefMinDistance(flowerID, 0.0);\par
+      rmSetObjectDefMaxDistance(flowerID, 0.0);\par
+      rmPlaceObjectDefInArea(flowerID, 0, rmAreaID("grass patch 2"+i), 1);\par
+   \}\par
+\par
+// We\rquote re done placing areas now, so we can start placing objects. We already defined the player\rquote s own fish, so now we can just place it. The false parameter indicates that these fish are not owned by the player.\par
+\par
+   rmPlaceObjectDefPerPlayer(playerFishID, false);\par
+\par
+// Since we\rquote re placing fish, let\rquote s go ahead and place some extra ones. These two sections place some mahi and some perch. There are 3 groups of 3 mahi per player and 1 group of 2 perch per player. These objects avoid land and other fish, but can otherwise be placed anywhere on the map-the location is set to the center of the map (0.5, 0.5) but the max distance is set at half the map (rmXFractionToMeters(0.5)).\par
+\par
+   int fishID=rmCreateObjectDef("fish");\par
+   rmAddObjectDefItem(fishID, "fish - mahi", 3, 9.0);\par
+   rmSetObjectDefMinDistance(fishID, 0.0);\par
+   rmSetObjectDefMaxDistance(fishID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(fishID, fishVsFishID);\par
+   rmAddObjectDefConstraint(fishID, fishLand);\par
+   rmPlaceObjectDefAtLoc(fishID, 0, 0.5, 0.5, 3*cNumberNonGaiaPlayers);\par
+\par
+   fishID=rmCreateObjectDef("fish2");\par
+   rmAddObjectDefItem(fishID, "fish - perch", 2, 6.0);\par
+   rmSetObjectDefMinDistance(fishID, 0.0);\par
+   rmSetObjectDefMaxDistance(fishID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(fishID, fishVsFishID);\par
+   rmAddObjectDefConstraint(fishID, fishLand);\par
+   rmPlaceObjectDefAtLoc(fishID, 0, 0.5, 0.5, 1*cNumberNonGaiaPlayers);\par
+\par
+  // Text\par
+   rmSetStatusText("",0.40);\par
+\par
+// Sharks and whales have no effect on gameplay, but they look cool. This section randomly chooses either sharks or whales and places 1 for every 2 players.\par
+ \par
+   int sharkLand = rmCreateTerrainDistanceConstraint("shark land", "land", true, 20.0);\par
+   int sharkVssharkID=rmCreateTypeDistanceConstraint("shark v shark", "shark", 20.0);\par
+   int sharkVssharkID2=rmCreateTypeDistanceConstraint("shark v orca", "orca", 20.0);\par
+   int sharkVssharkID3=rmCreateTypeDistanceConstraint("shark v whale", "whale", 20.0);\par
+\par
+  // Text\par
+   rmSetStatusText("",0.42);\par
+\par
+   int sharkID=rmCreateObjectDef("shark");\par
+   if(rmRandFloat(0,1)<0.5)\par
+      rmAddObjectDefItem(sharkID, "shark", 1, 0.0);\par
+   else\par
+      rmAddObjectDefItem(sharkID, "whale", 1, 0.0);\par
+   rmSetObjectDefMinDistance(sharkID, 0.0);\par
+   rmSetObjectDefMaxDistance(sharkID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(sharkID, sharkVssharkID);\par
+   rmAddObjectDefConstraint(sharkID, sharkVssharkID2);\par
+   rmAddObjectDefConstraint(sharkID, sharkVssharkID3);\par
+   rmAddObjectDefConstraint(sharkID, sharkLand);\par
+   rmPlaceObjectDefAtLoc(sharkID, 0, 0.5, 0.5, cNumberNonGaiaPlayers*0.5); \par
+\par
+   // Place starting settlements.\par
+   // Close things....\par
+\par
+   // TC. The order you place objects in is important. If you place lots of trees, and then tell objects they need to avoid trees, there might not be enough room for anything else. All we have placed so far, however, are fish and the monkey island stuff. So we want to start with the most important objects, the player\rquote s Town Center and Towers. Unlike the fish above, we want these things to be owned by the player, so we set the second parameter to true. Remember we place 4 Towers per player since the startingTowerID just has 1 Tower in it.\par
+\par
+   rmPlaceObjectDefPerPlayer(startingSettlementID, true);\par
+\par
+    // Towers.\par
+   rmPlaceObjectDefPerPlayer(startingTowerID, true, 4);\par
+\par
+// Even though we just got started placing objects, I take another detour here. If you place objects and then change the elevation, the object might get buried underground! I could tell the elevation to avoid objects, but then I might not get much elevation. Instead, I place elevation now and then just place objects on top of them. This could get crazy if the elevation were extreme, or were unpathable like cliffs. Elevation is placed just like any other area, except that we change the baseHeight, and then add a HeightBlend to make the height variation not so jagged. Also notice that each hill has a 50% chance to change its terrain, otherwise it just uses whatever else is beneath it. Another new concept here is the failCount. Areas don\rquote t always have room to place, and can make a map generate slowly. The loop here counts the number of failures, and when it reaches 20, it just bails, even though it could potentially place 6 areas per player number.\par
+\par
+   // Because player areas are so large on this map, elev needs to avoid buildings instead of player areas. \par
+\par
+   // Elev.\par
+   int numTries=6*cNumberNonGaiaPlayers;\par
+   int avoidBuildings=rmCreateTypeDistanceConstraint("avoid buildings", "Building", 20.0);\par
+   int failCount=0;\par
+   for(i=0; <numTries)\par
+   \{\par
+      int elevID=rmCreateArea("elev"+i);\par
+      rmSetAreaSize(elevID, rmAreaTilesToFraction(15), rmAreaTilesToFraction(80));\par
+      rmSetAreaWarnFailure(elevID, false);\par
+      rmAddAreaToClass(elevID, rmClassID("classHill"));\par
+      rmAddAreaConstraint(elevID, avoidBuildings);\par
+      rmAddAreaConstraint(elevID, centerConstraint);\par
+      if(rmRandFloat(0.0, 1.0)<0.5)\par
+         rmSetAreaTerrainType(elevID, "GrassDirt50"); \par
+/*      rmSetAreaTerrainType(elevID, "SnowA"); */\par
+      rmSetAreaBaseHeight(elevID, rmRandFloat(4.0, 7.0));\par
+      rmSetAreaHeightBlend(elevID, 3);\par
+      rmSetAreaMinBlobs(elevID, 1);\par
+      rmSetAreaMaxBlobs(elevID, 5);\par
+      rmSetAreaMinBlobDistance(elevID, 16.0);\par
+      rmSetAreaMaxBlobDistance(elevID, 40.0);\par
+      rmSetAreaCoherence(elevID, 0.0);\par
+\par
+      if(rmBuildArea(elevID)==false)\par
+      \{\par
+         // Stop trying once we fail 20 times in a row.\par
+         failCount++;\par
+         if(failCount==20)\par
+            break;\par
+      \}\par
+      else\par
+         failCount=0;\par
+   \}\par
+\par
+   // We placed some big hills, but little wrinkles in the terrain add interest, so here I place some more that are more numerous, but smaller and at smaller heights.\par
+\tab\par
+   // Slight Elevation\par
+   numTries=15*cNumberNonGaiaPlayers;\par
+   failCount=0;\par
+   for(i=0; <numTries)\par
+   \{\par
+      elevID=rmCreateArea("wrinkle"+i);\par
+      rmSetAreaSize(elevID, rmAreaTilesToFraction(15), rmAreaTilesToFraction(120));\par
+      rmSetAreaWarnFailure(elevID, false);\par
+      rmSetAreaBaseHeight(elevID, rmRandFloat(2.0, 4.0));\par
+      rmSetAreaHeightBlend(elevID, 1);\par
+      rmSetAreaMinBlobs(elevID, 1);\par
+      rmSetAreaMaxBlobs(elevID, 3);\par
+      rmSetAreaMinBlobDistance(elevID, 16.0);\par
+      rmSetAreaMaxBlobDistance(elevID, 20.0);\par
+      rmSetAreaCoherence(elevID, 0.0);\par
+      rmAddAreaConstraint(elevID, avoidBuildings);\par
+      rmAddAreaConstraint(elevID, centerConstraint);\par
+      rmAddAreaConstraint(elevID, shortHillConstraint);\par
+\par
+      if(rmBuildArea(elevID)==false)\par
+      \{\par
+         // Stop trying once we fail 10 times in a row.\par
+         failCount++;\par
+         if(failCount==10)\par
+            break;\par
+      \}\par
+      else\par
+         failCount=0;\par
+   \} \par
+\par
+  // Text\par
+   rmSetStatusText("",0.60);\par
+\par
+  // Okay, back to the objects. After the Town Center, the most important objects are the Settlements. Settlements are so important, that we use a special object placement function called Fair Locations. Fair Locs are great at forcing objects to be fair, but they are slow, so it is a good idea to only use them for really important things, like Settlements. Here we specify 2 Settlements per player-one that is forward, between a player and his enemies, and another one that is safe behind the player. Other maps do different things, and may have a chance of having both Settlements in safe places.\par
+\par
+   // Settlements.\par
+   //rmPlaceObjectDefPerPlayer(farSettlementID, true, 2);\par
+   id=rmAddFairLoc("Settlement", false, true,  60, 80, 40, 10);\par
+   rmAddFairLocConstraint(id, centerConstraint);\par
+\par
+   id=rmAddFairLoc("Settlement", true, false, 70, 120, 60, 10);\par
+   rmAddFairLocConstraint(id, centerConstraint);\par
+\par
+   if(rmPlaceFairLocs())\par
+   \{\par
+      id=rmCreateObjectDef("far settlement2");\par
+      rmAddObjectDefItem(id, "Settlement", 1, 0.0);\par
+      for(i=1; <cNumberPlayers)\par
+      \{\par
+         for(j=0; <rmGetNumberFairLocs(i))\par
+            rmPlaceObjectDefAtLoc(id, i, rmFairLocXFraction(i, j), rmFairLocZFraction(i, j), 1);\par
+      \}\par
+   \}\par
+\par
+// Now we can quickly run through all those objects that were generated. The two things that vary in the below commands, aside from the way the objects were defined above, is how many to place (default is 1) and whether the object is owned by the player or not. Trees and gold are not owned, while goats are.\tab\par
+\par
+   // Straggler trees.\par
+   rmPlaceObjectDefPerPlayer(stragglerTreeID, false, rmRandInt(2,6));\par
+   \par
+   // Gold\par
+   rmPlaceObjectDefPerPlayer(startingGoldID, false);\par
+\par
+   // Goats\par
+   rmPlaceObjectDefPerPlayer(closePigsID, true);\par
+\par
+   // Chickens or berries.\par
+   rmPlaceObjectDefPerPlayer(closeChickensID, true);\par
+\par
+   // Boar.\par
+   rmPlaceObjectDefPerPlayer(closeBoarID, false);\par
+\par
+   // Medium things....\par
+   // Gold\par
+   rmPlaceObjectDefPerPlayer(mediumGoldID, false);\par
+\par
+   // Pigs\par
+      \par
+   for(i=1; <cNumberPlayers)\par
+      rmPlaceObjectDefAtLoc(mediumPigsID, 0, rmPlayerLocXFraction(i), rmPlayerLocZFraction(i), 2);\par
+   \par
+   // Far things.\par
+   \par
+   // Gold.\par
+   rmPlaceObjectDefPerPlayer(farGoldID, false, 3);\par
+\par
+   // Relics\par
+   rmPlaceObjectDefPerPlayer(relicID, false);\par
+\par
+   // Hawks\par
+   rmPlaceObjectDefPerPlayer(farhawkID, false, 2); \par
+   \par
+// While many objects are placed per player with PlaceObjectDefPerPlayer, others are placed randomly across the map. Bonus huntables, berries and predators are all placed at the center of the map (0.5,0.5) with a max distance of half the map.\par
+\par
+   // Pigs\par
+   for(i=1; <cNumberPlayers)\par
+      rmPlaceObjectDefAtLoc(farPigsID, 0, rmPlayerLocXFraction(i), rmPlayerLocZFraction(i), 3);\par
+\par
+   // Bonus huntable.\par
+   rmPlaceObjectDefAtLoc(bonusHuntableID, 0, 0.5, 0.5, cNumberNonGaiaPlayers);\par
+\par
+   // Berries.\par
+   rmPlaceObjectDefAtLoc(farBerriesID, 0, 0.5, 0.5, cNumberPlayers);\par
+\par
+   // Predators\par
+   rmPlaceObjectDefPerPlayer(farPredatorID, false, 1);\par
+\par
+   // Random trees.\par
+   rmPlaceObjectDefAtLoc(randomTreeID, 0, 0.5, 0.5, 10*cNumberNonGaiaPlayers);\par
+  \par
+ // Forests are placed after objects because they can eat up a bunch of space, and we want to make sure the objects get placed first. Forests are essentially areas, but because they have hard obstructions, care need to be taken that they avoid other forests, and indeed other objects. \tab\par
+\par
+   // Forest.\par
+   int classForest=rmDefineClass("forest");\par
+   int forestObjConstraint=rmCreateTypeDistanceConstraint("forest obj", "all", 6.0);\par
+   int forestConstraint=rmCreateClassDistanceConstraint("forest v forest", rmClassID("forest"), 20.0);\par
+   int forestSettleConstraint=rmCreateClassDistanceConstraint("forest settle", rmClassID("starting settlement"), 20.0);\par
+   int forestCount=10*cNumberNonGaiaPlayers;\par
+   failCount=0;\par
+   for(i=0; <forestCount)\par
+   \{\par
+      int forestID=rmCreateArea("forest"+i);\par
+      rmSetAreaSize(forestID, rmAreaTilesToFraction(25), rmAreaTilesToFraction(100));\par
+      rmSetAreaWarnFailure(forestID, false);\par
+      if(rmRandFloat(0.0, 1.0)<0.5)\par
+         rmSetAreaForestType(forestID, "oak forest");\par
+      else\par
+         rmSetAreaForestType(forestID, "pine forest");\par
+      rmAddAreaConstraint(forestID, forestSettleConstraint);\par
+      rmAddAreaConstraint(forestID, forestObjConstraint);\par
+      rmAddAreaConstraint(forestID, forestConstraint);\par
+      rmAddAreaConstraint(forestID, avoidImpassableLand);\par
+      rmAddAreaToClass(forestID, classForest);\par
+      \par
+      rmSetAreaMinBlobs(forestID, 1);\par
+      rmSetAreaMaxBlobs(forestID, 5);\par
+      rmSetAreaMinBlobDistance(forestID, 16.0);\par
+      rmSetAreaMaxBlobDistance(forestID, 40.0);\par
+      rmSetAreaCoherence(forestID, 0.0);\par
+\par
+      if(rmBuildArea(forestID)==false)\par
+      \{\par
+         // Stop trying once we fail 3 times in a row.\par
+         failCount++;\par
+         if(failCount==3)\par
+            break;\par
+      \}\par
+      else\par
+         failCount=0;\par
+   \}\par
+\par
+  // Text\par
+   rmSetStatusText("",0.80);\par
+\par
+// The remaining objects are mostly for decoration. They are placed last because it isn\rquote t important if they get placed at all, or where they get placed, but because there are so many of them, and because forests avoid all, it is important to place them after the forest. Even though they are just eye-candy, these objects can slow down map generation, if, for example, you tried to place 2000 grass objects per player instead of 20. Notice that the seaweed uses a constraint like the fish to avoid land, but doesn\rquote t get to far from land. \par
+\par
+   // Decoration\par
+   int avoidAll=rmCreateTypeDistanceConstraint("avoid all", "all", 6.0);\par
+   int deerID=rmCreateObjectDef("lonely deer");\par
+   if(rmRandFloat(0,1)<0.5)\par
+      rmAddObjectDefItem(deerID, "deer", rmRandInt(1,2), 1.0);\par
+   else\par
+      rmAddObjectDefItem(deerID, "aurochs", 1, 0.0);\par
+   rmSetObjectDefMinDistance(deerID, 0.0);\par
+   rmSetObjectDefMaxDistance(deerID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(deerID, avoidAll);\par
+   rmAddObjectDefConstraint(deerID, avoidBuildings);\par
+   rmAddObjectDefConstraint(deerID, avoidImpassableLand);\par
+   rmPlaceObjectDefAtLoc(deerID, 0, 0.5, 0.5, cNumberNonGaiaPlayers);\par
+\par
+   int avoidGrass=rmCreateTypeDistanceConstraint("avoid grass", "grass", 12.0);\par
+   int grassID=rmCreateObjectDef("grass");\par
+   rmAddObjectDefItem(grassID, "grass", 3, 4.0);\par
+   rmSetObjectDefMinDistance(grassID, 0.0);\par
+   rmSetObjectDefMaxDistance(grassID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(grassID, avoidGrass);\par
+   rmAddObjectDefConstraint(grassID, avoidAll);\par
+   rmAddObjectDefConstraint(grassID, avoidImpassableLand);\par
+   rmPlaceObjectDefAtLoc(grassID, 0, 0.5, 0.5, 20*cNumberNonGaiaPlayers);\par
+\par
+   int rockID=rmCreateObjectDef("rock and grass");\par
+   int avoidRock=rmCreateTypeDistanceConstraint("avoid rock", "rock limestone sprite", 8.0);\par
+   rmAddObjectDefItem(rockID, "rock limestone sprite", 1, 1.0);\par
+   rmAddObjectDefItem(rockID, "grass", 2, 1.0);\par
+   rmSetObjectDefMinDistance(rockID, 0.0);\par
+   rmSetObjectDefMaxDistance(rockID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(rockID, avoidAll);\par
+   rmAddObjectDefConstraint(rockID, avoidImpassableLand);\par
+   rmAddObjectDefConstraint(rockID, avoidRock);\par
+   rmPlaceObjectDefAtLoc(rockID, 0, 0.5, 0.5, 15*cNumberNonGaiaPlayers);\par
+\par
+   int rockID2=rmCreateObjectDef("rock group");\par
+   rmAddObjectDefItem(rockID2, "rock limestone sprite", 3, 2.0);\par
+   rmSetObjectDefMinDistance(rockID2, 0.0);\par
+   rmSetObjectDefMaxDistance(rockID2, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(rockID2, avoidAll);\par
+   rmAddObjectDefConstraint(rockID2, avoidImpassableLand);\par
+   rmAddObjectDefConstraint(rockID2, avoidRock);\par
+   rmPlaceObjectDefAtLoc(rockID2, 0, 0.5, 0.5, 8*cNumberNonGaiaPlayers);\par
+   \par
+   int nearshore=rmCreateTerrainMaxDistanceConstraint("seaweed near shore", "land", true, 14.0);\par
+   int farshore = rmCreateTerrainDistanceConstraint("seaweed far from shore", "land", true, 10.0);\par
+   int kelpID=rmCreateObjectDef("seaweed");\par
+   rmAddObjectDefItem(kelpID, "seaweed", 12, 6.0);\par
+   rmSetObjectDefMinDistance(kelpID, 0.0);\par
+   rmSetObjectDefMaxDistance(kelpID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(kelpID, avoidAll);\par
+   rmAddObjectDefConstraint(kelpID, nearshore);\par
+   rmAddObjectDefConstraint(kelpID, farshore);\par
+   rmPlaceObjectDefAtLoc(kelpID, 0, 0.5, 0.5, 2*cNumberNonGaiaPlayers);\par
+\par
+   int kelp2ID=rmCreateObjectDef("seaweed 2");\par
+   rmAddObjectDefItem(kelp2ID, "seaweed", 5, 3.0);\par
+   rmSetObjectDefMinDistance(kelp2ID, 0.0);\par
+   rmSetObjectDefMaxDistance(kelp2ID, rmXFractionToMeters(0.5));\par
+   rmAddObjectDefConstraint(kelp2ID, avoidAll);\par
+   rmAddObjectDefConstraint(kelp2ID, nearshore);\par
+   rmAddObjectDefConstraint(kelp2ID, farshore);\par
+   rmPlaceObjectDefAtLoc(kelp2ID, 0, 0.5, 0.5, 6*cNumberNonGaiaPlayers);\par
+\par
+  // Text\par
+   rmSetStatusText("",1.0);\par
+\par
+// That\rquote s all there is to it. Places areas and place objects and you have a map. Just remember to try generating many maps of different sizes to make sure they are pretty fair (or work at all) before springing them on an unsuspecting public. It is a good idea to have a friend test them for you. Also make sure to include a name and description in the XML file that has the same name as your map so players know what they are getting into.\par
+      \par
+\}\par
+\pard\f4\par
+}
+ 

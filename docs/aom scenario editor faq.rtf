@@ -1,0 +1,68 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fswiss\fprq2\fcharset0 Arial;}{\f1\froman\fprq2\fcharset0 Times New Roman;}{\f2\fswiss\fprq2\fcharset128 Arial Unicode MS;}{\f3\froman\fprq2\fcharset2 Symbol;}{\f4\fmodern\fprq1\fcharset128 MS Mincho;}{\f5\fswiss\fcharset0 Arial;}}
+{\colortbl ;\red0\green0\blue0;}
+{\stylesheet{ Normal;}{\s1 heading 1;}{\s2 heading 2;}}
+\viewkind4\uc1\pard\keepn\s1\sb240\sa60\kerning32\b\f0\fs32 Age of Mythology\'99 Scenario Editor FAQ\par
+\pard\keepn\s2\sb240\sa60\kerning0\i\fs28 How do I make a cinematic?\par
+\pard\b0\i0\f1\fs24 A cinematic is just part of a scenario that plays in cinematic mode.  Use the effect \i Cinematic Mode (On)\i0  in the trigger that starts your cinematic and \i Cinematic Mode (Off)\i0  in the trigger that ends it.  This will automatically add letterbox bars to your cinematic.  \par
+\par
+You may wish to include other effects in your cinematic triggers, such as \i Fade To Color\i0  for fade-ups and fade-downs, \i Render Fog/Black Map, SetObscuredUnits \i0 (which can be turned off to hide units behind trees and other obstructions), and \i Render Sky\i0  (if you have camera shots that point up at the sky). \par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 How do camera tracks work?\par
+\pard\b0\i0\f1\fs24 Create a camera track using the Camera Track Editor (click the camera icon second from the right).  The Camera Track Editor is fairly simple to use, though making camera tracks that slowly circle an object or follow a target unit is tricky.  Use lots of waypoints and play with the timing between waypoints to help smooth things out.\par
+\par
+Once you have created a track in the Camera Track Editor, you can trigger it in the game using the \i Camera Track\i0  effect. \par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 How do I forbid techs and units?\par
+\pard\b0\i0\f1\fs24 To forbid techs, use the \i Set Tech Status\i0  effect and set the tech to \i Unobtainable.\i0   To forbid units, use the Forbidden Units option on the Scenario menu.  Type the player number in the box at the top of the dialog, then select the units or buildings that you wish to forbid.  If you want to reenable a unit during the scenario, use the \i Unforbid and Enable Unit\i0  effect.\par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 I can\rquote t find the object I\rquote m looking for in the object list.  Where is it?\par
+\pard\b0\i0\f1\fs24 Some of the objects in the game are named differently in the scenario editor.  Use the object type filter at the top of the object list to help narrow your search, and keep looking - everything in the game is in there somewhere.\par
+\par
+Some objects, such as fountains and other decorations, are variations of a single unit type.  To see an object\rquote s visual variants, press \b CTRL\b0 +\b ALT\b0 +\b V\b0  with the unit select.  Repeatedly pressing \b CTRL\b0 +\b ALT\b0 +\b V\b0  will cycle through an object\rquote s variants.\par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 How do I set up objectives for my scenario?\par
+\pard\b0\i0\f1\fs24 Use the Objectives Editor (on the Scenario menu).  Use the \i Objective \i0 trigger effect to change the objective during the game.  Only one objective can be active at a time; when a new \i Objective\i0  effect is fired, the previous objective is checked off in the list.  Each objective can have a separate associated hint. You may also use the Objectives Editor to define a title and a brief overall goal for the scenario.\par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 How do I define diplomatic relationships?\par
+\pard\b0\i0\f1\fs24 Use the Diplomacy option (on the Scenario menu).  Clicking the colored boxes will change diplomatic settings.  Note that the settings do not have to be reciprocal - player one can be allied to player two, but player two can be an enemy to player one.  If you wish to make adjustments to diplomacy settings during a scenario, use the \i Diplomacy \i0 effect.\par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 Can I set up difficulty level triggers in scenarios I design?\par
+\pard\b0\i0\f1\fs24 Yes.  Use the Difficulty Level condition to create events that only occur on particular game difficulty settings.  Level 0 is Easy, level 1 is Moderate, level 2 is Hard, and level 3 is Titan.\par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 How do I assign an AI to an enemy?\par
+\pard\cf1\b0\i0\f1\fs24 First of all, you don't need to include an AI for a computer player. Using triggers to create and move armies around, you can create challenging opponents for your scenario. If you do want to include an AI, select Player Data on the Scenario menu.  Click the AI button for the enemy player, select the AI file you want to use, then set the player\rquote s control field to CPU.  \par
+\par
+The Player Data window also allows you to change other basic information, such as starting god choice and unit color.  Make sure you have the Friend or Foe color option turned off before modifying player colors in the editor.\f2\par
+\f1  \par
+All of the AI files, for both random map and scenarios included with the game, can be found in the AI directory.  For a basic random map AI, use aomdefaultai.xs.  It is unlikely you can just plug any of the scenario-specific AIs into a custom scenario and expect them to work, but you can copy and edit these files to see how they handle things like attack groups and age advancement.\f2\par
+\pard\keepn\s2\sb240\sa60\cf0\b\i\f0\fs28 What are ghost armies for?\par
+\pard\b0\i0\f1\fs24 Ghost armies are used to define a set of units that are not placed on the map at the start of the game, but that still need to be manipulated by triggers - for example, a reinforcement group that shows up in the middle of a scenario and has to be moved to a particular spot after it arrives.  Set up the ghost army with the Army Editor (on the Triggers Menu), then create it using the Army Deploy effect.  The deployed units can now be referenced with other effects, such as Army Move and Army Work.\par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 How do I change the name of a unit?\par
+\pard\b0\i0\f1\fs24 You can\rquote t.  However, all of the single-player heroes and villains, along with all of the standard Greek heroes accessible in multiplayer, are available for you to use in your scenarios.\par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 Why am I seeing things from the enemy\rquote s point of view when I test my scenario?\par
+\pard\b0\i0\f1\fs24 You probably saved the scenario out from that player\rquote s point of view.  Press \b CTRL\b0 +\b F1\b0  in the editor to switch back to player 1\rquote s point of view, then save the scenario again.\par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 How do I add those nice-looking waves to my scenario?  Do I have to place them by hand?\par
+\pard\b0\i0\f1\fs24 No.  Select Edit Water on the tool bar (the button that looks like a river with red lines, just to the right of the regular water tool).  Select the body of water, then click the Beautify button.  This will automatically add waves to the body of water and place coral textures.  You may wish to make a few adjustments or texture changes along the beaches by hand after beautification.\par
+\pard\keepn\s2\sb240\sa60\b\i\f0\fs28 Are there any particularly useful hotkeys for editing and testing?\par
+\pard\fi-360\li720\tx720\b0\i0\f3\fs24\'b7\tab\b\f1 C\b0\f4\emspace\f1 Cliff tool\par
+\pard\fi-360\li720\f3\'b7\tab\b\f1 E\b0\f4\emspace\f1 Main edit command list\par
+\f3\'b7\tab\b\f1 F    \b0 Forest tool\par
+\f3\'b7\tab\b\f1 O\b0\f4\emspace\f1 Object palette\par
+\f3\'b7\tab\b\f1 T\b0\f4\emspace\f1 Paint land\par
+\f3\'b7\tab\b\f1 W\b0\f4\emspace\f1 Water tool\par
+\f3\'b7\tab\b\f1 1\b0 -\b 9\b0\f4\emspace\f1 Selects brush size (if a brush is active)\par
+\f3\'b7\tab\b\f1 [\b0\f4\emspace\f1 Changes brush type to circular (if a brush is active)\par
+\f3\'b7\tab\b\f1 ]\b0\f4\emspace\f1 Changes brush type to rectangular (if a brush is active)\par
+\f3\'b7\tab\b\f1 ALT\b0 +\b ENTER\b0\f4\emspace\f1 Windowed mode\par
+\f3\'b7\tab\b\f1 ALT\b0 +\b C\b0\f4\emspace\f1 Toggles camera rotation\par
+\f3\'b7\tab\b\f1 ALT\b0 +Mousewheel\f4\emspace\f1 Changes brush side (if a brush is active)\par
+\f3\'b7\tab\b\f1 CTRL\b0 +Function Keys\f4\emspace\f1 Switch to a different player (i.e., after pressing Ctrl-F3, objects placed will belong to player 3)\par
+\f3\'b7\tab\b\f1 CTRL\b0 +\b A\b0\f4\emspace\f1 Sample elevation\par
+\f3\'b7\tab\b\f1 CTRL\b0 +\b C\b0\f4\emspace\f1 Copies selected objects to clipboard\par
+\f3\'b7\tab\b\f1 CTRL\b0 +\b E\b0\f4\emspace\f1 Paint elevation\par
+\f3\'b7\tab\b\f1 CTRL\b0 +\b I\b0\f4\emspace\f1 Camera track editor\par
+\f3\'b7\tab\b\f1 CTRL\b0 +\b L\b0\f4\emspace\f1 Quickload\par
+\f3\'b7\tab\b\f1 CTRL\b0 +\b S\b0\f4\emspace\f1 Quicksave\par
+\f3\'b7\tab\b\f1 CTRL\b0 +\b T\b0\f4\emspace\f1 Trigger editor\par
+\f3\'b7\tab\b\f1 CTRL\b0 +\b V\b0\f4\emspace\f1 Pastes objects on clipboard\par
+\f3\'b7\tab\b\f1 CTRL\b0 +\b Y\b0\f4\emspace\f1 Redo\par
+\f3\'b7\tab\b\f1 CTRL\b0 +\b Z\b0\f4\emspace\f1 Undo\par
+\f3\'b7\tab\b\f1 ESC\b0\f4\emspace\f1 Closes any open windows (such as the terrain palette)\par
+\pard\b\par
+\fs20\'a9 2002, Microsoft Corporation. All rights reserved.\b0\par
+\pard\f5\par
+}
+ 
