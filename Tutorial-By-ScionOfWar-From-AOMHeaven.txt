@@ -1,0 +1,1332 @@
+accessed 19 September 2021 at http://aom.heavengames.com/cgi-bin/forums/display.cgi?action=ct&f=19,28148,,10
+posted 19 August 2009 03:24 AM EDT (US) by ScionOfWar
+
+This tutorial is to help you with making a random map script for Age of Mythology. I'll try to be quick and to the point and will cover making a script from the ground up.
+
+First, there's a couple terms and rules you may want to familiarize yourself with, if you haven't scripted before. One of the most important aspects of coding is to define everything you use. This means you must declare a variable before you use it, so the program knows what it's refering to. Here's some explanations of the main variables in RMS scripting:
+
+float - Use this for numbers with fractions, such as 0.1 or 1.09382
+int - Short for 'integer', use this for rounded numbers, such as 1, 1000, or -3.
+string - Use this for strings of characters, such as "Blue skies are pretty" or "Well of Urd"
+
+Some examples of how these variables will be used in your RMS:
+
+float speedModify = 0.4;
+int numHuntables = rmRandInt(1,100);
+string unitToModify = "Ajax";
+
+When you're scripting, you want to end every 'line' with a semicolon. This is like a period in English and is extremely crucial.
+
+
+
+Every time you see two backslashes before a line, this means that whole line has been cancelled out and made into a comment. Scriptors often use these to keep track of what they're writing or as a quick way to temporarily delete lines of code. You can also place /* and */ around an object. Examples:
+
+// Hey, look, I'm a comment!
+/* And I'm a block of comments
+So I can go
+Multiple lines! */
+
+'For' and 'If' loops
+
+The words 'for', 'if' and 'else' are special in coding. These can be used to make conditional statements. Let's start with an example of an 'if' condition.
+
+//First, we make a random number using the rmRandInt(Int1,Int2) function.  
+//The numbers between the brackets are the lowest and highest possible numbers it'll produce.
+//We'll also declare another integer to be used later.
+int randomChance = rmRandInt(1,3);
+int randomBonus = 0;
+
+//Now we say 'if randomChance is equal to 1'
+if (randomChance==1){
+//We make randomBonus gain a higher value
+randomBonus = 1;
+} 
+//This is important: we need to close every { bracket with it's counterpart, }
+//But what if we want the numbers two and three to also have a different effect?
+//That's where 'else' comes into play.  You could also say 'else if (randomChance==2){'  or just end it like above.
+else {
+randomBonus = 2;
+}
+
+A for loop can be used in a similar way and can be useful in making a variable express more then one number. For example, here's a good loop you'll see a ton in scripting:
+
+//Declare the variables 'i' and 'j'.  For some reason, 'i' is the most common variable people use so it's usually declared
+//at the very top of the script.  Note that I'm able to have multiple variables declared in the same line, as long as I use
+//the invaluable semicolon to seperate them.  I'll use 'j' below for illustrative purposes, so I declare it too.
+int i = 0; int j = 0;
+
+//This says 'the variable i begins as 1, and is less then the number of players'
+//So if there is four players, i equals 1, 2, 3 and 4.  You could also say something else,
+//such as 'for(i=1;<1000){' if you want the loop to happen 1000 times.  This will actually
+//end up making 'j' get exponentially bigger, but you can have it be use for thousands of things.
+for(i=1;<cNumberPlayers){
+j = j+j;
+}
+
+When you're making a map, you begin with the void main(void){ line. It basically tells the computer that the following code doesn't return a value (void). You absolutely need this in a script.
+
+This is the bare minimum you need to make a map (don't panic, I'll explain it). You'll want to open Notepad and save this as a .xs file in the folder "My Documents > My Games > Age of Mythology > RM2"
+
+// Main entry point for random map script
+void main(void) {
+
+  // Text
+   rmSetStatusText("",0.01);
+
+   // Set size.
+   int playerTiles=7500;
+   if(cMapSize == 1)
+   {
+      playerTiles = 9750;
+   }
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+   rmSetMapSize(size, size);
+
+   // Init map.
+   rmTerrainInitialize("SavannahA");
+}
+
+Every RMS script has a .xs file, which has the code like you see above, and a .xml script. They have the same name and both can be edited in Notepad. Make a new Notepad file and paste this into it:
+
+<?xml version = "1.0" encoding = "UTF-8"?>
+<mapinfo detailsText = "This is a test!" imagepath = "ui\ui map king of the hill 256x256" displayName="The Tutorial Test" cannotReplace=""/>
+
+Now save that with the same exact name as the .xs file. For example, I called the first one "The Tutorial Test.xs" and the second one "The Tutorial Test.xml"
+
+If done properly, you should be able to open your scenario editor, click on 'New' map, and select 'The Tutorial Test' from the drop down menu. Generate your map and you'll see a flat plain with the SavannahA texture, very boring. Nevertheless, we should explain what's going on here. Look at your .xs file and let me explain.
+
+void main(void){
+//This line is, like it said in the comments, the main entry point.  
+//Every { bracket has an accompanying } bracket, so as a rule we can look at 
+//the very bottom to see the end of the script.
+
+rmSetStatusText("",0.01);
+//The Status Text is useful for when you're loading the map.  They go from 0.01 to 0.99,
+//and you can add them so the loading bar doesn't sit at a stand still.  We'll add the rest at
+//the end.
+
+int playerTiles=7500;
+//This simply declares the number "playerTiles" to be used later.
+
+if (cMapSize==1){ 
+//This is one of those 'if' conditional statements I mentioned earlier.  
+//It's checking to see if the MapSize is large or small (in this case, large).
+ 
+playerTiles = 9750;
+//Changes the value of "playerTiles".  Notice they didn't have to have the 'int' word 
+//before it because they already declared the variable earlier in the code (two lines above).
+
+}
+//We have to end every bracket.  In this case it's to close the if condition above.
+
+int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+//This is a mouthful!  It's quite common in random map scripts, though.  As you can see, you 
+//can use math when declaring your variables, including the sqrt() function.  The 'cNumberNonGaiaPlayers' 
+//simply means the number of players in the map, minus Gaia.  It's a very useful number you'll often use 
+//frequently so your maps change with the number of players on it.
+
+rmSetMapSize(size, size);
+//This sets the map size.  Since they want it to be perfectly square, they use the same variable in both X and Y planes.
+
+rmTerrainInitialize("SavannahA");
+//This initializes the map and determines its texture.
+
+}
+//As you might be learning, you need to end every open { bracket with another } closing bracket.  This one ends the entire script.
+
+Still with me? Good! We're getting somewhere - as you can see, you can make your map generate (though it's kinda boring)! But what if you want it to be called something different, or have a special description like all the other RMS scripts you see out there? Well, if you look at your .xml file, (this one should be shorter), you'll notice that there's a place to edit these. Let's break it down:
+
+<?xml version = "1.0" encoding = "UTF-8"?>
+<mapinfo detailsText = "This is a test!" imagepath = "ui\ui map king of the hill 256x256" displayName="The Tutorial Test" cannotReplace=""/>
+
+The 'detailsText' variable is where you can name your map. The 'imagepath' variable is where you can choose the image your map is displayed as, in this case it's King of the hill. You can often open up other .xml files to find more pictures to use. The 'displayName' variable is where you pick your name. Pretty simple!
+
+
+
+Now, back to the .xs script. We need to make our map actually have something. This basic map is worse then the blank map that AoM makes in it's editor! But not to worry, we'll add a nifty center area to make it have some features. I'm also going to add a chunk of very common variables so we don't have to worry about identifying them later.
+
+Cut and paste this into your .xs file and save:
+
+// Main entry point for random map script
+void main(void)
+
+{
+
+  // Text
+   rmSetStatusText("",0.01);
+
+//Declare Variables
+int id=0; int i=0; int j=0; int k=0; int id2=0; int failCount=0; float f=0;
+
+
+   // Set size.
+   int playerTiles=7500;
+   if(cMapSize == 1)
+   {
+      playerTiles = 9750;
+   }
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+   rmSetMapSize(size, size);
+
+   // Init map.
+   rmTerrainInitialize("SavannahA");
+
+//Make the center
+id=rmCreateArea("center");
+    rmSetAreaSize(id, 0.2, 0.2);
+    rmSetAreaLocation(id, 0.5, 0.5);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SavannahB");
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 2);
+rmBuildArea(id);
+
+}
+
+There's only a few more new things added to the script. The most important one is where we call the rmCreateArea function. With this function, you're able to set the area size (0.0 is the minimum, and 1.0 is the entire map), location ("0.5, 0.5" is the dead center), blobs (useful for breaking up the shape a bit), coherance (from "0.0" to "1.0"), terrain type (check your textures under the Scenario Editor for more), Base Height, and finally Height Blend. At the end, you build the area, otherwise it won't show up!
+
+Toggle some of these variables a bit and test it out! Once you know what they do a bit, we're ready to continue.
+
+
+Classes and constraints are very important in RMS coding. With a constraint, you can tell an object or area to avoid another object or area. So let's say you place some gold mines - don't you want them to be evenly spaced? If your answer is yes, you'll end up using constraints and classes.
+
+Let's place some gold as an example. We'll also place the gold mines on the map to teach you how to place items. Cut and paste the below code into your .xs file, save it, and test it:
+
+void main(void){
+
+  // Text
+   rmSetStatusText("",0.01);
+
+//Declare Variables
+int id=0; int i=0; int j=0; int k=0; int id2=0; int failCount=0; float f=0;
+
+
+   // Set size.
+   int playerTiles=7500;
+   if(cMapSize == 1)
+   {
+      playerTiles = 9750;
+   }
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+   rmSetMapSize(size, size);
+
+   // Init map.
+   rmTerrainInitialize("SavannahA");
+
+//Classes
+int classGold = rmDefineClass("Gold");
+
+//Constraints
+int closeAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldClose", classGold, 5.0);
+int farAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldFar", classGold, 35.0);
+
+
+//Make the center
+id=rmCreateArea("center");
+    rmSetAreaSize(id, 0.2, 0.2);
+    rmSetAreaLocation(id, 0.5, 0.5);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SavannahB");
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 2);
+rmBuildArea(id);
+
+
+//Random gold mines
+id=rmCreateObjectDef("random mines");
+   rmAddObjectDefItem(id, "Gold Mine", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefToClass(id, classGold);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 4*cNumberNonGaiaPlayers);
+
+}
+
+Evenly spaced gold! We're getting somewhere! Let's look at the new code I just added to make sure you understand it. Underneath the 'classes' comment, you'll see I define the variable 'classGold'. The name between the two apostraphes can be anything you want, as long as it's entirely unique from the other class names.
+
+After you define classGold, you need to build some constraints. We made two here, one we might use later. closeAvoidGold is useful for huntables and buildings, and farAvoidGold is more useful for avoiding other gold mines and possibly town centers. As you can tell, the constraint calls to classGold, and each new constraint has a new name after 'int' and between the apostraphes.
+
+Hopefully that wasn't too confusing! Experiment with the numbers on farAvoidGold and generate your map to see what it does.
+
+After all these constraints, we get to placing the gold. This new snippet of code is on the bottom of the script. Like areas, we call the whole thing 'id' and give it a unique name. Unlike areas, we use the function rmCreateObjectDef. The Min and Max distances are virtually null on this, as the max distance is the entire map.
+
+rmAddObjectDefConstraint is where we refer to farAvoidGold. We could also use closeAvoidGold, or as we get later on we can add more constraints to prevent this object from going where it shouldn't.
+
+Now you use the rmAddObjectDefToClass function to add the gold mine to 'classGold'. This is important - it's making this gold mine part of the class and therefor it can now interact with itself (and other items) through constraints.
+
+Finally, you use rmPlaceObjectDefAtLoc to place the objects on the map. The second variable is which player it is, the third and fourth ones are the x and y positions, and the final one is for how many gold mines to place (in this case, 4*cNumberNonGaiaPlayers)
+
+Phew. That was a mouthful. Now let's build a new area, applying what we learned! I'm going to try to make this new area avoid the center area using classes and constraints. Cut and paste the below code and test it out in your scenario editor:
+
+void main(void){
+
+  // Text
+   rmSetStatusText("",0.01);
+
+//Declare Variables
+int id=0; int i=0; int j=0; int k=0; int id2=0; int failCount=0; float f=0;
+
+
+   // Set size.
+   int playerTiles=7500;
+   if(cMapSize == 1)
+   {
+      playerTiles = 9750;
+   }
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+   rmSetMapSize(size, size);
+
+   // Init map.
+   rmTerrainInitialize("SavannahA");
+
+//Classes
+int classCenter = rmDefineClass("Center");
+int classGold = rmDefineClass("Gold");
+
+//Constraints
+   int closeAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterClose", classCenter, 5.0);
+   int farAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterFar", classCenter, 35.0);
+int closeAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldClose", classGold, 5.0);
+int farAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldFar", classGold, 35.0);
+
+
+//Make the center
+id=rmCreateArea("center");
+    rmSetAreaSize(id, 0.2, 0.2);
+    rmSetAreaLocation(id, 0.5, 0.5);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SavannahB");
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 2);
+rmBuildArea(id);
+
+
+//Make the border patch
+id=rmCreateArea("border patch");
+    rmSetAreaSize(id, 0.02, 0.02);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SandA");
+      rmAddAreaConstraint(id, farAvoidCenter);
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 1);
+rmBuildArea(id);
+
+//Random gold mines
+id=rmCreateObjectDef("random mines");
+   rmAddObjectDefItem(id, "Gold Mine", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefToClass(id, classGold);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 4*cNumberNonGaiaPlayers);
+}
+
+As you can see, the new area, what I called the border patch, is able to make a small patch of sand which tries to avoid the center by 35 units. I basically cut and paste the other area and changed the name, size, and constraints. At the top, you'll notice I also made a closeAvoidCenter and a farAvoidCenter, which we can use later.
+
+Now let's use the for(i=1,<cNumberPlayers){ loop for some fun. I'm going to add even more constraints to the border patch and build it several times!
+
+Cut and paste this:
+
+void main(void){
+
+  // Text
+   rmSetStatusText("",0.01);
+
+//Declare Variables
+int id=0; int i=0; int j=0; int k=0; int id2=0; int failCount=0; float f=0;
+
+
+   // Set size.
+   int playerTiles=7500;
+   if(cMapSize == 1)
+   {
+      playerTiles = 9750;
+   }
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+   rmSetMapSize(size, size);
+
+   // Init map.
+   rmTerrainInitialize("SavannahA");
+
+//Classes
+int classCenter = rmDefineClass("Center");
+int classBorderPatch = rmDefineClass("Border Patch");
+int classGold = rmDefineClass("Gold");
+
+//Constraints
+   int closeAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterClose", classCenter, 5.0);
+   int farAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterFar", classCenter, 35.0);
+int closeAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldClose", classGold, 5.0);
+int farAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldFar", classGold, 35.0);
+   int avoidBorderPatch=rmCreateClassDistanceConstraint("AvoidBorderPatch", classBorderPatch, 5.0);
+
+
+
+//Make the center
+id=rmCreateArea("center");
+    rmSetAreaSize(id, 0.2, 0.2);
+    rmSetAreaLocation(id, 0.5, 0.5);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SavannahB");
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 2);
+rmBuildArea(id);
+
+
+//Make the border patch
+for(i=1;<cNumberPlayers*3){
+id=rmCreateArea("border patch"+i);
+    rmSetAreaSize(id, 0.02, 0.02);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SandA");
+      rmAddAreaToClass(id, classBorderPatch);
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 1);
+rmBuildArea(id);
+}
+
+//Random gold mines
+id=rmCreateObjectDef("random mines");
+   rmAddObjectDefItem(id, "Gold Mine", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefToClass(id, classGold);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 4*cNumberNonGaiaPlayers);
+
+}
+
+How's that playing in your editor? Do you see anything new in the code that might've caused that? I added a new class and constraint for the border patches, and used a for loop to make it several times (3*cNumberPlayers, to be exact). You'll notice I called the border patch "border patch"+i, this is because you absolutely need to call each area by a unique name or the map won't work right. This is the easiest way!
+
+
+Wow, well, we're still kinda looking at a boring map. Let's make some forests?
+
+void main(void){
+
+  // Text
+   rmSetStatusText("",0.01);
+
+//Declare Variables
+int id=0; int i=0; int j=0; int k=0; int id2=0; int failCount=0; float f=0;
+
+
+   // Set size.
+   int playerTiles=7500;
+   if(cMapSize == 1)
+   {
+      playerTiles = 9750;
+   }
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+   rmSetMapSize(size, size);
+
+   // Init map.
+   rmTerrainInitialize("SavannahA");
+
+//Classes
+int classCenter = rmDefineClass("Center");
+int classBorderPatch = rmDefineClass("Border Patch");
+int classGold = rmDefineClass("Gold");
+int classForest = rmDefineClass("Forest");
+
+//Constraints
+   int closeAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterClose", classCenter, 5.0);
+   int farAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterFar", classCenter, 35.0);
+int closeAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldClose", classGold, 5.0);
+int farAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldFar", classGold, 35.0);
+   int avoidBorderPatch=rmCreateClassDistanceConstraint("AvoidBorderPatch", classBorderPatch, 5.0);
+int closeAvoidForest=rmCreateClassDistanceConstraint("AvoidForestClose", classForest, 5.0);
+int farAvoidForest=rmCreateClassDistanceConstraint("AvoidForestFar", classForest, 35.0);
+
+
+//Make the center
+id=rmCreateArea("center");
+    rmSetAreaSize(id, 0.2, 0.2);
+    rmSetAreaLocation(id, 0.5, 0.5);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SavannahB");
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 2);
+rmBuildArea(id);
+
+
+//Make the border patch
+for(i=1;<cNumberPlayers*3){
+id=rmCreateArea("border patch"+i);
+    rmSetAreaSize(id, 0.02, 0.02);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SandA");
+      rmAddAreaToClass(id, classBorderPatch);
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 1);
+rmBuildArea(id);
+}
+
+
+// Forest
+   int forestCount=30*cNumberNonGaiaPlayers;
+   failCount=0;
+   for(i=0; <forestCount)
+   {
+      id=rmCreateArea("forest"+i);
+      rmSetAreaSize(id, rmAreaTilesToFraction(100), rmAreaTilesToFraction(200));
+      rmSetAreaWarnFailure(id, false);
+
+rmSetAreaForestType(id, "mixed oak forest");
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, closeAvoidForest);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+      rmAddAreaToClass(id, classForest);
+
+      rmSetAreaMinBlobs(id, 2);
+      rmSetAreaMaxBlobs(id, 4);
+      rmSetAreaMinBlobDistance(id, 16.0);
+      rmSetAreaMaxBlobDistance(id, 20.0);
+      rmSetAreaCoherence(id, 0.0);
+
+      if(rmBuildArea(id)==false)
+      {
+         // Stop trying once we fail 5 times in a row.
+         failCount++;
+         if(failCount==5)
+            break;
+      }
+      else
+         failCount=0;
+   }
+
+//Random gold mines
+id=rmCreateObjectDef("random mines");
+   rmAddObjectDefItem(id, "Gold Mine", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefConstraint(id, closeAvoidForest);
+   rmAddObjectDefToClass(id, classGold);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 4*cNumberNonGaiaPlayers);
+}
+
+You'll notice we're adding a big chunk of code here. There's more classes, and constraints, built especially for the new forest we're making. For fun, I decided to make my forest a bit unique, by making 30 patches for each player. They avoid eachother with the constraints, and also avoid the border patches and the center.
+
+Something else which is new is the failCount checker. This method is common if you don't want your forests to take a minute longer then they should to make - sometimes it'll keep trying to place them even though it fails. Three is usually enough, but I made mine five.
+
+In general, the forest acts just like the border patches and center area.
+
+Now that that's explained, let's add some more depth. Maybe we should add the players BEFORE we add the forest, so we can get it to dodge the players base.
+
+Let's try that out right now. Cut and paste this into your .xs file, save, and give it a spin:
+
+void main(void){
+
+  // Text
+   rmSetStatusText("",0.01);
+
+//Declare Variables
+int id=0; int i=0; int j=0; int k=0; int id2=0; int failCount=0; float f=0;
+
+
+   // Set size.
+   int playerTiles=7500;
+   if(cMapSize == 1)
+   {
+      playerTiles = 9750;
+   }
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+   rmSetMapSize(size, size);
+
+   // Init map.
+   rmTerrainInitialize("SavannahA");
+
+//Classes
+int classCenter = rmDefineClass("Center");
+int classBorderPatch = rmDefineClass("Border Patch");
+int classGold = rmDefineClass("Gold");
+int classForest = rmDefineClass("Forest");
+int classPlayerBase = rmDefineClass("Player Base");
+
+//Constraints
+   int closeAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterClose", classCenter, 5.0);
+   int farAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterFar", classCenter, 35.0);
+int closeAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldClose", classGold, 5.0);
+int farAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldFar", classGold, 35.0);
+   int avoidBorderPatch=rmCreateClassDistanceConstraint("AvoidBorderPatch", classBorderPatch, 5.0);
+int closeAvoidForest=rmCreateClassDistanceConstraint("AvoidForestClose", classForest, 5.0);
+int farAvoidForest=rmCreateClassDistanceConstraint("AvoidForestFar", classForest, 35.0);
+   int closeAvoidPlayerBase=rmCreateClassDistanceConstraint("AvoidPBClose", classPlayerBase, 5.0);
+   int farAvoidPlayerBase=rmCreateClassDistanceConstraint("AvoidPBFar", classPlayerBase, 35.0);
+
+//Place players
+    rmSetTeamSpacingModifier(0.50);
+    rmPlacePlayersCircular(0.4, 0.45, rmDegreesToRadians(5.0));
+
+//Make the center
+id=rmCreateArea("center");
+    rmSetAreaSize(id, 0.2, 0.2);
+    rmSetAreaLocation(id, 0.5, 0.5);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SavannahB");
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 2);
+rmBuildArea(id);
+
+//Make the player bases
+for(i=1; <cNumberPlayers){
+      id=rmCreateArea("Player base"+i);
+      rmSetAreaSize(id, rmAreaTilesToFraction(500), rmAreaTilesToFraction(500));
+      rmAddAreaToClass(id, classPlayerBase);
+      rmSetAreaCoherence(id, 0.3);
+      rmSetAreaBaseHeight(id, 4.0);
+      rmSetAreaLocPlayer(id, i);
+     rmAddAreaConstraint(id, closeAvoidCenter);
+        rmSetAreaTerrainType(id, "GrassDirt75");
+        rmAddAreaTerrainLayer(id, "GrassDirt50", 0, 1);
+        rmAddAreaTerrainLayer(id, "GrassDirt25", 2, 3);
+  rmSetAreaHeightBlend(id, 2);
+      rmBuildArea(id);
+}
+
+//Make the border patch
+for(i=1;<cNumberPlayers*3){
+id=rmCreateArea("border patch"+i);
+    rmSetAreaSize(id, 0.02, 0.02);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SandA");
+      rmAddAreaToClass(id, classBorderPatch);
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+      rmAddAreaConstraint(id, closeAvoidPlayerBase);
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 1);
+rmBuildArea(id);
+}
+
+
+// Forest
+   int forestCount=30*cNumberNonGaiaPlayers;
+   failCount=0;
+   for(i=0; <forestCount){
+      id=rmCreateArea("forest"+i);
+      rmSetAreaSize(id, rmAreaTilesToFraction(100), rmAreaTilesToFraction(200));
+      rmSetAreaWarnFailure(id, false);
+      rmSetAreaForestType(id, "mixed oak forest");
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, closeAvoidForest);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+      rmAddAreaConstraint(id, farAvoidPlayerBase);
+      rmAddAreaToClass(id, classForest);
+      rmSetAreaMinBlobs(id, 2);
+      rmSetAreaMaxBlobs(id, 4);
+      rmSetAreaMinBlobDistance(id, 16.0);
+      rmSetAreaMaxBlobDistance(id, 20.0);
+      rmSetAreaCoherence(id, 0.0);
+      if(rmBuildArea(id)==false){
+         // Stop trying once we fail 5 times in a row.
+         failCount++;
+         if(failCount==5)
+            break;
+       } else
+         failCount=0;
+      }
+
+//Random gold mines
+id=rmCreateObjectDef("random mines");
+   rmAddObjectDefItem(id, "Gold Mine", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefConstraint(id, closeAvoidForest);
+   rmAddObjectDefToClass(id, classGold);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 4*cNumberNonGaiaPlayers);
+}
+
+Whoa! What just happened?! First, look under "//Place Players". The rmSetTeamSpacingModifier function is useful for when you have teams, it'll make the teams get skewed. Then you use the rmPlacePlayersCircular to, well, place the players circular! It's very useful, I believe you can also use rmPlacePlayersSquare
+
+Now that we know where players are, we can place an area next to players. You'll notice under the player bases section the line "rmSetAreaLocPlayer(id, i);", this places the area in a specific player location. Also under the Player Bases section, I used the "rmAddAreaTerrainLayer" function to create some border blending zones for the player bases. We can always change these later.
+
+There's a couple new classes and constraints in play here to make the map start taking form. Hopefully by now you understand some of th e basics of map scripting, but we're not done yet! We need some town centers and some huntables. I'd also like the player base to be less coherant so the forests don't make a big circle, that'll be a quick fix. Cut and paste this into your .xs file:
+
+void main(void){
+
+  // Text
+   rmSetStatusText("",0.01);
+
+//Declare Variables
+int id=0; int i=0; int j=0; int k=0; int id2=0; int failCount=0; float f=0;
+
+
+   // Set size.
+   int playerTiles=7500;
+   if(cMapSize == 1)
+   {
+      playerTiles = 9750;
+   }
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+   rmSetMapSize(size, size);
+
+   // Init map.
+   rmTerrainInitialize("SavannahA");
+
+//Classes
+int classCenter = rmDefineClass("Center");
+int classBorderPatch = rmDefineClass("Border Patch");
+int classGold = rmDefineClass("Gold");
+int classForest = rmDefineClass("Forest");
+int classPlayerBase = rmDefineClass("Player Base");
+int classHuntable = rmDefineClass("Huntables");
+
+//Constraints
+   int closeAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterClose", classCenter, 5.0);
+   int farAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterFar", classCenter, 20.0);
+int closeAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldClose", classGold, 5.0);
+int farAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldFar", classGold, 35.0);
+   int avoidBorderPatch=rmCreateClassDistanceConstraint("AvoidBorderPatch", classBorderPatch, 5.0);
+int closeAvoidForest=rmCreateClassDistanceConstraint("AvoidForestClose", classForest, 5.0);
+int farAvoidForest=rmCreateClassDistanceConstraint("AvoidForestFar", classForest, 35.0);
+   int closeAvoidPlayerBase=rmCreateClassDistanceConstraint("AvoidPBClose", classPlayerBase, 5.0);
+   int farAvoidPlayerBase=rmCreateClassDistanceConstraint("AvoidPBFar", classPlayerBase, 35.0);
+int avoidHuntable=rmCreateClassDistanceConstraint("AvoidHuntable", classHuntable, 35.0);
+
+//Place players
+    rmSetTeamSpacingModifier(0.50);
+    rmPlacePlayersCircular(0.4, 0.45, rmDegreesToRadians(5.0));
+
+//Make the center
+id=rmCreateArea("center");
+    rmSetAreaSize(id, 0.2, 0.2);
+    rmSetAreaLocation(id, 0.5, 0.5);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SavannahB");
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 2);
+rmBuildArea(id);
+
+//Make the player bases
+for(i=1; <cNumberPlayers){
+      id=rmCreateArea("Player base"+i);
+      rmSetAreaSize(id, rmAreaTilesToFraction(500), rmAreaTilesToFraction(500));
+      rmAddAreaToClass(id, classPlayerBase);
+      rmSetAreaCoherence(id, 0.0);
+      rmSetAreaBaseHeight(id, 4.0);
+      rmSetAreaLocPlayer(id, i);
+     rmAddAreaConstraint(id, closeAvoidCenter);
+        rmSetAreaTerrainType(id, "GrassDirt75");
+        rmAddAreaTerrainLayer(id, "GrassDirt50", 0, 1);
+        rmAddAreaTerrainLayer(id, "GrassDirt25", 2, 3);
+  rmSetAreaHeightBlend(id, 2);
+      rmBuildArea(id);
+}
+
+//Make the border patch
+for(i=1;<cNumberPlayers*3){
+id=rmCreateArea("border patch"+i);
+    rmSetAreaSize(id, 0.02, 0.02);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SandA");
+      rmAddAreaToClass(id, classBorderPatch);
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+      rmAddAreaConstraint(id, closeAvoidPlayerBase);
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 1);
+rmBuildArea(id);
+}
+
+
+// Forest
+   int forestCount=30*cNumberNonGaiaPlayers;
+   failCount=0;
+   for(i=0; <forestCount){
+      id=rmCreateArea("forest"+i);
+      rmSetAreaSize(id, rmAreaTilesToFraction(100), rmAreaTilesToFraction(200));
+      rmSetAreaWarnFailure(id, false);
+      rmSetAreaForestType(id, "mixed oak forest");
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, closeAvoidForest);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+      rmAddAreaConstraint(id, farAvoidPlayerBase);
+      rmAddAreaToClass(id, classForest);
+      rmSetAreaMinBlobs(id, 2);
+      rmSetAreaMaxBlobs(id, 4);
+      rmSetAreaMinBlobDistance(id, 16.0);
+      rmSetAreaMaxBlobDistance(id, 20.0);
+      rmSetAreaCoherence(id, 0.0);
+      if(rmBuildArea(id)==false){
+         // Stop trying once we fail 5 times in a row.
+         failCount++;
+         if(failCount==5)
+            break;
+       } else
+         failCount=0;
+      }
+
+//Starting TC
+id=rmCreateObjectDef("Starting TC");
+   rmAddObjectDefItem(id, "Settlement Level 1", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, 0.0);
+   rmPlaceObjectDefPerPlayer(id, true, 1);
+
+
+//Random gold mines
+id=rmCreateObjectDef("random mines");
+   rmAddObjectDefItem(id, "Gold Mine", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefConstraint(id, closeAvoidForest);
+   rmAddObjectDefToClass(id, classGold);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 4*cNumberNonGaiaPlayers);
+
+//Huntables
+id=rmCreateObjectDef("random huntable");
+   rmAddObjectDefItem(id, "Elephant", rmRandInt(2,5), 4.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidPlayerBase);
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefConstraint(id, avoidHuntable);
+   rmAddObjectDefConstraint(id, closeAvoidForest);
+   rmAddObjectDefToClass(id, classHuntable);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 5*cNumberNonGaiaPlayers);
+}
+
+Well, that looks more reasonable. We used another new function to place the settlements. "rmPlaceObjectDefPerPlayer" can be used for placing an object for each player, automatically in their player location. You can then use min and max distance to be more specific. If you said 'false', it'd be a Gaia player instead of human players, useful for huntables. Speaking of which, we still have some balance problems - no huntables, no starting gold, and the other gold seems to get a little too close. Let's work on that. Meanwhile, let's get started on something new- triggers.
+
+If you've ever worked on the Scenario Editor in Age of Mythology, you might know a bit about triggers. They're useful for creating effects while the game is running, such as playing music, sending chat, converting units, modifying stats, or.. I dunno... blowing everything up. You can create and manipulate triggers using RMS scripting, though in some cases it can be a bit tricky. I suggest downloading RMS maps with triggers in them and familiarizing yourself even further with each individual trigger.
+
+There's another new concept I'll introduce here - functions. Functions are useful for repeating long blocks of code, and you can use them to make your RMS script easier for you to understand - a very important detail. In some cases, triggers have like 4 variables, meaning you may have to make five lines for that trigger. With some functions you can shorten it a bit.
+
+//Functions
+void newEffect(string str="") {
+rmAddTriggerEffect(str);
+}
+
+void effectParam(string name="", string val="") {
+rmSetTriggerEffectParam(name, val, false);
+}
+
+
+//Begin map
+void main(void){
+
+  // Text
+   rmSetStatusText("",0.01);
+
+//Declare Variables
+int id=0; int i=0; int j=0; int k=0; int id2=0; int failCount=0; float f=0;
+
+
+   // Set size.
+   int playerTiles=7500;
+   if(cMapSize == 1)
+   {
+      playerTiles = 9750;
+   }
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+   rmSetMapSize(size, size);
+
+   // Init map.
+   rmTerrainInitialize("SavannahA");
+
+//Classes
+int classCenter = rmDefineClass("Center");
+int classBorderPatch = rmDefineClass("Border Patch");
+int classGold = rmDefineClass("Gold");
+int classForest = rmDefineClass("Forest");
+int classPlayerBase = rmDefineClass("Player Base");
+int classHuntable = rmDefineClass("Huntables");
+
+//Constraints
+   int closeAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterClose", classCenter, 5.0);
+   int farAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterFar", classCenter, 20.0);
+int closeAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldClose", classGold, 5.0);
+int farAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldFar", classGold, 35.0);
+   int avoidBorderPatch=rmCreateClassDistanceConstraint("AvoidBorderPatch", classBorderPatch, 5.0);
+int closeAvoidForest=rmCreateClassDistanceConstraint("AvoidForestClose", classForest, 5.0);
+int farAvoidForest=rmCreateClassDistanceConstraint("AvoidForestFar", classForest, 35.0);
+   int closeAvoidPlayerBase=rmCreateClassDistanceConstraint("AvoidPBClose", classPlayerBase, 5.0);
+   int farAvoidPlayerBase=rmCreateClassDistanceConstraint("AvoidPBFar", classPlayerBase, 35.0);
+int avoidHuntable=rmCreateClassDistanceConstraint("AvoidHuntable", classHuntable, 35.0);
+
+//Place players
+    rmSetTeamSpacingModifier(0.50);
+    rmPlacePlayersCircular(0.4, 0.45, rmDegreesToRadians(5.0));
+
+//Make the center
+id=rmCreateArea("center");
+    rmSetAreaSize(id, 0.2, 0.2);
+    rmSetAreaLocation(id, 0.5, 0.5);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SavannahB");
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 2);
+rmBuildArea(id);
+
+//Make the player bases
+for(i=1; <cNumberPlayers){
+      id=rmCreateArea("Player base"+i);
+      rmSetAreaSize(id, rmAreaTilesToFraction(500), rmAreaTilesToFraction(500));
+      rmAddAreaToClass(id, classPlayerBase);
+      rmSetAreaCoherence(id, 0.0);
+      rmSetAreaBaseHeight(id, 4.0);
+      rmSetAreaLocPlayer(id, i);
+     rmAddAreaConstraint(id, closeAvoidCenter);
+        rmSetAreaTerrainType(id, "GrassDirt75");
+        rmAddAreaTerrainLayer(id, "GrassDirt50", 0, 1);
+        rmAddAreaTerrainLayer(id, "GrassDirt25", 2, 3);
+  rmSetAreaHeightBlend(id, 2);
+      rmBuildArea(id);
+}
+
+//Make the border patch
+for(i=1;<cNumberPlayers*3){
+id=rmCreateArea("border patch"+i);
+    rmSetAreaSize(id, 0.02, 0.02);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SandA");
+      rmAddAreaToClass(id, classBorderPatch);
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+      rmAddAreaConstraint(id, closeAvoidPlayerBase);
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 1);
+rmBuildArea(id);
+}
+
+
+// Forest
+   int forestCount=30*cNumberNonGaiaPlayers;
+   failCount=0;
+   for(i=0; <forestCount){
+      id=rmCreateArea("forest"+i);
+      rmSetAreaSize(id, rmAreaTilesToFraction(100), rmAreaTilesToFraction(200));
+      rmSetAreaWarnFailure(id, false);
+      rmSetAreaForestType(id, "mixed oak forest");
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, closeAvoidForest);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+      rmAddAreaConstraint(id, farAvoidPlayerBase);
+      rmAddAreaToClass(id, classForest);
+      rmSetAreaMinBlobs(id, 2);
+      rmSetAreaMaxBlobs(id, 4);
+      rmSetAreaMinBlobDistance(id, 16.0);
+      rmSetAreaMaxBlobDistance(id, 20.0);
+      rmSetAreaCoherence(id, 0.0);
+      if(rmBuildArea(id)==false){
+         // Stop trying once we fail 5 times in a row.
+         failCount++;
+         if(failCount==5)
+            break;
+       } else
+         failCount=0;
+      }
+
+//Starting TC
+id=rmCreateObjectDef("Starting TC");
+   rmAddObjectDefItem(id, "Settlement Level 1", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, 0.0);
+   rmPlaceObjectDefPerPlayer(id, true, 1);
+
+//Starting Gold
+id=rmCreateObjectDef("Starting Golds");
+   rmAddObjectDefItem(id, "Gold Mine Small", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 10.0);
+   rmSetObjectDefMaxDistance(id, 15.0);
+   rmPlaceObjectDefPerPlayer(id, true, 1);
+
+//Starting Huntables
+id=rmCreateObjectDef("Starting Huntables");
+   rmAddObjectDefItem(id, "Giraffe", 8, 8.0);
+   rmSetObjectDefMinDistance(id, 13.0);
+   rmSetObjectDefMaxDistance(id, 18.0);
+   rmPlaceObjectDefPerPlayer(id, false, 2);
+
+
+//Random gold mines
+id=rmCreateObjectDef("random mines");
+   rmAddObjectDefItem(id, "Gold Mine", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefConstraint(id, closeAvoidForest);
+   rmAddObjectDefConstraint(id, farAvoidPlayerBase);
+   rmAddObjectDefToClass(id, classGold);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 4*cNumberNonGaiaPlayers);
+
+//Huntables
+id=rmCreateObjectDef("random huntable");
+   rmAddObjectDefItem(id, "Elephant", rmRandInt(2,5), 4.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidPlayerBase);
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefConstraint(id, avoidHuntable);
+   rmAddObjectDefConstraint(id, closeAvoidForest);
+   rmAddObjectDefToClass(id, classHuntable);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 5*cNumberNonGaiaPlayers);
+
+
+
+//Triggers
+
+//Intro text trigger
+rmCreateTrigger("Intro Text");
+ newEffect("Clear Chat History");
+ newEffect("Fade To Color");
+    effectParam("R","160");
+    effectParam("G","160");
+    effectParam("B","255");
+    effectParam("Duration","500");
+    effectParam("Delay","0");
+    effectParam("Fade","false");
+ newEffect("Send Chat");
+    effectParam("PlayerID", "0");
+    effectParam("Message", "<color=0.5,1.0,0.5>Welcome to</color><color=0.1,1.0,0.1> The Tutorial!</color>");
+
+ newEffect("Send Chat");
+    effectParam("PlayerID", "0");
+    effectParam("Message", "<color=1.0,0.4,0.4>Map made by</color> <color=1.0,0.0,0.0>ScionOfWar.</color>");
+
+    rmSetTriggerPriority(3);
+    rmSetTriggerActive(true);
+    rmSetTriggerRunImmediately(false);
+    rmSetTriggerLoop(false);
+
+
+    rmCreateTrigger("Intro Fade");
+ newEffect("Fade To Color");
+    effectParam("R","160");
+    effectParam("G","160");
+    effectParam("B","255");
+    effectParam("Duration","0");
+    effectParam("Delay","0");
+    effectParam("Fade","true");
+    rmSetTriggerPriority(3);
+    rmSetTriggerActive(true);
+    rmSetTriggerRunImmediately(true);
+    rmSetTriggerLoop(false);
+
+   // Text
+   rmSetStatusText("",0.99);
+}
+
+Well, it's starting to get more complicated! Now there's starting huntables, gold, and even triggers to cause text and fade. All we need now is some straggler starter trees, embellishment, extra town centers, and some final touches and we have a working map. Let's see if we can wrap this up, shall we?:
+
+//Functions
+void newEffect(string str="") {
+rmAddTriggerEffect(str);
+}
+
+void effectParam(string name="", string val="") {
+rmSetTriggerEffectParam(name, val, false);
+}
+
+
+//Begin map
+void main(void){
+
+  // Text
+   rmSetStatusText("",0.01);
+
+//Declare Variables
+int id=0; int i=0; int j=0; int k=0; int id2=0; int failCount=0; float f=0;
+
+
+   // Set size.
+   int playerTiles=7500;
+   if(cMapSize == 1)
+   {
+      playerTiles = 9750;
+   }
+   int size=2.0*sqrt(cNumberNonGaiaPlayers*playerTiles/0.9);
+   rmSetMapSize(size, size);
+
+   // Init map.
+   rmTerrainInitialize("SavannahA");
+
+//Classes
+int classCenter = rmDefineClass("Center");
+int classBorderPatch = rmDefineClass("Border Patch");
+int classGold = rmDefineClass("Gold");
+int classForest = rmDefineClass("Forest");
+int classPlayerBase = rmDefineClass("Player Base");
+int classHuntable = rmDefineClass("Huntables");
+
+//Constraints
+   int closeAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterClose", classCenter, 5.0);
+   int farAvoidCenter=rmCreateClassDistanceConstraint("AvoidCenterFar", classCenter, 20.0);
+int closeAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldClose", classGold, 5.0);
+int farAvoidGold=rmCreateClassDistanceConstraint("AvoidGoldFar", classGold, 35.0);
+   int avoidBorderPatch=rmCreateClassDistanceConstraint("AvoidBorderPatch", classBorderPatch, 5.0);
+int closeAvoidForest=rmCreateClassDistanceConstraint("AvoidForestClose", classForest, 5.0);
+int farAvoidForest=rmCreateClassDistanceConstraint("AvoidForestFar", classForest, 35.0);
+   int closeAvoidPlayerBase=rmCreateClassDistanceConstraint("AvoidPBClose", classPlayerBase, 5.0);
+   int farAvoidPlayerBase=rmCreateClassDistanceConstraint("AvoidPBFar", classPlayerBase, 35.0);
+int avoidHuntable=rmCreateClassDistanceConstraint("AvoidHuntable", classHuntable, 35.0);
+
+//Place players
+    rmSetTeamSpacingModifier(0.50);
+    rmPlacePlayersCircular(0.4, 0.45, rmDegreesToRadians(5.0));
+
+//Make the center
+id=rmCreateArea("center");
+    rmSetAreaSize(id, 0.2, 0.2);
+    rmSetAreaLocation(id, 0.5, 0.5);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SavannahB");
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 2);
+rmBuildArea(id);
+
+//Make the player bases
+for(i=1; <cNumberPlayers){
+      id=rmCreateArea("Player base"+i);
+      rmSetAreaSize(id, rmAreaTilesToFraction(500), rmAreaTilesToFraction(500));
+      rmAddAreaToClass(id, classPlayerBase);
+      rmSetAreaCoherence(id, 0.0);
+      rmSetAreaBaseHeight(id, 4.0);
+      rmSetAreaLocPlayer(id, i);
+     rmAddAreaConstraint(id, closeAvoidCenter);
+        rmSetAreaTerrainType(id, "ShorelineAegean");
+        rmAddAreaTerrainLayer(id, "SavannahC", 0, 1);
+        rmAddAreaTerrainLayer(id, "SavannahB", 2, 3);
+  rmSetAreaHeightBlend(id, 2);
+      rmBuildArea(id);
+}
+
+//Make the border patch
+for(i=1;<cNumberPlayers*3){
+id=rmCreateArea("border patch"+i);
+    rmSetAreaSize(id, 0.02, 0.02);
+      rmSetAreaMinBlobs(id, 4);
+      rmSetAreaMaxBlobs(id, 8);
+         rmSetAreaMinBlobDistance(id, 20.0);
+         rmSetAreaMaxBlobDistance(id, 30.0);
+         rmSetAreaCoherence(id, 0.3);
+         rmSetAreaTerrainType(id, "SavannahB");
+      rmAddAreaToClass(id, classBorderPatch);
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+      rmAddAreaConstraint(id, closeAvoidPlayerBase);
+  rmSetAreaBaseHeight(id, 3.0);
+  rmSetAreaHeightBlend(id, 1);
+rmBuildArea(id);
+}
+
+
+// Forest
+   int forestCount=30*cNumberNonGaiaPlayers;
+   failCount=0;
+   for(i=0; <forestCount){
+      id=rmCreateArea("forest"+i);
+      rmSetAreaSize(id, rmAreaTilesToFraction(100), rmAreaTilesToFraction(200));
+      rmSetAreaWarnFailure(id, false);
+      rmSetAreaForestType(id, "savannah forest");
+      rmAddAreaConstraint(id, farAvoidCenter);
+      rmAddAreaConstraint(id, closeAvoidForest);
+      rmAddAreaConstraint(id, avoidBorderPatch);
+      rmAddAreaConstraint(id, farAvoidPlayerBase);
+      rmAddAreaToClass(id, classForest);
+      rmSetAreaMinBlobs(id, 2);
+      rmSetAreaMaxBlobs(id, 4);
+      rmSetAreaMinBlobDistance(id, 16.0);
+      rmSetAreaMaxBlobDistance(id, 20.0);
+      rmSetAreaCoherence(id, 0.0);
+      if(rmBuildArea(id)==false){
+         // Stop trying once we fail 5 times in a row.
+         failCount++;
+         if(failCount==5)
+            break;
+       } else
+         failCount=0;
+      }
+
+//Fair locations
+   id=rmAddFairLoc("Settlement", false, true,  40, 50, 20, 10); /* forward inside */
+
+   id=rmAddFairLoc("Settlement", false, false, 30, 60, 30, 20); /* forward outside */
+   rmAddObjectDefConstraint(id, closeAvoidForest);
+   rmAddObjectDefConstraint(id, closeAvoidPlayerBase);
+
+
+   if(rmPlaceFairLocs())
+   {
+      id=rmCreateObjectDef("far settlement2");
+      rmAddObjectDefItem(id, "Settlement", 1, 0.0);
+      for(i=1; <cNumberPlayers)
+      {
+         for(j=0; <rmGetNumberFairLocs(i))
+            rmPlaceObjectDefAtLoc(id, i, rmFairLocXFraction(i, j), rmFairLocZFraction(i, j), 1);
+      }
+   }
+
+//Starting TC
+id=rmCreateObjectDef("Starting TC");
+   rmAddObjectDefItem(id, "Settlement Level 1", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, 0.0);
+   rmPlaceObjectDefPerPlayer(id, true, 1);
+
+//Starting Gold
+id=rmCreateObjectDef("Starting Golds");
+   rmAddObjectDefItem(id, "Gold Mine Small", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 10.0);
+   rmSetObjectDefMaxDistance(id, 15.0);
+   rmPlaceObjectDefPerPlayer(id, true, 1);
+
+//Starting Huntables
+id=rmCreateObjectDef("Starting Huntables");
+   rmAddObjectDefItem(id, "Giraffe", 8, 8.0);
+   rmSetObjectDefMinDistance(id, 13.0);
+   rmSetObjectDefMaxDistance(id, 18.0);
+   rmPlaceObjectDefPerPlayer(id, false, 2);
+
+//Starting Trees
+id=rmCreateObjectDef("Starting Trees");
+   rmAddObjectDefItem(id, "Savannah Tree", 18, 45.0);
+   rmSetObjectDefMinDistance(id, 13.0);
+   rmSetObjectDefMaxDistance(id, 18.0);
+   rmPlaceObjectDefPerPlayer(id, false, 2);
+
+
+//Random gold mines
+id=rmCreateObjectDef("random mines");
+   rmAddObjectDefItem(id, "Gold Mine", 1, 0.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefConstraint(id, closeAvoidForest);
+   rmAddObjectDefConstraint(id, farAvoidPlayerBase);
+   rmAddObjectDefToClass(id, classGold);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 4*cNumberNonGaiaPlayers);
+
+//Huntables
+id=rmCreateObjectDef("random huntable");
+   rmAddObjectDefItem(id, "Elephant", rmRandInt(2,5), 4.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, farAvoidPlayerBase);
+   rmAddObjectDefConstraint(id, farAvoidGold);
+   rmAddObjectDefConstraint(id, avoidHuntable);
+   rmAddObjectDefConstraint(id, closeAvoidForest);
+   rmAddObjectDefToClass(id, classHuntable);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 5*cNumberNonGaiaPlayers);
+
+//Random bushes
+id=rmCreateObjectDef("random bushes");
+   rmAddObjectDefItem(id, "Bush", rmRandInt(2,5), 9.0);
+   rmAddObjectDefItem(id, "Grass", rmRandInt(4,9), 6.0);
+   rmSetObjectDefMinDistance(id, 0.0);
+   rmSetObjectDefMaxDistance(id, rmXFractionToMeters(0.5));
+   rmAddObjectDefConstraint(id, closeAvoidForest);
+   rmPlaceObjectDefAtLoc(id, 0, 0.5, 0.5, 10*cNumberNonGaiaPlayers);
+
+//Triggers
+
+//Intro text trigger
+rmCreateTrigger("Intro Text");
+ newEffect("Clear Chat History");
+ newEffect("Fade To Color");
+    effectParam("R","160");
+    effectParam("G","160");
+    effectParam("B","255");
+    effectParam("Duration","500");
+    effectParam("Delay","0");
+    effectParam("Fade","false");
+ newEffect("Send Chat");
+    effectParam("PlayerID", "0");
+    effectParam("Message", "<color=0.5,1.0,0.5>Welcome to</color><color=0.1,1.0,0.1> The Tutorial!</color>");
+
+ newEffect("Send Chat");
+    effectParam("PlayerID", "0");
+    effectParam("Message", "<color=1.0,0.4,0.4>Map made by</color> <color=1.0,0.0,0.0>ScionOfWar.</color>");
+
+    rmSetTriggerPriority(3);
+    rmSetTriggerActive(true);
+    rmSetTriggerRunImmediately(false);
+    rmSetTriggerLoop(false);
+
+
+    rmCreateTrigger("Intro Fade");
+ newEffect("Fade To Color");
+    effectParam("R","160");
+    effectParam("G","160");
+    effectParam("B","255");
+    effectParam("Duration","0");
+    effectParam("Delay","0");
+    effectParam("Fade","true");
+    rmSetTriggerPriority(3);
+    rmSetTriggerActive(true);
+    rmSetTriggerRunImmediately(true);
+    rmSetTriggerLoop(false);
+
+   // Text
+   rmSetStatusText("",0.99);
+}
+
+Well, we now officially have a working, playable map with unique forest shapes you don't see on most common random maps. Of course, we could do a ton more to it, like add some more areas and textures, or some more triggers. With what you should now know, you can make all sorts of maps! Hopefully this step-by-step tutorial will help you make your own exciting random map scripts. And thank you for taking the time to read my tutorial.
