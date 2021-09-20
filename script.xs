@@ -46,8 +46,8 @@ void main(void) {
 	* a shortcut for those cases where we reference the classes a lot, but classes can be done
 	* either way.
 	*/
-	int classPlayer=rmDefineClass("player");
-	int classPlayerCore=rmDefineClass("player core");
+	int classPlayer = rmDefineClass("player");
+	int classPlayerCore = rmDefineClass("player core");
 	rmDefineClass("corner");
 	rmDefineClass("classHill");
 	rmDefineClass("center");
@@ -56,6 +56,7 @@ void main(void) {
 
 	/*
 	* -------------Define constraints.
+	*
 	* We’re done with the basics and ready to get into placing areas and objects. I broke this
 	* section out with the ----- marks just so it is easier to find when scrolling through a large
 	* file. Next, we will set up the constraints. Again, keeping them all in one place makes it
@@ -63,92 +64,247 @@ void main(void) {
 	* duty.
 	*/
 
-	// Create a edge of map constraint. This constraint is necessary on many maps. It sets up a box around the edge of the map, in this case 4m from the edges. Player areas and many objects will use this constraint to keep from being placed to close to the map edge. Other areas, such as forests, will NOT use this constraint, or else there would be a pathable strip all the way around the edge of the map, which makes attacking too easy.
+	/*
+	* Create a edge of map constraint. This constraint is necessary on many maps. It sets up a box
+	* around the edge of the map, in this case 4m from the edges. Player areas and many objects will
+	* use this constraint to keep from being placed to close to the map edge. Other areas, such as
+	* forests, will NOT use this constraint, or else there would be a pathable strip all the way
+	* around the edge of the map, which makes attacking too easy.
+	*/
+	int edgeConstraint = rmCreateBoxConstraint(
+		"edge of map",
+		rmXTilesToFraction(4),
+		rmZTilesToFraction(4),
+		1.0 - rmXTilesToFraction(4),
+		1.0 - rmZTilesToFraction(4)
+	);
 
-	int edgeConstraint=rmCreateBoxConstraint("edge of map", rmXTilesToFraction(4), rmZTilesToFraction(4), 1.0-rmXTilesToFraction(4), 1.0-rmZTilesToFraction(4));
+	/*
+	* The player constraints are used to tell players and other objects to keep away from players.
+	* Remember that player areas can be quite large-on some maps there is no land but player areas, so
+	* you may need to use object constraints from the player’s Town Center on some maps rather than just
+	* avoiding a player area completely. Note that you can have multiple constraints that do similar
+	* things (in this case avoid player areas) as long as they have different string names (“stay away
+	* from players” and “stay away from players a lot.”) The content of the strings don’t matter, but
+	* naming them something you’ll remember makes it easier.
+	*/
+	int playerConstraint = rmCreateClassDistanceConstraint(
+		"stay away from players",
+		classPlayer,
+		30.0
+	);
+	int smallMapPlayerConstraint = rmCreateClassDistanceConstraint(
+		"stay away from players a lot",
+		classPlayer,
+		70.0
+	);
 
-	/* The player constraints are used to tell players and other objects to keep away from players.
-	Remember that player areas can be quite large-on some maps there is no land but player areas, so
-	you may need to use object constraints from the player’s Town Center on some maps rather than just
-	avoiding a player area completely. Note that you can have multiple constraints that do similar
-	things (in this case avoid player areas) as long as they have different string names (“stay away
-	from players” and “stay away from players a lot.”) The content of the strings don’t matter, but
-	naming them something you’ll remember makes it easier. */
+	/*
+	* Center constraint. Because we want a large ocean in the center, we want to make sure player
+	* areas don’t get too close to the center. We don’t have anything in classID(“center”) yet, but
+	* later we will add the central ocean to this class.
+	*/
+	int centerConstraint = rmCreateClassDistanceConstraint(
+		"stay away from center",
+		rmClassID("center"),
+		15.0
+	);
+	int wideCenterConstraint = rmCreateClassDistanceConstraint(
+		"elevation avoids center",
+		rmClassID("center"),
+		50.0
+	);
 
-	int playerConstraint=rmCreateClassDistanceConstraint("stay away from players", classPlayer, 30.0);
-	int smallMapPlayerConstraint=rmCreateClassDistanceConstraint("stay away from players a lot", classPlayer, 70.0);
+	/*
+	* Corner constraint. Because maps are square but players are placed in circles on many maps, it
+	* is possible for a lot of objects to get shoved into corners. Corner constraints try and avoid
+	* that possibility. These constraints are not actually used for this RMS, but I left them in as
+	* an example of the kind of thing you can do.
+	*/
+	int cornerConstraint = rmCreateClassDistanceConstraint(
+		"stay away from corner",
+		rmClassID("corner"),
+		15.0
+	);
+	int cornerOverlapConstraint = rmCreateClassDistanceConstraint(
+		"don't overlap corner",
+		rmClassID("corner"),
+		2.0
+	);
 
-	// Center constraint. Because we want a large ocean in the center, we want to make sure player areas don’t get too close to the center. We don’t have anything in classID(“center”) yet, but later we will add the central ocean to this class.
+	/*
+	* Settlement constraints. These are among the most important object constraints, since maps can
+	* be unfair if too many good resources are near Settlements, or Settlements are too close to each
+	* other. In this map, there are three Settlement constraints, one to avoid by a short distance
+	* (20m) a long distance (40m) and a really long distance (60m). Note that the 60m constraint is
+	* used only to avoid “starting settlements,” meaning the TC (which always has a Settlement
+	* beneath it) that each player starts with. You could defined dozens of Settlement constraints if
+	* you needed them.
+	*/
+	int shortAvoidSettlement = rmCreateTypeDistanceConstraint(
+		"objects avoid TC by short distance",
+		"AbstractSettlement",
+		20.0
+	);
+	int farAvoidSettlement = rmCreateTypeDistanceConstraint(
+		"TCs avoid TCs by long distance",
+		"AbstractSettlement",
+		40.0
+	);
+	int farStartingSettleConstraint = rmCreateClassDistanceConstraint(
+		"objects avoid player TCs",
+		rmClassID("starting settlement"),
+		60.0
+	);
 
-	int centerConstraint=rmCreateClassDistanceConstraint("stay away from center", rmClassID("center"), 15.0);
-	int wideCenterConstraint=rmCreateClassDistanceConstraint("elevation avoids center", rmClassID("center"), 50.0);
+	/*
+	* Tower constraint. These constraints are used to make sure the starting towers avoid each other
+	* by a reasonable distance. The constraints could be larger, but then there is the risk that a
+	* player won’t get all 4 of their towers.
+	*/
+	int avoidTower = rmCreateTypeDistanceConstraint(
+		"towers avoid towers",
+		"tower",
+		20.0
+	);
+	int avoidTower2 = rmCreateTypeDistanceConstraint(
+		"objects avoid towers",
+		"tower",
+		22.0
+	);
 
-	// corner constraint. Because maps are square but players are placed in circles on many maps, it is possible for a lot of objects to get shoved into corners. Corner constraints try and avoid that possibility. These constraints are not actually used for this RMS, but I left them in as an example of the kind of thing you can do.
+	/*
+	* Gold. Gold isn’t quite as important as Settlements, but you may want to avoid gold being placed
+	* too close to other gold, or have super resource piles of gold and good in the same small area.
+	*/
+	int avoidGold = rmCreateTypeDistanceConstraint(
+		"avoid gold",
+		"gold",
+		30.0
+	);
+	int shortAvoidGold = rmCreateTypeDistanceConstraint(
+		"short avoid gold",
+		"gold",
+		10.0
+	);
 
-	int cornerConstraint=rmCreateClassDistanceConstraint("stay away from corner", rmClassID("corner"), 15.0);
-	int cornerOverlapConstraint=rmCreateClassDistanceConstraint("don't overlap corner", rmClassID("corner"), 2.0);
+	/*
+	* Food. These constraints will mostly be used to make sure all the herd animals and predators
+	* aren’t located in one portion of the map.
+	*/
+	int avoidHerdable = rmCreateTypeDistanceConstraint(
+		"avoid herdable",
+		"herdable",
+		30.0
+	);
+	int avoidPredator = rmCreateTypeDistanceConstraint(
+		"avoid predator",
+		"animalPredator",
+		20.0
+	);
+	int avoidFood = rmCreateTypeDistanceConstraint(
+		"avoid other food sources",
+		"food",
+		6.0
+	);
 
-	// Settlement constraints. These are among the most important object constraints, since maps can be unfair if too many good resources are near Settlements, or Settlements are too close to each other. In this map, there are three Settlement constraints, one to avoid by a short distance (20m) a long distance (40m) and a really long distance (60m). Note that the 60m constraint is used only to avoid “starting settlements,” meaning the TC (which always has a Settlement beneath it) that each player starts with. You could defined dozens of Settlement constraints if you needed them.
+	/*
+	* Avoid impassable land. Constraints that avoid passable or impassable land are very useful for a
+	* variety of objects. These constraints will be used to keep everything from hills to trees out
+	* of the water.
+	*/
+	int avoidImpassableLand = rmCreateTerrainDistanceConstraint(
+		"avoid impassable land",
+		"land",
+		false,
+		10.0
+	);
+	int shortHillConstraint = rmCreateClassDistanceConstraint(
+		"patches vs. hill",
+		rmClassID("classHill"),
+		10.0
+	);
 
-	int shortAvoidSettlement=rmCreateTypeDistanceConstraint("objects avoid TC by short distance", "AbstractSettlement", 20.0);
-	int farAvoidSettlement=rmCreateTypeDistanceConstraint("TCs avoid TCs by long distance", "AbstractSettlement", 40.0);
-	int farStartingSettleConstraint=rmCreateClassDistanceConstraint("objects avoid player TCs", rmClassID("starting settlement"), 60.0);
+	/*
+	* -------------Define objects.
+	*
+	* Okay, we are all done with most of the constraints (there are a few more down below where it
+	* just made more sense to keep them with their objects). Now we will define the objects. They
+	* don’t actually get placed here, but just defined. Remember that an “object” in this sense could
+	* be a single building, like a Settlement, or a pile of rocks that including large and small
+	* rocks, grass, or even gold.
+	*/
 
-	// Tower constraint. These constraints are used to make sure the starting towers avoid each other by a reasonable distance. The constraints could be larger, but then there is the risk that a player won’t get all 4 of their towers.
+	/*
+	* Close Objects. Calling objects close, medium or far is just a shorthand note for me to keep
+	* them straight. Close objects are those that “belong” to a certain player and are generally used
+	* right away. Medium objects are still placed per player, but are far enough away that they might
+	* be ignored, missed, or stolen. Far objects are placed randomly on the map, but ignore player
+	* areas, and are generally up for grabs. In general, I make close objects more predictable than
+	* far objects.
+	*/
 
-	int avoidTower=rmCreateTypeDistanceConstraint("towers avoid towers", "tower", 20.0);
-	int avoidTower2=rmCreateTypeDistanceConstraint("objects avoid towers", "tower", 22.0);
-
-	// Gold. Gold isn’t quite as important as Settlements, but you may want to avoid gold being placed too close to other gold, or have super resource piles of gold and good in the same small area.
-
-	int avoidGold=rmCreateTypeDistanceConstraint("avoid gold", "gold", 30.0);
-	int shortAvoidGold=rmCreateTypeDistanceConstraint("short avoid gold", "gold", 10.0);
-
-	// Food.  These constraints will mostly be used to make sure all the herd animals and predators aren’t located in one portion of the map.
-
-	int avoidHerdable=rmCreateTypeDistanceConstraint("avoid herdable", "herdable", 30.0);
-	int avoidPredator=rmCreateTypeDistanceConstraint("avoid predator", "animalPredator", 20.0);
-	int avoidFood=rmCreateTypeDistanceConstraint("avoid other food sources", "food", 6.0);
-
-	// Avoid impassable land. Constraints that avoid passable or impassable land are very useful for a variety of objects. These constraints will be used to keep everything from hills to trees out of the water.
-
-	int avoidImpassableLand=rmCreateTerrainDistanceConstraint("avoid impassable land", "land", false, 10.0);
-	int shortHillConstraint=rmCreateClassDistanceConstraint("patches vs. hill", rmClassID("classHill"), 10.0);
-
-	// -------------Define objects. Okay, we are all done with most of the constraints (there are a few more down below where it just made more sense to keep them with their objects). Now we will define the objects. They don’t actually get placed here, but just defined. Remember that an “object” in this sense could be a single building, like a Settlement, or a pile of rocks that including large and small rocks, grass, or even gold.
-
-	// Close Objects.  Calling objects close, medium or far is just a shorthand note for me to keep them straight. Close objects are those that “belong” to a certain player and are generally used right away. Medium objects are still placed per player, but are far enough away that they might be ignored, missed, or stolen. Far objects are placed randomly on the map, but ignore player areas, and are generally up for grabs. In general, I make close objects more predictable than far objects.
-
-	// This first object is the Town Center. Note that it has to be called by its protounit name, which is “Settlement Level 1,” not “Town Center.” First, startingSettlementID is defined so I can reference it later. Then, a Settlement Level 1 is added to the object with a distance of 0.0, meaning that it must be in the center. Since there is only one thing added to this object, 0.0 makes sense. The object is then added to the “starting settlement” class. It could be added to any classes as necessary. Then, the min and max distance are both set to 0 to make sure the Town Center is always placed in the exact middle of a players’s area. You could make a map where the Town Centers are anywhere on the map, but without starting resources around the TC, players may not want to play your map.
-
-	int startingSettlementID=rmCreateObjectDef("starting settlement");
-	rmAddObjectDefItem(startingSettlementID, "Settlement Level 1", 1, 0.0);
+	/*
+	* This first object is the Town Center. Note that it has to be called by its protounit name,
+	* which is “Settlement Level 1,” not “Town Center.” First, startingSettlementID is defined so I
+	* can reference it later. Then, a Settlement Level 1 is added to the object with a distance of
+	* 0.0, meaning that it must be in the center. Since there is only one thing added to this object,
+	* 0.0 makes sense. The object is then added to the “starting settlement” class. It could be added
+	* to any classes as necessary. Then, the min and max distance are both set to 0 to make sure the
+	* Town Center is always placed in the exact middle of a players’s area. You could make a map
+	* where the Town Centers are anywhere on the map, but without starting resources around the TC,
+	* players may not want to play your map.
+	*/
+	int startingSettlementID = rmCreateObjectDef("starting settlement");
+	rmAddObjectDefItem(
+		startingSettlementID,
+		"Settlement Level 1",
+		1,
+		0.0
+	);
 	rmAddObjectDefToClass(startingSettlementID, rmClassID("starting settlement"));
 	rmSetObjectDefMinDistance(startingSettlementID, 0.0);
 	rmSetObjectDefMaxDistance(startingSettlementID, 0.0);
 
-	// towers avoid other towers. Next, we define the starting towers. You can see only 1 tower is defined in startingTowerID, but we will end up placing 4 of them per player. If we changed 0.0 to 4.0 then we could place all 4 at once, but they might not avoid each other and the Town Center might be vulnerable on one side. Of course, you don’t have to have starting towers at all, but remember that sometimes a game can be determined in the opening seconds if a player can’t see all his starting resources right away. We also tell the towers to avoid impassable land, which on this map means the center ocean and cliffs. It probably isn’t necessary to include this constraint since player areas avoid impassable land too, but as we get to resources that are placed farther than 28 m from the player’s center, it will become more of a risk.
-
-	int startingTowerID=rmCreateObjectDef("Starting tower");
+	/*
+	* Towers avoid other towers. Next, we define the starting towers. You can see only 1 tower is
+	* defined in startingTowerID, but we will end up placing 4 of them per player. If we changed 0.0
+	* to 4.0 then we could place all 4 at once, but they might not avoid each other and the Town
+	* Center might be vulnerable on one side. Of course, you don’t have to have starting towers at
+	* all, but remember that sometimes a game can be determined in the opening seconds if a player
+	* can’t see all his starting resources right away. We also tell the towers to avoid impassable
+	* land, which on this map means the center ocean and cliffs. It probably isn’t necessary to
+	* include this constraint since player areas avoid impassable land too, but as we get to
+	* resources that are placed farther than 28 m from the player’s center, it will become more of a
+	* risk.
+	*/
+	int startingTowerID = rmCreateObjectDef("Starting tower");
 	rmAddObjectDefItem(startingTowerID, "tower", 1, 0.0);
 	rmSetObjectDefMinDistance(startingTowerID, 22.0);
 	rmSetObjectDefMaxDistance(startingTowerID, 28.0);
 	rmAddObjectDefConstraint(startingTowerID, avoidTower);
 	rmAddObjectDefConstraint(startingTowerID, avoidImpassableLand);
 
-	// gold avoids gold. By placing the gold so close to the Town Center, I ensure that an early attack won’t completely deny a player of gold.
-
-	int startingGoldID=rmCreateObjectDef("Starting gold");
+	/*
+	* Gold avoids gold. By placing the gold so close to the Town Center, I ensure that an early
+	* attack won’t completely deny a player of gold.
+	*/
+	int startingGoldID = rmCreateObjectDef("Starting gold");
 	rmAddObjectDefItem(startingGoldID, "Gold mine small", 1, 0.0);
 	rmSetObjectDefMinDistance(startingGoldID, 20.0);
 	rmSetObjectDefMaxDistance(startingGoldID, 25.0);
 	rmAddObjectDefConstraint(startingGoldID, avoidGold);
 	rmAddObjectDefConstraint(startingGoldID, avoidImpassableLand);
 
-	// pigs. Notice that I place a random number of pigs, from 2-4. PigNumber should technically be an integer, but since there is no such thing as 2.3 pigs, the fractions are just dropped. Note also that by defining closePigsID once, we make sure that every player gets the same number of pigs, though that number may be different if the map is played again. If different players on the same map had different numbers of pigs, there might be a serious balance problem.
-
-	float pigNumber=rmRandFloat(2, 4);
-	int closePigsID=rmCreateObjectDef("close pigs");
+	/*
+	* Pigs. Notice that I place a random number of pigs, from 2-4. PigNumber should technically be an
+	* integer, but since there is no such thing as 2.3 pigs, the fractions are just dropped. Note
+	* also that by defining closePigsID once, we make sure that every player gets the same number of
+	* pigs, though that number may be different if the map is played again. If different players on
+	* the same map had different numbers of pigs, there might be a serious balance problem.
+	*/
+	float pigNumber = rmRandFloat(2, 4);
+	int closePigsID = rmCreateObjectDef("close pigs");
 	rmAddObjectDefItem(closePigsID, "pig", pigNumber, 2.0);
 	rmSetObjectDefMinDistance(closePigsID, 25.0);
 	rmSetObjectDefMaxDistance(closePigsID, 30.0);
