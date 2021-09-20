@@ -81,12 +81,12 @@ void main(void)
 
   /*
   * The player constraints are used to tell players and other objects to keep away from players.
-  * Remember that player areas can be quite large-on some maps there is no land but player areas, so
-  * you may need to use object constraints from the player’s Town Center on some maps rather than just
-  * avoiding a player area completely. Note that you can have multiple constraints that do similar
-  * things (in this case avoid player areas) as long as they have different string names (“stay away
-  * from players” and “stay away from players a lot.”) The content of the strings don’t matter, but
-  * naming them something you’ll remember makes it easier.
+  * Remember that player areas can be quite large-on some maps there is no land but player areas,
+  * so you may need to use object constraints from the player’s Town Center on some maps rather
+  * than just avoiding a player area completely. Note that you can have multiple constraints that
+  * do similar things (in this case avoid player areas) as long as they have different string names
+  * (“stay away from players” and “stay away from players a lot.”) The content of the strings don’t
+  * matter, but naming them something you’ll remember makes it easier.
   */
   int playerConstraint = rmCreateClassDistanceConstraint(
       "stay away from players",
@@ -292,7 +292,14 @@ void main(void)
   rmAddObjectDefConstraint(closePigsID, avoidImpassableLand);
   rmAddObjectDefConstraint(closePigsID, avoidFood);
 
-  // Berries and Chickens are often used interchangeably. However, they do provide different levels of Food, so you need to make sure one player doesn’t have more Food than another player. In this case, we determine once whether closeChickensID actually includes chickens (which happens 0.8 of the time) or has berries instead. From 6-10 chickens are placed in a 5m radius, or 4-6 berries are placed in a 4m radius. Because pigs are type “Food”, both chickens and berries will avoid them. We could have made an avoidPig constraint just as easily.
+  /*
+  * Berries and Chickens are often used interchangeably. However, they do provide different levels
+  * of Food, so you need to make sure one player doesn’t have more Food than another player. In
+  * this case, we determine once whether closeChickensID actually includes chickens (which happens
+  * 0.8 of the time) or has berries instead. From 6-10 chickens are placed in a 5m radius, or 4-6
+  * berries are placed in a 4m radius. Because pigs are type “Food”, both chickens and berries will
+  * avoid them. We could have made an avoidPig constraint just as easily.
+  */
 
   int closeChickensID = rmCreateObjectDef("close Chickens");
   if (rmRandFloat(0, 1) < 0.8)
@@ -304,8 +311,12 @@ void main(void)
   rmAddObjectDefConstraint(closeChickensID, avoidImpassableLand);
   rmAddObjectDefConstraint(closeChickensID, avoidFood);
 
-  // Most of the time we get 1-3 Boar, but sometimes we get 1-2 Aurochs instead. Like all of the previous objects, we will place the closeBoarID object once per player, so if one player gets 2 Aurochs, every player will get 2 Aurochs. Another, less fair method, would be to do a loop over the number of players and determine the animals every time.
-
+  /*
+  * Most of the time we get 1-3 Boar, but sometimes we get 1-2 Aurochs instead. Like all of the
+  * previous objects, we will place the closeBoarID object once per player, so if one player gets 2
+  * Aurochs, every player will get 2 Aurochs. Another, less fair method, would be to do a loop over
+  * the number of players and determine the animals every time.
+  */
   int closeBoarID = rmCreateObjectDef("close Boar");
   if (rmRandFloat(0, 1) < 0.7)
     rmAddObjectDefItem(closeBoarID, "boar", rmRandInt(1, 3), 4.0);
@@ -322,8 +333,12 @@ void main(void)
 
   // Medium Objects
 
-  // gold avoids gold and Settlements. Notice that this gold mine uses a larger type of gold than the starting gold mine. It not only avoids gold (which includes both the starting gold mine and other medium gold mines) but it avoids Settelments, the starting Settelement (TC), the edge of the map and impassable land (cliffs or water).
-
+  /*
+  * Gold avoids gold and Settlements. Notice that this gold mine uses a larger type of gold than
+  * the starting gold mine. It not only avoids gold (which includes both the starting gold mine and
+  * other medium gold mines) but it avoids Settelments, the starting Settelement (TC), the edge of
+  * the map and impassable land (cliffs or water).
+  */
   int mediumGoldID = rmCreateObjectDef("medium gold");
   rmAddObjectDefItem(mediumGoldID, "Gold mine", 1, 0.0);
   rmSetObjectDefMinDistance(mediumGoldID, 40.0);
@@ -342,8 +357,15 @@ void main(void)
   rmAddObjectDefConstraint(mediumPigsID, avoidHerdable);
   rmAddObjectDefConstraint(mediumPigsID, farStartingSettleConstraint);
 
-  // player fish. We want to make sure every player has some fish close by, so we will place playerFishID for each player. However, we need two new constraints first: one that keeps fish groups away from each other, and one that keeps fish from being placed on top of land. Because fish are harder to place (since they are avoiding land) we allow them to be up to 100m from a player’s center. Remember, this distance includes both the land and water. If a player’s Town Center is 70m from shore, then there is only 30m left to place the fish group in. PlayerFishID is actually a group of 3 mahi mahi, which just makes the water look more interesting.
-
+  /*
+  * Player fish. We want to make sure every player has some fish close by, so we will place
+  * playerFishID for each player. However, we need two new constraints first: one that keeps fish
+  * groups away from each other, and one that keeps fish from being placed on top of land. Because
+  * fish are harder to place (since they are avoiding land) we allow them to be up to 100m from a
+  * player’s center. Remember, this distance includes both the land and water. If a player’s Town
+  * Center is 70m from shore, then there is only 30m left to place the fish group in. PlayerFishID
+  * is actually a group of 3 mahi mahi, which just makes the water look more interesting.
+  */
   int fishVsFishID = rmCreateTypeDistanceConstraint("fish v fish", "fish", 18.0);
   int fishLand = rmCreateTerrainDistanceConstraint("fish land", "land", true, 6.0);
 
@@ -356,8 +378,16 @@ void main(void)
 
   // Far Objects
 
-  // gold avoids gold, Settlements and TCs. Far objects are handled differently on this map (and most ES maps) from close and medium objects, but they don’t have to be. The difference comes in how these objects are placed, below. Close and medium objects are placed per player. Some far objects, like gold, are placed per player, but others are just placed randomly across the map, with a few constraints.  It is important to remember that the randomly placed objects will not avoid a player’s starting area by the minDistance. The difference between the minimum and maximum has grown, to account for all the variation in land and water; if the min and max were both 70, farGoldID might fail several times.
-
+  /*
+  * Gold avoids gold, Settlements and TCs. Far objects are handled differently on this map (and
+  * most ES maps) from close and medium objects, but they don’t have to be. The difference comes in
+  * how these objects are placed, below. Close and medium objects are placed per player. Some far
+  * objects, like gold, are placed per player, but others are just placed randomly across the map,
+  * with a few constraints.  It is important to remember that the randomly placed objects will not
+  * avoid a player’s starting area by the minDistance. The difference between the minimum and
+  * maximum has grown, to account for all the variation in land and water; if the min and max were
+  * both 70, farGoldID might fail several times.
+  */
   int farGoldID = rmCreateObjectDef("far gold");
   rmAddObjectDefItem(farGoldID, "Gold mine", 1, 0.0);
   rmSetObjectDefMinDistance(farGoldID, 70.0);
@@ -367,8 +397,11 @@ void main(void)
   rmAddObjectDefConstraint(farGoldID, shortAvoidSettlement);
   rmAddObjectDefConstraint(farGoldID, farStartingSettleConstraint);
 
-  // pigs avoid TCs and other herds, since this map places a lot of pigs. Mediterranean is a pig-heavy map, so it needs extra constraints that other maps might not need. It aways places pigs in pairs. You could make a random number of 0-2 pigs; 0 of any object is just ignored.
-
+  /*
+  * Pigs avoid TCs and other herds, since this map places a lot of pigs. Mediterranean is a
+  * pig-heavy map, so it needs extra constraints that other maps might not need. It aways places
+  * pigs in pairs. You could make a random number of 0-2 pigs; 0 of any object is just ignored.
+  */
   int farPigsID = rmCreateObjectDef("far pigs");
   rmAddObjectDefItem(farPigsID, "pig", 2, 4.0);
   rmSetObjectDefMinDistance(farPigsID, 80.0);
@@ -377,9 +410,12 @@ void main(void)
   rmAddObjectDefConstraint(farPigsID, avoidHerdable);
   rmAddObjectDefConstraint(farPigsID, farStartingSettleConstraint);
 
-  // pick lions or bears as predators. Placing predators is tricky, because a player with too many predators nearby has an unfair advantage. To make sure this doesn’t happen, we tell predators to avoid starting areas.
-
-  // avoid TCs
+  /*
+  * Pick lions or bears as predators. Placing predators is tricky, because a player with too many
+  * predators nearby has an unfair advantage. To make sure this doesn’t happen, we tell predators
+  * to avoid starting areas.
+  */
+  // Avoid TCs
   int farPredatorID = rmCreateObjectDef("far predator");
   float predatorSpecies = rmRandFloat(0, 1);
   if (predatorSpecies < 0.5)
@@ -400,10 +436,18 @@ void main(void)
   rmAddObjectDefConstraint(farBerriesID, avoidImpassableLand);
   rmAddObjectDefConstraint(farBerriesID, farStartingSettleConstraint);
 
-  // This map will either use boar or deer as the extra huntable food. We set up two new class constraints to make sure the bonus animals are distributed evenly. Hunted animals are placed randomly, not per player as farGoldID was placed. The difference is that the minDistance of 0 below does not mean 0m from a player’s starting area, but 0m from the random location where bonusHundableID was placed. This will make more sense in the placement section below areas.
-
+  /*
+  * This map will either use boar or deer as the extra huntable food. We set up two new class
+  * constraints to make sure the bonus animals are distributed evenly. Hunted animals are placed
+  * randomly, not per player as farGoldID was placed. The difference is that the minDistance of 0
+  * below does not mean 0m from a player’s starting area, but 0m from the random location where
+  * bonusHundableID was placed. This will make more sense in the placement section below areas.
+  */
   int classBonusHuntable = rmDefineClass("bonus huntable");
-  int avoidBonusHuntable = rmCreateClassDistanceConstraint("avoid bonus huntable", classBonusHuntable, 40.0);
+  int avoidBonusHuntable = rmCreateClassDistanceConstraint(
+    "avoid bonus huntable",
+    classBonusHuntable,
+    40.0);
   int avoidHuntable = rmCreateTypeDistanceConstraint("avoid huntable", "huntable", 20.0);
 
   // hunted avoids hunted and TCs
@@ -427,12 +471,17 @@ void main(void)
   rmAddObjectDefItem(randomTreeID, "oak tree", 1, 0.0);
   rmSetObjectDefMinDistance(randomTreeID, 0.0);
   rmSetObjectDefMaxDistance(randomTreeID, rmXFractionToMeters(0.5));
-  rmAddObjectDefConstraint(randomTreeID, rmCreateTypeDistanceConstraint("random tree", "all", 4.0));
+  rmAddObjectDefConstraint(
+    randomTreeID,
+    rmCreateTypeDistanceConstraint("random tree", "all", 4.0));
   rmAddObjectDefConstraint(randomTreeID, shortAvoidSettlement);
   rmAddObjectDefConstraint(randomTreeID, avoidImpassableLand);
 
-  // Birds. These don’t have any effect on gameplay, and they move around, so there is no point assigning constraints to them. In fact, we specify that the min distance is 0 and the max distance is half the map, meaning they can be placed anywhere.
-
+  /*
+  * Birds. These don’t have any effect on gameplay, and they move around, so there is no point
+  * assigning constraints to them. In fact, we specify that the min distance is 0 and the max
+  * distance is half the map, meaning they can be placed anywhere.
+  */
   int farhawkID = rmCreateObjectDef("far hawks");
   rmAddObjectDefItem(farhawkID, "hawk", 1, 0.0);
   rmSetObjectDefMinDistance(farhawkID, 0.0);
@@ -444,11 +493,17 @@ void main(void)
   rmSetObjectDefMinDistance(relicID, 60.0);
   rmSetObjectDefMaxDistance(relicID, 150.0);
   rmAddObjectDefConstraint(relicID, edgeConstraint);
-  rmAddObjectDefConstraint(relicID, rmCreateTypeDistanceConstraint("relic vs relic", "relic", 70.0));
+  rmAddObjectDefConstraint(
+    relicID,
+    rmCreateTypeDistanceConstraint("relic vs relic", "relic", 70.0));
   rmAddObjectDefConstraint(relicID, farStartingSettleConstraint);
   rmAddObjectDefConstraint(relicID, avoidImpassableLand);
 
-  // -------------Done defining objects. That’s it for objects. Next we will not only define, but place some areas, and then we will add all of the above defined objects to the areas. Then the map will be done.
+  /*
+  * -------------Done defining objects. That’s it for objects. Next we will not only define, but
+  * place some areas, and then we will add all of the above defined objects to the areas. Then the
+  * map will be done.
+  */
 
   // Text
   rmSetStatusText("", 0.20);
