@@ -508,16 +508,30 @@ void main(void)
   // Text
   rmSetStatusText("", 0.20);
 
-  // Cheesy "circular" placement of players. Through trial and error, we found that when there were fewer than 4 players, the players were too close to the center, which meant the ocean was very small. So, we place players at 0.4 to 0.43 on smaller, 2-3 player maps, and from closer to the center (by a small amount) for larger, 4-12 player maps. Teams are placed slightly closer together than enemies.
-
+  /*
+  * Cheesy "circular" placement of players. Through trial and error, we found that when there were
+  * fewer than 4 players, the players were too close to the center, which meant the ocean was very
+  * small. So, we place players at 0.4 to 0.43 on smaller, 2-3 player maps, and from closer to the
+  * center (by a small amount) for larger, 4-12 player maps. Teams are placed slightly closer
+  * together than enemies.
+  */
   rmSetTeamSpacingModifier(0.75);
   if (cNumberNonGaiaPlayers < 4)
     rmPlacePlayersCircular(0.4, 0.43, rmDegreesToRadians(5.0));
   else
     rmPlacePlayersCircular(0.43, 0.45, rmDegreesToRadians(5.0));
 
-  // Create a center water area -- the Mediterranean part. This is the first area. It is the central ocean that gives the map its name. We name the area (centerID), pick a size for it (more than a third of the map), place it in the center of the map, specify a water type for it, add it to the center class (since it is the only area in this class, we could have just had areas avoid centerID), give the area a height of 0 so that it is underwater, provide some variation by setting more than 1 blob and letting the blobs move a part a little, smooth the outer perimeter so it looks more like an ocean, add coherence to keep the ocean from looking too much like an amoeba, and then build the area. Building the ocean now is important, because much of the Mediterranean look comes the fact that player areas spill over into the ocean.
-
+  /*
+  * Create a center water area -- the Mediterranean part. This is the first area. It is the central
+  * ocean that gives the map its name. We name the area (centerID), pick a size for it (more than a
+  * third of the map), place it in the center of the map, specify a water type for it, add it to
+  * the center class (since it is the only area in this class, we could have just had areas avoid
+  * centerID), give the area a height of 0 so that it is underwater, provide some variation by
+  * setting more than 1 blob and letting the blobs move a part a little, smooth the outer perimeter
+  * so it looks more like an ocean, add coherence to keep the ocean from looking too much like an
+  * amoeba, and then build the area. Building the ocean now is important, because much of the
+  * Mediterranean look comes the fact that player areas spill over into the ocean.
+  */
   int centerID = rmCreateArea("center");
   rmSetAreaSize(centerID, 0.35, 0.35);
   rmSetAreaLocation(centerID, 0.5, 0.5);
@@ -532,8 +546,12 @@ void main(void)
   rmSetAreaCoherence(centerID, 0.25);
   rmBuildArea(centerID);
 
-  // monkey island. Just to be silly, and to make the map more random, there is a chance of placing a monkey island in the middle. I found that the island connects to other land too often on smaller maps, so there is only a chance to place the island on maps with more than 3 players, and even then there is only a 66% chance.
-
+  /*
+  * Monkey island. Just to be silly, and to make the map more random, there is a chance of placing
+  * a monkey island in the middle. I found that the island connects to other land too often on
+  * smaller maps, so there is only a chance to place the island on maps with more than 3 players,
+  * and even then there is only a 66% chance.
+  */
   float monkeyChance = rmRandFloat(0, 1);
   if (cNumberPlayers > 3)
   {
@@ -549,8 +567,17 @@ void main(void)
       rmSetAreaCoherence(monkeyIslandID, 1.0);
       rmBuildArea(monkeyIslandID);
 
-      // Here is our first object. Normally, the monkeyID would be defined above with the other objects and placed below with the other objects, but I left it here to indicate that certain things don’t have to go in a certain order. I knew the monkey would not interact much with other objects, since it is placed in the center and many objects avoid the center or avoid water. All the defining is done as above, but notice that 3 different units are added to monkeyID. The final command actually places the monkey at location 0.5, 0.5 which is also where monkey island gets placed. If you stopped the map generating here, you would get a big field of grassDirt25, an ocean, an island in the ocean, and a monkey, palm tree and gold on the island. That’s it.
-
+      /*
+      * Here is our first object. Normally, the monkeyID would be defined above with the other
+      * objects and placed below with the other objects, but I left it here to indicate that
+      * certain things don’t have to go in a certain order. I knew the monkey would not interact
+      * much with other objects, since it is placed in the center and many objects avoid the center
+      * or avoid water. All the defining is done as above, but notice that 3 different units are
+      * added to monkeyID. The final command actually places the monkey at location 0.5, 0.5 which
+      * is also where monkey island gets placed. If you stopped the map generating here, you would
+      * get a big field of grassDirt25, an ocean, an island in the ocean, and a monkey, palm tree
+      * and gold on the island. That’s it.
+      */
       int monkeyID = rmCreateObjectDef("monkey");
       rmAddObjectDefItem(monkeyID, "baboon", 1, 2.0);
       rmAddObjectDefItem(monkeyID, "palm", 1, 2.0);
@@ -561,8 +588,15 @@ void main(void)
     }
   }
 
-  // Set up player areas. With the center ocean (and ludicrous monkey island out of the way) we set out placing the player areas. Note that the area is set up much like the ocean, except that instead of placing a set fraction, I place a number of tiles per player. I used to place more tiles on smaller maps, but decided that wasn’t necessary and commented it out-instead I add a new constraint on small maps only. Also notice that here is our first loop. We generate an area once for each player in the game, and then call these areas “Player” plus the player number. You have to change the string ID of the area or you will get an error message.
-
+  /*
+  * Set up player areas. With the center ocean (and ludicrous monkey island out of the way) we set
+  * out placing the player areas. Note that the area is set up much like the ocean, except that
+  * instead of placing a set fraction, I place a number of tiles per player. I used to place more
+  * tiles on smaller maps, but decided that wasn’t necessary and commented it out-instead I add a
+  * new constraint on small maps only. Also notice that here is our first loop. We generate an area
+  * once for each player in the game, and then call these areas “Player” plus the player number.
+  * You have to change the string ID of the area or you will get an error message.
+  */
   float playerFraction = rmAreaTilesToFraction(3200);
   /*   if(cNumberNonGaiaPlayers < 4)
   playerFraction=rmAreaTilesToFraction(3000); */
@@ -572,7 +606,10 @@ void main(void)
     // Create the area.
     int id = rmCreateArea("Player" + i);
 
-    // Assign to the player. Without this, you won’t be able to associate this area with the player location determined above in the player placement section.
+    /*
+    * Assign to the player. Without this, you won’t be able to associate this area with the player
+    * location determined above in the player placement section.
+    */
     rmSetPlayerArea(i, id);
 
     // Set the size.
@@ -596,12 +633,20 @@ void main(void)
     rmSetAreaTerrainType(id, "grassDirt25");
   }
 
-  // Build the areas. We already built the ocean and monkey island, so this command will just build all the player areas at once. If buildAreas was inside of the loop, then player 1’s land would get build before other players, and some players might run out of space.
-
+  /*
+  * Build the areas. We already built the ocean and monkey island, so this command will just build
+  * all the player areas at once. If buildAreas was inside of the loop, then player 1’s land would
+  * get build before other players, and some players might run out of space.
+  */
   rmBuildAllAreas();
 
-  // Because the player areas used the same terrain as the base map (grassDirt25) the map is going to look pretty boring. To remedy this, we add sub-areas. These areas have no effect on gameplay, though they could if we placed certain objects in these areas. This loop just sets up a small patch of GrassDirt50 within each player’s area. Notice that a parentID is specified here-the lands of each player.
-
+  /*
+  * Because the player areas used the same terrain as the base map (grassDirt25) the map is going
+  * to look pretty boring. To remedy this, we add sub-areas. These areas have no effect on
+  * gameplay, though they could if we placed certain objects in these areas. This loop just sets up
+  * a small patch of GrassDirt50 within each player’s area. Notice that a parentID is specified
+  * here-the lands of each player.
+  */
   for (i = 1; < cNumberPlayers)
   {
     // Beautification sub area.
@@ -637,8 +682,12 @@ void main(void)
     rmBuildArea(id3);
   }
 
-  // I defined another object here that I wanted to always place in id4, an object called flowerID that contains flowers and grass. I use a special constraint called an edgeDistanceConstraint to keep the flowerID within the area of id4. I also place the flowerID in id4. The 0 parameter indicates that the object belongs to Gaia-we don’t want the player to own any flowers.
-
+  /*
+  * I defined another object here that I wanted to always place in id4, an object called flowerID
+  * that contains flowers and grass. I use a special constraint called an edgeDistanceConstraint to
+  * keep the flowerID within the area of id4. I also place the flowerID in id4. The 0 parameter
+  * indicates that the object belongs to Gaia-we don’t want the player to own any flowers.
+  */
   int flowerID = 0;
   int id4 = 0;
   int stayInPatch = rmCreateEdgeDistanceConstraint("stay in patch", id4, 4.0);
@@ -667,12 +716,20 @@ void main(void)
     rmPlaceObjectDefInArea(flowerID, 0, rmAreaID("grass patch 2" + i), 1);
   }
 
-  // We’re done placing areas now, so we can start placing objects. We already defined the player’s own fish, so now we can just place it. The false parameter indicates that these fish are not owned by the player.
-
+  /*
+  * We’re done placing areas now, so we can start placing objects. We already defined the player’s
+  * own fish, so now we can just place it. The false parameter indicates that these fish are not
+  * owned by the player.
+  */
   rmPlaceObjectDefPerPlayer(playerFishID, false);
 
-  // Since we’re placing fish, let’s go ahead and place some extra ones. These two sections place some mahi and some perch. There are 3 groups of 3 mahi per player and 1 group of 2 perch per player. These objects avoid land and other fish, but can otherwise be placed anywhere on the map-the location is set to the center of the map (0.5, 0.5) but the max distance is set at half the map (rmXFractionToMeters(0.5)).
-
+  /*
+  * Since we’re placing fish, let’s go ahead and place some extra ones. These two sections place
+  * some mahi and some perch. There are 3 groups of 3 mahi per player and 1 group of 2 perch per
+  * player. These objects avoid land and other fish, but can otherwise be placed anywhere on the
+  * map-the location is set to the center of the map (0.5, 0.5) but the max distance is set at half
+  * the map (rmXFractionToMeters(0.5)).
+  */
   int fishID = rmCreateObjectDef("fish");
   rmAddObjectDefItem(fishID, "fish - mahi", 3, 9.0);
   rmSetObjectDefMinDistance(fishID, 0.0);
@@ -692,8 +749,10 @@ void main(void)
   // Text
   rmSetStatusText("", 0.40);
 
-  // Sharks and whales have no effect on gameplay, but they look cool. This section randomly chooses either sharks or whales and places 1 for every 2 players.
-
+  /*
+  * Sharks and whales have no effect on gameplay, but they look cool. This section randomly chooses
+  * either sharks or whales and places 1 for every 2 players.
+  */
   int sharkLand = rmCreateTerrainDistanceConstraint("shark land", "land", true, 20.0);
   int sharkVssharkID = rmCreateTypeDistanceConstraint("shark v shark", "shark", 20.0);
   int sharkVssharkID2 = rmCreateTypeDistanceConstraint("shark v orca", "orca", 20.0);
@@ -718,17 +777,36 @@ void main(void)
   // Place starting settlements.
   // Close things....
 
-  // TC. The order you place objects in is important. If you place lots of trees, and then tell objects they need to avoid trees, there might not be enough room for anything else. All we have placed so far, however, are fish and the monkey island stuff. So we want to start with the most important objects, the player’s Town Center and Towers. Unlike the fish above, we want these things to be owned by the player, so we set the second parameter to true. Remember we place 4 Towers per player since the startingTowerID just has 1 Tower in it.
-
+  /*
+  * TC. The order you place objects in is important. If you place lots of trees, and then tell
+  * objects they need to avoid trees, there might not be enough room for anything else. All we have
+  * placed so far, however, are fish and the monkey island stuff. So we want to start with the most
+  * important objects, the player’s Town Center and Towers. Unlike the fish above, we want these
+  * things to be owned by the player, so we set the second parameter to true. Remember we place 4
+  * Towers per player since the startingTowerID just has 1 Tower in it.
+  */
   rmPlaceObjectDefPerPlayer(startingSettlementID, true);
 
   // Towers.
   rmPlaceObjectDefPerPlayer(startingTowerID, true, 4);
 
-  // Even though we just got started placing objects, I take another detour here. If you place objects and then change the elevation, the object might get buried underground! I could tell the elevation to avoid objects, but then I might not get much elevation. Instead, I place elevation now and then just place objects on top of them. This could get crazy if the elevation were extreme, or were unpathable like cliffs. Elevation is placed just like any other area, except that we change the baseHeight, and then add a HeightBlend to make the height variation not so jagged. Also notice that each hill has a 50% chance to change its terrain, otherwise it just uses whatever else is beneath it. Another new concept here is the failCount. Areas don’t always have room to place, and can make a map generate slowly. The loop here counts the number of failures, and when it reaches 20, it just bails, even though it could potentially place 6 areas per player number.
-
-  // Because player areas are so large on this map, elev needs to avoid buildings instead of player areas.
-
+  /*
+  * Even though we just got started placing objects, I take another detour here. If you place
+  * objects and then change the elevation, the object might get buried underground! I could tell
+  * the elevation to avoid objects, but then I might not get much elevation. Instead, I place
+  * elevation now and then just place objects on top of them. This could get crazy if the elevation
+  * were extreme, or were unpathable like cliffs. Elevation is placed just like any other area,
+  * except that we change the baseHeight, and then add a HeightBlend to make the height variation
+  * not so jagged. Also notice that each hill has a 50% chance to change its terrain, otherwise it
+  * just uses whatever else is beneath it. Another new concept here is the failCount. Areas don’t
+  * always have room to place, and can make a map generate slowly. The loop here counts the number
+  * of failures, and when it reaches 20, it just bails, even though it could potentially place 6
+  * areas per player number.
+  */
+  /*
+  * Because player areas are so large on this map, elev needs to avoid buildings instead of player
+  * areas.
+  */
   // Elev.
   int numTries = 6 * cNumberNonGaiaPlayers;
   int avoidBuildings = rmCreateTypeDistanceConstraint("avoid buildings", "Building", 20.0);
@@ -763,8 +841,10 @@ void main(void)
       failCount = 0;
   }
 
-  // We placed some big hills, but little wrinkles in the terrain add interest, so here I place some more that are more numerous, but smaller and at smaller heights.
-
+  /*
+  * We placed some big hills, but little wrinkles in the terrain add interest, so here I place some
+  * more that are more numerous, but smaller and at smaller heights.
+  */
   // Slight Elevation
   numTries = 15 * cNumberNonGaiaPlayers;
   failCount = 0;
@@ -798,8 +878,15 @@ void main(void)
   // Text
   rmSetStatusText("", 0.60);
 
-  // Okay, back to the objects. After the Town Center, the most important objects are the Settlements. Settlements are so important, that we use a special object placement function called Fair Locations. Fair Locs are great at forcing objects to be fair, but they are slow, so it is a good idea to only use them for really important things, like Settlements. Here we specify 2 Settlements per player-one that is forward, between a player and his enemies, and another one that is safe behind the player. Other maps do different things, and may have a chance of having both Settlements in safe places.
-
+  /*
+  * Okay, back to the objects. After the Town Center, the most important objects are the
+  * Settlements. Settlements are so important, that we use a special object placement function
+  * called Fair Locations. Fair Locs are great at forcing objects to be fair, but they are slow, so
+  * it is a good idea to only use them for really important things, like Settlements. Here we
+  * specify 2 Settlements per player-one that is forward, between a player and his enemies, and
+  * another one that is safe behind the player. Other maps do different things, and may have a
+  * chance of having both Settlements in safe places.
+  */
   // Settlements.
   //rmPlaceObjectDefPerPlayer(farSettlementID, true, 2);
   id = rmAddFairLoc("Settlement", false, true, 60, 80, 40, 10);
@@ -819,7 +906,12 @@ void main(void)
     }
   }
 
-  // Now we can quickly run through all those objects that were generated. The two things that vary in the below commands, aside from the way the objects were defined above, is how many to place (default is 1) and whether the object is owned by the player or not. Trees and gold are not owned, while goats are.
+  /*
+  * Now we can quickly run through all those objects that were generated. The two things that vary
+  * in the below commands, aside from the way the objects were defined above, is how many to place
+  * (default is 1) and whether the object is owned by the player or not. Trees and gold are not
+  * owned, while goats are.
+  */
 
   // Straggler trees.
   rmPlaceObjectDefPerPlayer(stragglerTreeID, false, rmRandInt(2, 6));
@@ -856,8 +948,11 @@ void main(void)
   // Hawks
   rmPlaceObjectDefPerPlayer(farhawkID, false, 2);
 
-  // While many objects are placed per player with PlaceObjectDefPerPlayer, others are placed randomly across the map. Bonus huntables, berries and predators are all placed at the center of the map (0.5,0.5) with a max distance of half the map.
-
+  /*
+  * While many objects are placed per player with PlaceObjectDefPerPlayer, others are placed
+  * randomly across the map. Bonus huntables, berries and predators are all placed at the center of
+  * the map (0.5,0.5) with a max distance of half the map.
+  */
   // Pigs
   for (i = 1; < cNumberPlayers)
     rmPlaceObjectDefAtLoc(farPigsID, 0, rmPlayerLocXFraction(i), rmPlayerLocZFraction(i), 3);
@@ -874,13 +969,22 @@ void main(void)
   // Random trees.
   rmPlaceObjectDefAtLoc(randomTreeID, 0, 0.5, 0.5, 10 * cNumberNonGaiaPlayers);
 
-  // Forests are placed after objects because they can eat up a bunch of space, and we want to make sure the objects get placed first. Forests are essentially areas, but because they have hard obstructions, care need to be taken that they avoid other forests, and indeed other objects.
-
+  /*
+  * Forests are placed after objects because they can eat up a bunch of space, and we want to make
+  * sure the objects get placed first. Forests are essentially areas, but because they have hard
+  * obstructions, care need to be taken that they avoid other forests, and indeed other objects.
+  */
   // Forest.
   int classForest = rmDefineClass("forest");
   int forestObjConstraint = rmCreateTypeDistanceConstraint("forest obj", "all", 6.0);
-  int forestConstraint = rmCreateClassDistanceConstraint("forest v forest", rmClassID("forest"), 20.0);
-  int forestSettleConstraint = rmCreateClassDistanceConstraint("forest settle", rmClassID("starting settlement"), 20.0);
+  int forestConstraint = rmCreateClassDistanceConstraint(
+    "forest v forest",
+    rmClassID("forest"),
+    20.0);
+  int forestSettleConstraint = rmCreateClassDistanceConstraint(
+    "forest settle",
+    rmClassID("starting settlement"),
+    20.0);
   int forestCount = 10 * cNumberNonGaiaPlayers;
   failCount = 0;
   for (i = 0; < forestCount)
@@ -918,8 +1022,14 @@ void main(void)
   // Text
   rmSetStatusText("", 0.80);
 
-  // The remaining objects are mostly for decoration. They are placed last because it isn’t important if they get placed at all, or where they get placed, but because there are so many of them, and because forests avoid all, it is important to place them after the forest. Even though they are just eye-candy, these objects can slow down map generation, if, for example, you tried to place 2000 grass objects per player instead of 20. Notice that the seaweed uses a constraint like the fish to avoid land, but doesn’t get to far from land.
-
+  /*
+  * The remaining objects are mostly for decoration. They are placed last because it isn’t
+  * important if they get placed at all, or where they get placed, but because there are so many of
+  * them, and because forests avoid all, it is important to place them after the forest. Even
+  * though they are just eye-candy, these objects can slow down map generation, if, for example,
+  * you tried to place 2000 grass objects per player instead of 20. Notice that the seaweed uses a
+  * constraint like the fish to avoid land, but doesn’t get to far from land.
+  */
   // Decoration
   int avoidAll = rmCreateTypeDistanceConstraint("avoid all", "all", 6.0);
   int deerID = rmCreateObjectDef("lonely deer");
@@ -987,5 +1097,11 @@ void main(void)
   // Text
   rmSetStatusText("", 1.0);
 
-  // That’s all there is to it. Places areas and place objects and you have a map. Just remember to try generating many maps of different sizes to make sure they are pretty fair (or work at all) before springing them on an unsuspecting public. It is a good idea to have a friend test them for you. Also make sure to include a name and description in the XML file that has the same name as your map so players know what they are getting into.
+  /*
+  * That’s all there is to it. Places areas and place objects and you have a map. Just remember to
+  * try generating many maps of different sizes to make sure they are pretty fair (or work at all)
+  * before springing them on an unsuspecting public. It is a good idea to have a friend test them
+  * for you. Also make sure to include a name and description in the XML file that has the same
+  * name as your map so players know what they are getting into.
+  */
 }
