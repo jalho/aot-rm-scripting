@@ -7,7 +7,7 @@ cp script.xs build/script.xs
 cp label.xml build/label.xml
 
 # substitute the placeholders in the copies
-SED_ARG="s/BUILD_ID_PLACEHOLDER/$SCRIPT_CHECKSUM/"
+SED_ARG="s/BUILD_ID_PLACEHOLDER/$SCRIPT_CHECKSUM/g"
 sed -i $SED_ARG build/script.xs
 sed -i $SED_ARG build/label.xml
 
