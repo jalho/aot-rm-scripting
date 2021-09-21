@@ -2,11 +2,23 @@
 
 include "rmx 5-0-0.xs";
 
+/** Placeholder text is to be substituted in the script that moves the map to RM2. */
+void injectBuildChecksumMsg() {
+	code("rule _build_checksum_msg");
+	code("{");
+	code("trChatSend(0, \"<color=0.0,0.5,0.6>Test build of a map script in progress.</color>\");");
+	code("trChatSend(0, \"<color=0.0,0.5,0.6>Build checksum: BUILD_ID_PLACEHOLDER</color>\");");
+	code("xsDisableRule(\"_build_checksum_msg\");");
+	code("}");
+}
+
 void main() {
 	progress(0.0);
 
 	// Initial map setup.
 	rmxInit("Alfheim");
+
+	injectBuildChecksumMsg();
 
 	// Set size.
 	int axisLength = getStandardMapDimInMeters(7500, 1.0);
