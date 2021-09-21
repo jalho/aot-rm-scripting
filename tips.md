@@ -1,3 +1,9 @@
+## Dev scripts
+
+Placeholder `BUILDID` in source script and its labeling XML is substituted with script checksum in `cpToMyGames.sh`.
+
+## Dev tips
+
 Get protounit name:
 
 1. Go to Editor, place a unit and have it selected.
