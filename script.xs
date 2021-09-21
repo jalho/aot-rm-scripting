@@ -7,7 +7,7 @@ void injectBuildChecksumMsg() {
 	code("rule _build_checksum_msg");
 	code("{");
 	code("trChatSend(0, \"<color=0.0,0.5,0.6>Test build of a map script in progress.</color>\");");
-	code("trChatSend(0, \"<color=0.0,0.5,0.6>Build checksum: BUILD_ID_PLACEHOLDER</color>\");");
+	code("trChatSend(0, \"<color=0.0,0.5,0.6>Build checksum: BUILD_ID_PLACEHOLDER.</color>\");");
 	code("xsDisableRule(\"_build_checksum_msg\");");
 	code("}");
 }
