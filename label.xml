@@ -1,2 +1,2 @@
 <?xml version = "1.0" encoding = "UTF-8"?>
-<mapinfo detailsText = "Test build of a map in progress." imagepath = "" displayName = "BUILDID"/>
+<mapinfo detailsText = "Test build of a map in progress." imagepath = "" displayName = "BUILD_ID_PLACEHOLDER"/>

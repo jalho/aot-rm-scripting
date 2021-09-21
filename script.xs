@@ -22,7 +22,7 @@ extern const int cVersion = cVersionAoT;
 extern const int cDebugMode = cDebugCompetitive;
 
 // Name of the patch displayed in the initial message.
-extern const string cPatch = "<build ID> BUILDID";
+extern const string cPatch = "BUILD_ID_PLACEHOLDER";
 
 // Patch info message displayed below the patch string if set.
 extern const string cPatchInfo = "Test build for random map scripting practise.";
