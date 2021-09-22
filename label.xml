@@ -1,6 +1,6 @@
 <?xml version = "1.0" encoding = "UTF-8"?>
 <mapinfo
-  detailsText = "Test build of a map script in progress. Depends on RM X 5. Script checksum: BUILD_ID_PLACEHOLDER."
+  detailsText = "Unfinished version of the map. Build checksum: BUILD_ID_PLACEHOLDER."
   imagepath = "ui\ui map the unknown 256x256"
   displayName = "Tompechs"
 />
