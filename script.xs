@@ -259,7 +259,7 @@ void main() {
 	// Other objects.
 	// Relics.
 	int relicID = createObjectDefVerify("relic");
-	addObjectDefItemVerify(relicID, "Relic", 5, 30.0);
+	addObjectDefItemVerify(relicID, "Relic", 4, 20.0);
 	rmAddObjectDefConstraint(relicID, avoidAll);
 	rmAddObjectDefConstraint(relicID, avoidEdge);
 	rmAddObjectDefConstraint(relicID, avoidCorner);
@@ -796,7 +796,7 @@ void main() {
 	}
 
 	// Starting gold near one of the towers (set last parameter to true to use square placement).
-	storeObjectDefItem("Gold Mine Small", 1, 0.0);
+	storeObjectDefItem("Gold Mine", 1, 0.0);
 	storeObjectConstraint(createTypeDistConstraint("Tower", rmRandFloat(8.0, 10.0))); // Don't get too close.
 	// storeObjectConstraint(avoidAll);
 	storeObjectConstraint(avoidEdge);
@@ -1134,7 +1134,7 @@ void main() {
 
 	// Rocks.
 	int rock1ID = rmCreateObjectDef("rock small");
-	rmAddObjectDefItem(rock1ID, "Rock Sandstone Small", 3, 2.0);
+	rmAddObjectDefItem(rock1ID, "Rock Granite Small", 3, 2.0);
 	rmAddObjectDefItem(rock1ID, "Rock Limestone Sprite", 4, 3.0);
 	setObjectDefDistanceToMax(rock1ID);
 	rmAddObjectDefConstraint(rock1ID, embellishmentAvoidAll);
@@ -1186,7 +1186,7 @@ void main() {
 		addProtoPlacementCheck("Settlement Level 1", 1, i);
 		addProtoPlacementCheck("Tower", 4, i);
 	}
-	addProtoPlacementCheck("Gold Mine Small", cNonGaiaPlayers, 0);
+	addProtoPlacementCheck("Gold Mine", cNonGaiaPlayers, 0);
 	addProtoPlacementCheck("Settlement", 2 * cNonGaiaPlayers, 0);
 
 	// Finalize RM X.

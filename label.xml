@@ -1,6 +1,6 @@
 <?xml version = "1.0" encoding = "UTF-8"?>
 <mapinfo
-  detailsText = "Test build of a map script in progress. Depends on RM X 5 that is included in Voobly Balance Patch 5.0. Script checksum: BUILD_ID_PLACEHOLDER."
+  detailsText = "Test build of a map script in progress. Depends on RM X 5. Script checksum: BUILD_ID_PLACEHOLDER."
   imagepath = "ui\ui map the unknown 256x256"
-  displayName = "BUILD_ID_PLACEHOLDER"
+  displayName = "Tompechs"
 />
