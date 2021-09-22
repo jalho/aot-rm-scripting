@@ -997,10 +997,11 @@ void main() {
 	placeObjectInPlayerSplits(centerHunt2ID, false, numBonusHunt2);
 
 	// Other food.
-	// Starting food.
+	// Starting food, two for each player location.
+	placeObjectAtPlayerLocs(startingHuntID);
 	placeObjectAtPlayerLocs(startingHuntID);
 
-	// Far cranes.
+	// Far aurochs.
 	for(i = 1; < cPlayers) {
 		// Into player areas.
 		placeObjectDefInArea(farAurochsID, 0, rmAreaID("player area " + i));
