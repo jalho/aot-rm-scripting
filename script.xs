@@ -1063,20 +1063,20 @@ void main() {
 	}
 
 	// Other forest.
-	int numRegularForests = 12 - numPlayerForests;
+	int numRegularForests = 30 - numPlayerForests;
 
 	int forestFailCount = 0;
 
 	for(i = 0; < numRegularForests * cNonGaiaPlayers) {
 		int forestID = rmCreateArea("forest " + i);
-		rmSetAreaSize(forestID, rmAreaTilesToFraction(50), rmAreaTilesToFraction(100));
+		rmSetAreaSize(forestID, rmAreaTilesToFraction(200), rmAreaTilesToFraction(300));
 		if(randChance(0.8)) {
 			rmSetAreaForestType(forestID, "Mixed Oak Forest");
 		} else {
 			rmSetAreaForestType(forestID, "Oak Forest");
 		}
-		rmSetAreaMinBlobs(forestID, 2);
-		rmSetAreaMaxBlobs(forestID, 4);
+		rmSetAreaMinBlobs(forestID, 3);
+		rmSetAreaMaxBlobs(forestID, 7);
 		rmSetAreaMinBlobDistance(forestID, 16.0);
 		rmSetAreaMaxBlobDistance(forestID, 20.0);
 		rmAddAreaToClass(forestID, classForest);
@@ -1089,7 +1089,7 @@ void main() {
 		if(rmBuildArea(forestID) == false) {
 			forestFailCount++;
 
-			if(forestFailCount == 3) {
+			if(forestFailCount == 5) {
 				break;
 			}
 		} else {
