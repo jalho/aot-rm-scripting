@@ -851,7 +851,7 @@ void main() {
 	}
 
 	// Medium hunt.
-	int numMediumHunt = rmRandInt(6, 10);
+	int numMediumHunt = rmRandInt(9, 11);
 
 	// 50% Chance for first, 40% chance for second, 10% chance for both.
 	float mediumHuntFloat = rmRandFloat(0.0, 1.0);
@@ -876,10 +876,10 @@ void main() {
 	int mediumHunt2ID = createObjectDefVerify("medium hunt 2");
 
 	if(randChance()) {
-		addObjectDefItemVerify(mediumHunt1ID, "Gazelle", numMediumHunt, 4.0);
+		addObjectDefItemVerify(mediumHunt1ID, "Caribou", numMediumHunt, 4.0);
 		addObjectDefItemVerify(mediumHunt2ID, "Elk", numMediumHunt, 4.0);
 	} else {
-		addObjectDefItemVerify(mediumHunt2ID, "Gazelle", numMediumHunt, 4.0);
+		addObjectDefItemVerify(mediumHunt2ID, "Caribou", numMediumHunt, 4.0);
 		addObjectDefItemVerify(mediumHunt1ID, "Elk", numMediumHunt, 4.0);
 	}
 
@@ -960,7 +960,7 @@ void main() {
 			addObjectDefItemVerify(centerHunt1ID, "Elk", rmRandInt(2, 4), 4.0);
 		}
 	} else {
-		addObjectDefItemVerify(centerHunt1ID, "Gazelle", rmRandInt(6, 9), 2.0);
+		addObjectDefItemVerify(centerHunt1ID, "Caribou", rmRandInt(6, 9), 2.0);
 	}
 
 	rmAddObjectDefConstraint(centerHunt1ID, avoidAll);
@@ -1044,9 +1044,9 @@ void main() {
 			int playerForestID = rmCreateArea("player forest " + i + " " + j, playerForestAreaID);
 			rmSetAreaSize(playerForestID, rmAreaTilesToFraction(50), rmAreaTilesToFraction(100));
 			if(randChance(0.8)) {
-				rmSetAreaForestType(playerForestID, "Savannah Forest");
+				rmSetAreaForestType(playerForestID, "Mixed Oak Forest");
 			} else {
-				rmSetAreaForestType(playerForestID, "Palm Forest");
+				rmSetAreaForestType(playerForestID, "Oak Forest");
 			}
 			rmSetAreaMinBlobs(playerForestID, 2);
 			rmSetAreaMaxBlobs(playerForestID, 4);
@@ -1071,9 +1071,9 @@ void main() {
 		int forestID = rmCreateArea("forest " + i);
 		rmSetAreaSize(forestID, rmAreaTilesToFraction(50), rmAreaTilesToFraction(100));
 		if(randChance(0.8)) {
-			rmSetAreaForestType(forestID, "Savannah Forest");
+			rmSetAreaForestType(forestID, "Mixed Oak Forest");
 		} else {
-			rmSetAreaForestType(forestID, "Palm Forest");
+			rmSetAreaForestType(forestID, "Oak Forest");
 		}
 		rmSetAreaMinBlobs(forestID, 2);
 		rmSetAreaMaxBlobs(forestID, 4);
@@ -1126,7 +1126,7 @@ void main() {
 
 	int bush2ID = rmCreateObjectDef("bush 2");
 	rmAddObjectDefItem(bush2ID, "Bush", 3, 2.0);
-	rmAddObjectDefItem(bush2ID, "Rock Sandstone Sprite", 1, 2.0);
+	rmAddObjectDefItem(bush2ID, "Rock Granite Small", 1, 2.0);
 	setObjectDefDistanceToMax(bush2ID);
 	rmAddObjectDefConstraint(bush2ID, embellishmentAvoidAll);
 	rmAddObjectDefConstraint(bush2ID, farAvoidImpassableLand);
@@ -1142,7 +1142,7 @@ void main() {
 	rmPlaceObjectDefAtLoc(rock1ID, 0, 0.5, 0.5, 5 * cNonGaiaPlayers);
 
 	int rock2ID = rmCreateObjectDef("rock sprite");
-	rmAddObjectDefItem(rock2ID, "Rock Sandstone Sprite", 1, 0.0);
+	rmAddObjectDefItem(rock2ID, "Rock Granite Small", 1, 0.0);
 	setObjectDefDistanceToMax(rock2ID);
 	rmAddObjectDefConstraint(rock2ID, embellishmentAvoidAll);
 	rmAddObjectDefConstraint(rock2ID, farAvoidImpassableLand);
@@ -1177,7 +1177,7 @@ void main() {
 
 	// Birds.
 	int birdsID = rmCreateObjectDef("birds");
-	rmAddObjectDefItem(birdsID, "Vulture", 1, 0.0);
+	rmAddObjectDefItem(birdsID, "Hawk", 1, 0.0);
 	setObjectDefDistanceToMax(birdsID);
 	rmPlaceObjectDefAtLoc(birdsID, 0, 0.5, 0.5, 2 * cNonGaiaPlayers);
 
