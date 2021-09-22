@@ -230,11 +230,7 @@ void main() {
 
 	// Far predators 2 (center islands).
 	int farPredators2ID = createObjectDefVerify("far predators 2");
-	if(randChance()) {
-		addObjectDefItemVerify(farPredators2ID, "Bear", 2, 20.0);
-	} else {
-		addObjectDefItemVerify(farPredators2ID, "Bear", 1, 0.0);
-	}
+	addObjectDefItemVerify(farPredators2ID, "Bear", 1, 0.0);
 	rmAddObjectDefConstraint(farPredators2ID, avoidAll);
 	rmAddObjectDefConstraint(farPredators2ID, avoidEdge);
 	rmAddObjectDefConstraint(farPredators2ID, shortAvoidImpassableLand);
@@ -1031,7 +1027,7 @@ void main() {
 	progress(0.8);
 
 	// Player forest.
-	int numPlayerForests = 2;
+	int numPlayerForests = 5;
 
 	for(i = 1; < cPlayers) {
 		int playerForestAreaID = rmCreateArea("player forest area " + i);
