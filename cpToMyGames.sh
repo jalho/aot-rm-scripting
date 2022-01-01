@@ -7,7 +7,7 @@ fi
 SCRIPT_SRC="src/script.xs"
 
 # get map name from the docstring that is in the beginning of the .xs file
-MAP_NAME=$(cat $SCRIPT_SRC | awk 'match($0, /\*{2} (.*\w$)/, m) {print m[1]}' | head -n 1)
+MAP_NAME=$(head -n 2 $SCRIPT_SRC | awk 'match($0, /\*{2} (.*\w$)/, m) {print m[1]}')
 echo "Building '$MAP_NAME'..."
 
 if [ -d "$MAP_DIR_PATH" ];
