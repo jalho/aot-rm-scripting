@@ -22,7 +22,7 @@ void main() {
 	rmSetStatusText("", 0.01);
 
 	// RM X Setup.
-	rmxInit("Lonely Islands", false, false, false);
+	rmxInit("SED_MAP_NAME", false, false, false);
 	injectVersionMsg();
 
 	// Set size.
