@@ -8,11 +8,21 @@
 
 include "rmx 5-0-0.xs";
 
+/** Placeholder text is to be substituted in the script that moves the map to RM2. */
+void injectVersionMsg() {
+	code("rule _build_checksum_msg");
+	code("{");
+	code("trChatSend(0, \"<color=0.0,0.5,0.6>Version SED_DATE (checksum SED_CHECKSUM_SHORT).</color>\");");
+	code("xsDisableRule(\"_build_checksum_msg\");");
+	code("}");
+}
+
 void main() {
 	progress(0.0);
 
 	// Initial map setup.
-	rmxInit("Savannah");
+	rmxInit("Big Ass Savannah");
+	injectVersionMsg();
 
 	// Set size.
 	int axisLength = getStandardMapDimInMeters();
