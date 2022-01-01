@@ -5,10 +5,12 @@ if [ -z ${MAP_DIR_PATH+x} ];
 fi
 
 SCRIPT_SRC="src/script.xs"
+CYAN='\033[0;36m'
+NOCOLOR='\033[0m'
 
 # get map name from the docstring that is in the beginning of the .xs file
 MAP_NAME=$(head -n 2 $SCRIPT_SRC | awk 'match($0, /\*{2} (.*\w$)/, m) {print m[1]}')
-echo "Building '$MAP_NAME'..."
+echo -e "Map name is $CYAN$MAP_NAME$NOCOLOR."
 
 if [ -d "$MAP_DIR_PATH" ];
   then echo "Putting map script files to '$MAP_DIR_PATH'.";
@@ -34,7 +36,9 @@ sed -i "$SED_ARG_DATE" build/*
 sed -i "$SED_ARG_MAP_NAME" build/*
 
 # copy build to game directory
-cp build/script.xs "$MAP_DIR_PATH"/$SCRIPT_CHECKSUM.xs
-cp build/label.xml "$MAP_DIR_PATH"/$SCRIPT_CHECKSUM.xml
+OUT_FILENAME=$(echo "$MAP_NAME-$CURRENT_DATE-SHA-$SCRIPT_CHECKSUM_SHORT" | sed -r s/[\ \/\\]//g) # remove all " ", "/" and "\" from filename
+echo -e "Using filename $CYAN$OUT_FILENAME$NOCOLOR (.xml and .xs)."
+cp build/script.xs "$MAP_DIR_PATH"/$OUT_FILENAME.xs
+cp build/label.xml "$MAP_DIR_PATH"/$OUT_FILENAME.xml
 
-echo "Done. Filenames start with $SCRIPT_CHECKSUM_SHORT."
+echo "Done!"
