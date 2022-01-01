@@ -1,5 +1,5 @@
 /*
-** SED_MAP_NAME
+** Big Ass Savannah
 ** Raudus
 ** Last edit: SED_DATE (checksum SED_CHECKSUM_SHORT)
 **
