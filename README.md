@@ -4,14 +4,13 @@ AoT random map scripting.
 
 ## Development workflow
 
-1. edit `script.xs`
-2. update `label.xml` if desired
-3. build
+1. edit `script.xs` and `label.xml` under `src/`
+3. _build_ files and emit results to map script directory (*)
+   
+   give absolute path to map script directory as parameter
 
-       bash cpToMyGames.sh
+   example in my [WSL](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) setup:
 
-Other files are for reference.
+       bash cpToMyGames.sh /mnt/c/Users/alhoj/Documents/'My Games'/'Age of Mythology'/RM2
 
-![image](https://user-images.githubusercontent.com/34038726/134415284-a649c386-957e-46f2-a617-a1c0945ca394.png)
-![image](https://user-images.githubusercontent.com/34038726/134414871-43346c20-e8b8-4c75-a3e9-c97371cd6a47.png)
-![image](https://user-images.githubusercontent.com/34038726/134414952-bea6903a-7728-4559-b431-d73a9f570efc.png)
+(*) _Building_ here means substituting some placeholder values.

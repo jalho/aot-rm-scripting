@@ -1,7 +1,3 @@
-## Dev scripts
-
-Build ID placeholder in source script and its labeling XML is substituted with script checksum in `cpToMyGames.sh`.
-
 ## Dev tips
 
 Get protounit name:

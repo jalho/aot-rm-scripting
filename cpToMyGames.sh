@@ -1,3 +1,13 @@
+# validate path parameter
+MAP_DIR_PATH=$1
+if [ -z ${MAP_DIR_PATH+x} ];
+  then echo "Absolute path to AoT map directory is missing. Aborting!" && exit 1;
+fi
+if [ -d "$MAP_DIR_PATH" ];
+  then echo "Directory $MAP_DIR_PATH exists.";
+  else echo "Directory '$MAP_DIR_PATH' does not exist. Aborting!" && exit 1;
+fi
+
 # get checksum of current script, and date
 SCRIPT_CHECKSUM=$(sha1sum src/script.xs | awk '{print $1}')
 SCRIPT_CHECKSUM_SHORT=$(echo "$SCRIPT_CHECKSUM" | cut -c1-8)
@@ -15,5 +25,5 @@ sed -i $SED_ARG_CHECKSUM_SHORT build/*
 sed -i $SED_ARG_DATE build/*
 
 # copy build to game directory
-cp build/script.xs /mnt/c/Users/alhoj/Documents/"My Games"/"Age of Mythology"/RM2/$SCRIPT_CHECKSUM.xs
-cp build/label.xml /mnt/c/Users/alhoj/Documents/"My Games"/"Age of Mythology"/RM2/$SCRIPT_CHECKSUM.xml
+cp build/script.xs "$MAP_DIR_PATH"/$SCRIPT_CHECKSUM.xs
+cp build/label.xml "$MAP_DIR_PATH"/$SCRIPT_CHECKSUM.xml
