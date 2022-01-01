@@ -1,12 +1,20 @@
 /*
-** TOMPECHS
+** Tompechs
 ** Raudus
-** Last edit: 22/09/2021
+** Last edit: 01/01/2022 (checksum 5a9bd765)
 **
 ** Based on WATERING HOLE by RebelsRising
 */
 
 include "rmx 5-0-0.xs";
+
+void injectVersionMsg() {
+	code("rule _build_checksum_msg");
+	code("{");
+	code("trChatSend(0, \"<color=0.12,0.71,0.38>Tompechs, version 01/01/2022 (checksum 5a9bd765).</color>\");");
+	code("xsDisableRule(\"_build_checksum_msg\");");
+	code("}");
+}
 
 // Connection array.
 int connectionID1 = 0; int connectionID2  = 0; int connectionID3  = 0; int connectionID4  = 0;
@@ -26,22 +34,12 @@ void setConnectionID(int i = 0, int id = 0) {
 	if(i == 9) connectionID9 = id; if(i == 10) connectionID10 = id; if(i == 11) connectionID11 = id; if(i == 12) connectionID12 = id;
 }
 
-void injectBuildChecksumMsg() {
-	code("rule _build_checksum_msg");
-	code("{");
-	code("trChatSend(0, \"<color=0.0,0.5,0.6>Development build of map 'Tompechs'</color>\");");
-	code("trChatSend(0, \"<color=0.0,0.5,0.6>Build checksum: bacb1258919620a2044dd2b3e9ee92759605fe94</color>\");");
-	code("xsDisableRule(\"_build_checksum_msg\");");
-	code("}");
-}
-
 void main() {
 	progress(0.0);
 
 	// Initial map setup.
 	rmxInit("Tompechs");
-
-	injectBuildChecksumMsg();
+	injectVersionMsg();
 
 	// Set size.
 	int axisLength = getStandardMapDimInMeters(9000);

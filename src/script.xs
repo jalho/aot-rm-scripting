@@ -1,9 +1,9 @@
 /*
-** Lonely Islands
+** Tompechs
 ** Raudus
 ** Last edit: SED_DATE (checksum SED_CHECKSUM_SHORT)
 **
-** Based on "Islands" (ESO).
+** Based on WATERING HOLE by RebelsRising
 */
 
 include "rmx 5-0-0.xs";
@@ -16,529 +16,1176 @@ void injectVersionMsg() {
 	code("}");
 }
 
+// Connection array.
+int connectionID1 = 0; int connectionID2  = 0; int connectionID3  = 0; int connectionID4  = 0;
+int connectionID5 = 0; int connectionID6  = 0; int connectionID7  = 0; int connectionID8  = 0;
+int connectionID9 = 0; int connectionID10 = 0; int connectionID11 = 0; int connectionID12 = 0;
+
+int getConnectionID(int n = 0) {
+	if(n == 1) return(connectionID1); if(n == 2)  return(connectionID2);  if(n == 3)  return(connectionID3);  if(n == 4)  return(connectionID4);
+	if(n == 5) return(connectionID5); if(n == 6)  return(connectionID6);  if(n == 7)  return(connectionID7);  if(n == 8)  return(connectionID8);
+	if(n == 9) return(connectionID9); if(n == 10) return(connectionID10); if(n == 11) return(connectionID11); if(n == 12) return(connectionID12);
+	return(-1);
+}
+
+void setConnectionID(int i = 0, int id = 0) {
+	if(i == 1) connectionID1 = id; if(i == 2)  connectionID2  = id; if(i == 3)  connectionID3  = id; if(i == 4)  connectionID4  = id;
+	if(i == 5) connectionID5 = id; if(i == 6)  connectionID6  = id; if(i == 7)  connectionID7  = id; if(i == 8)  connectionID8  = id;
+	if(i == 9) connectionID9 = id; if(i == 10) connectionID10 = id; if(i == 11) connectionID11 = id; if(i == 12) connectionID12 = id;
+}
+
 void main() {
+	progress(0.0);
 
-	// Text
-	rmSetStatusText("", 0.01);
-
-	// RM X Setup.
-	rmxInit("SED_MAP_NAME", false, false, false);
+	// Initial map setup.
+	rmxInit("SED_MAP_NAME");
 	injectVersionMsg();
 
 	// Set size.
-	int playerTiles = 15860;
-	int size = 4.0 * sqrt(cNumberNonGaiaPlayers * playerTiles);
-	rmEchoInfo("Map size=" + size + "m x " + size + "m");
-	rmSetMapSize(size, size);
+	int axisLength = getStandardMapDimInMeters(9000);
 
-	// Set up default water.
-	rmSetSeaLevel(0.0);
-	rmSetSeaType("mediterranean sea");
-
-	// Init map.
-	rmTerrainInitialize("water");
-
-	// Define some classes.
-	int classPlayer = rmDefineClass("player");
-	int classBonusIsland = rmDefineClass("bonus island");
-	int classIsland = rmDefineClass("island");
-	rmDefineClass("corner");
-	rmDefineClass("starting settlement");
-
-	// -------------Define constraints
-	// Create a edge of map constraint.
-	int playerEdgeConstraint = rmCreateBoxConstraint("player edge of map", rmXTilesToFraction(16), rmZTilesToFraction(16), 1.0 - rmXTilesToFraction(16), 1.0 - rmZTilesToFraction(16), 0.01);
-
-	// Player area constraint.
-	int playerConstraint = rmCreateClassDistanceConstraint("stay away from players", classPlayer, 60.0);
-	int shortPlayerConstraint = rmCreateClassDistanceConstraint("short stay away from players", classPlayer, 30.0);
-
-	// corner constraint.
-	int cornerConstraint = rmCreateClassDistanceConstraint("stay away from corner", rmClassID("corner"), 15.0);
-	int cornerOverlapConstraint = rmCreateClassDistanceConstraint("don't overlap corner", rmClassID("corner"), 2.0);
-
-	// Settlement constraint.
-	int avoidSettlement = rmCreateTypeDistanceConstraint("avoid settlement", "AbstractSettlement", 50.0);
-	int mediumAvoidSettlement = rmCreateTypeDistanceConstraint("medium avoid settlement", "AbstractSettlement", 30.0);
-	int shortAvoidSettlement = rmCreateTypeDistanceConstraint("short avoid settlement", "AbstractSettlement", 10.0);
-	int farAvoidSettlement = rmCreateTypeDistanceConstraint("TCs avoid TCs by long distance", "AbstractSettlement", 50.0);
-
-	// Far starting settlement constraint.
-	int farStartingSettleConstraint = rmCreateClassDistanceConstraint("far start settle", rmClassID("starting settlement"), 60.0);
-
-	// Tower constraint.
-	int avoidTower = rmCreateTypeDistanceConstraint("avoid tower", "tower", 25.0);
-
-	// Gold
-	int avoidGold = rmCreateTypeDistanceConstraint("avoid gold", "gold", 30.0);
-	int farAvoidGold = rmCreateTypeDistanceConstraint("far avoid gold", "gold", 50.0);
-	int shortAvoidGold = rmCreateTypeDistanceConstraint("short avoid gold", "gold", 10.0);
-
-	// Goats/pigs
-	int avoidHerdable = rmCreateTypeDistanceConstraint("avoid herdable", "herdable", 20.0);
-
-	// Animals
-	int classBonusHuntable = rmDefineClass("bonus huntable");
-	int avoidHuntable = rmCreateClassDistanceConstraint("avoid bonus huntable", classBonusHuntable, 15.0);
-	int avoidFood = rmCreateTypeDistanceConstraint("avoid other food sources", "food", 6.0);
-	int avoidPredator = rmCreateTypeDistanceConstraint("avoid predator", "animalPredator", 20.0);
-
-	// Avoid impassable land
-	int avoidImpassableLand = rmCreateTerrainDistanceConstraint("avoid impassable land", "Land", false, 10.0);
-	int shortAvoidImpassableLand = rmCreateTerrainDistanceConstraint("short avoid impassable land", "Land", false, 5.0);
-
-	//Island avoidance
-	int islandConstraint = rmCreateClassDistanceConstraint("islands avoid islands", classIsland, 2 * 40.0);
-
-	// -------------Define objects
-	// Close Objects
-	int startingSettlementID = rmCreateObjectDef("Starting settlement");
-	rmAddObjectDefItem(startingSettlementID, "Settlement Level 1", 1, 0.0);
-	rmAddObjectDefToClass(startingSettlementID, rmClassID("starting settlement"));
-	rmSetObjectDefMinDistance(startingSettlementID, 0.0);
-	rmSetObjectDefMaxDistance(startingSettlementID, 20.0);
-	rmAddObjectDefConstraint(startingSettlementID, shortAvoidImpassableLand);
-
-	// towers avoid other towers
-	int startingTowerID = rmCreateObjectDef("Starting tower");
-	rmAddObjectDefItem(startingTowerID, "tower", 1, 0.0);
-	rmSetObjectDefMinDistance(startingTowerID, 22.0);
-	rmSetObjectDefMaxDistance(startingTowerID, 25.0);
-	rmAddObjectDefConstraint(startingTowerID, avoidTower);
-	rmAddObjectDefConstraint(startingTowerID, avoidImpassableLand);
-
-	int startingGoldID = rmCreateObjectDef("Starting gold");
-	rmAddObjectDefItem(startingGoldID, "Gold mine small", 2, 10.0);
-	rmSetObjectDefMinDistance(startingGoldID, 20.0);
-	rmSetObjectDefMaxDistance(startingGoldID, 25.0);
-	rmAddObjectDefConstraint(startingGoldID, avoidGold);
-	rmAddObjectDefConstraint(startingGoldID, avoidImpassableLand);
-	rmAddObjectDefConstraint(startingGoldID, shortAvoidSettlement);
-
-	// pigs
-	int closePigsID = rmCreateObjectDef("close pigs");
-	rmAddObjectDefItem(closePigsID, "pig", 2, 2.0);
-	rmSetObjectDefMinDistance(closePigsID, 25.0);
-	rmSetObjectDefMaxDistance(closePigsID, 30.0);
-	rmAddObjectDefConstraint(closePigsID, avoidFood);
-
-	int closeChickensID = rmCreateObjectDef("close Chickens");
-	rmAddObjectDefItem(closeChickensID, "chicken", rmRandInt(7, 10), 5.0);
-	rmSetObjectDefMinDistance(closeChickensID, 20.0);
-	rmSetObjectDefMaxDistance(closeChickensID, 25.0);
-	rmAddObjectDefConstraint(closeChickensID, avoidFood);
-
-	int closeWaterBuffaloID = rmCreateObjectDef("close water buffalo");
-	float waterBuffaloNumber = rmRandFloat(0, 1);
-	if (waterBuffaloNumber < 0.3) rmAddObjectDefItem(closeWaterBuffaloID, "water buffalo", 1, 4.0);
-	else if (waterBuffaloNumber < 0.6) rmAddObjectDefItem(closeWaterBuffaloID, "water buffalo", 2, 4.0);
-	else rmAddObjectDefItem(closeWaterBuffaloID, "water buffalo", 3, 6.0);
-	rmSetObjectDefMinDistance(closeWaterBuffaloID, 30.0);
-	rmSetObjectDefMaxDistance(closeWaterBuffaloID, 50.0);
-
-	int stragglerTreeID = rmCreateObjectDef("straggler tree");
-	rmAddObjectDefItem(stragglerTreeID, "palm", 1, 0.0);
-	rmSetObjectDefMinDistance(stragglerTreeID, 12.0);
-	rmSetObjectDefMaxDistance(stragglerTreeID, 15.0);
-	rmAddObjectDefConstraint(stragglerTreeID, shortAvoidImpassableLand);
-
-	// Medium Objects
-	// gold avoids gold and Settlements
-	int mediumGoldID = rmCreateObjectDef("medium gold");
-	rmAddObjectDefItem(mediumGoldID, "gold mine", 2, 12.0);
-	rmSetObjectDefMinDistance(mediumGoldID, 30.0);
-	rmSetObjectDefMaxDistance(mediumGoldID, 65.0);
-	rmAddObjectDefConstraint(mediumGoldID, avoidGold);
-	rmAddObjectDefConstraint(mediumGoldID, shortAvoidSettlement);
-	rmAddObjectDefConstraint(mediumGoldID, avoidImpassableLand);
-
-	int mediumPigsID = rmCreateObjectDef("medium pigs");
-	rmAddObjectDefItem(mediumPigsID, "pig", 2, 4.0);
-	rmSetObjectDefMinDistance(mediumPigsID, 50.0);
-	rmSetObjectDefMaxDistance(mediumPigsID, 70.0);
-	rmAddObjectDefConstraint(mediumPigsID, shortAvoidImpassableLand);
-
-	// Far Objects
-	// Settlement avoid Settlements
-	int farSettlementID = rmCreateObjectDef("far settlement");
-	rmAddObjectDefItem(farSettlementID, "Settlement", 1, 0.0);
-	rmSetObjectDefMinDistance(farSettlementID, 40.0);
-	rmSetObjectDefMaxDistance(farSettlementID, 120.0);
-	rmAddObjectDefConstraint(farSettlementID, avoidImpassableLand);
-	rmAddObjectDefConstraint(farSettlementID, mediumAvoidSettlement);
-
-	int bonusSettlementID = rmCreateObjectDef("bonus settlement");
-	rmAddObjectDefItem(bonusSettlementID, "Settlement", 1, 0.0);
-	rmSetObjectDefMinDistance(bonusSettlementID, 0.0);
-	rmSetObjectDefMaxDistance(bonusSettlementID, 120.0);
-	rmAddObjectDefConstraint(bonusSettlementID, avoidImpassableLand);
-
-	// gold avoids gold, Settlements and TCs
-	int farGoldID = rmCreateObjectDef("far gold");
-	rmAddObjectDefItem(farGoldID, "Gold mine", 1, 0.0);
-	rmSetObjectDefMinDistance(farGoldID, 0.0);
-	rmSetObjectDefMaxDistance(farGoldID, 100.0);
-	rmAddObjectDefConstraint(farGoldID, avoidGold);
-	rmAddObjectDefConstraint(farGoldID, shortAvoidImpassableLand);
-	rmAddObjectDefConstraint(farGoldID, shortAvoidSettlement);
-	rmAddObjectDefConstraint(farGoldID, farStartingSettleConstraint);
-
-	int bonusGoldID = rmCreateObjectDef("bonus gold");
-	rmAddObjectDefItem(bonusGoldID, "Gold mine", 1, 0.0);
-	rmSetObjectDefMinDistance(bonusGoldID, 0.0);
-	rmSetObjectDefMaxDistance(bonusGoldID, 150.0);
-	rmAddObjectDefConstraint(bonusGoldID, farAvoidGold);
-	rmAddObjectDefConstraint(bonusGoldID, shortAvoidImpassableLand);
-	rmAddObjectDefConstraint(bonusGoldID, shortAvoidSettlement);
-	rmAddObjectDefConstraint(bonusGoldID, farStartingSettleConstraint);
-
-	// pigs aboid pigs
-	int farPigsID = rmCreateObjectDef("far pigs");
-	rmAddObjectDefItem(farPigsID, "pig", 2, 4.0);
-	rmSetObjectDefMinDistance(farPigsID, 80.0);
-	rmSetObjectDefMaxDistance(farPigsID, 150.0);
-	rmAddObjectDefConstraint(farPigsID, avoidHerdable);
-	rmAddObjectDefConstraint(farPigsID, shortAvoidImpassableLand);
-
-	// player fish
-	int fishVsFishID = rmCreateTypeDistanceConstraint("fish v fish", "fish", 20);
-	int fishLand = rmCreateTerrainDistanceConstraint("fish land", "land", true, 8.0);
-
-	int playerFishID = rmCreateObjectDef("owned fish");
-	rmAddObjectDefItem(playerFishID, "fish - mahi", 3, 10.0);
-	rmSetObjectDefMinDistance(playerFishID, 0.0);
-	rmSetObjectDefMaxDistance(playerFishID, 100.0);
-	rmAddObjectDefConstraint(playerFishID, fishVsFishID);
-	rmAddObjectDefConstraint(playerFishID, fishLand);
-
-	// pick lions or bears as predators
-	// avoid TCs
-	int farPredatorID = rmCreateObjectDef("far predator");
-	float predatorSpecies = rmRandFloat(0, 1);
-	if (predatorSpecies < 0.5) rmAddObjectDefItem(farPredatorID, "lion", 2, 4.0);
-	else rmAddObjectDefItem(farPredatorID, "lion", 1, 4.0);
-	rmSetObjectDefMinDistance(farPredatorID, 50.0);
-	rmSetObjectDefMaxDistance(farPredatorID, 100.0);
-	rmAddObjectDefConstraint(farPredatorID, avoidPredator);
-	rmAddObjectDefConstraint(farPredatorID, farStartingSettleConstraint);
-	rmAddObjectDefConstraint(farPredatorID, shortAvoidImpassableLand);
-
-	// This map will either use water buffalo or deer as the extra huntable food.
-
-	// hunted avoids hunted and TCs
-	int bonusHuntableID = rmCreateObjectDef("bonus huntable");
-	float bonusChance = rmRandFloat(0, 1);
-	if (bonusChance < 0.5) rmAddObjectDefItem(bonusHuntableID, "zebra", 4, 4.0);
-	else rmAddObjectDefItem(bonusHuntableID, "gazelle", 6, 8.0);
-	rmSetObjectDefMinDistance(bonusHuntableID, 0.0);
-	rmSetObjectDefMaxDistance(bonusHuntableID, rmXFractionToMeters(0.5));
-	rmAddObjectDefConstraint(bonusHuntableID, avoidHuntable);
-	rmAddObjectDefToClass(bonusHuntableID, classBonusHuntable);
-	rmAddObjectDefConstraint(bonusHuntableID, shortAvoidImpassableLand);
-
-	int randomTreeID = rmCreateObjectDef("random tree");
-	rmAddObjectDefItem(randomTreeID, "palm", 1, 0.0);
-	rmSetObjectDefMinDistance(randomTreeID, 0.0);
-	rmSetObjectDefMaxDistance(randomTreeID, rmXFractionToMeters(0.5));
-	rmAddObjectDefConstraint(randomTreeID, rmCreateTypeDistanceConstraint("random tree", "all", 4.0));
-	rmAddObjectDefConstraint(randomTreeID, shortAvoidImpassableLand);
-
-	// Birds
-	int farhawkID = rmCreateObjectDef("far hawks");
-	rmAddObjectDefItem(farhawkID, "seagull", 1, 0.0);
-	rmSetObjectDefMinDistance(farhawkID, 0.0);
-	rmSetObjectDefMaxDistance(farhawkID, rmXFractionToMeters(0.5));
-
-	// Relics avoid TCs
-	int relicID = rmCreateObjectDef("relic");
-	rmAddObjectDefItem(relicID, "relic", 1, 0.0);
-	rmSetObjectDefMinDistance(relicID, 40.0);
-	rmSetObjectDefMaxDistance(relicID, 150.0);
-	rmAddObjectDefConstraint(relicID, rmCreateTypeDistanceConstraint("relic vs relic", "relic", 70.0));
-	rmAddObjectDefConstraint(relicID, shortAvoidImpassableLand);
-	rmAddObjectDefConstraint(relicID, farStartingSettleConstraint);
-
-	// --------------------------------------------------------------------------------Done defining objects
-	// Text
-	rmSetStatusText("", 0.20);
-
-	rmPlacePlayersCircular(0.4, 0.43, rmDegreesToRadians(5.0));
-
-	// Set up player areas.
-	float playerFraction = rmAreaTilesToFraction(4500);
-	if (cNumberNonGaiaPlayers < 4) playerFraction = rmAreaTilesToFraction(4200);
-	float randomIslandChance = rmRandFloat(0, 1);
-	for (i = 1; < cNumberPlayers) {
-		// Create the area.
-		int id = rmCreateArea("Player" + i);
-
-		// Assign to the player.
-		rmSetPlayerArea(i, id);
-
-		// Set the size.
-		rmSetAreaSize(id, 0.8 * playerFraction, 1.2 * playerFraction);
-
-		rmAddAreaToClass(id, classPlayer);
-		rmAddAreaToClass(id, classIsland);
-
-		rmSetAreaMinBlobs(id, 3);
-		rmSetAreaMaxBlobs(id, 3);
-		rmSetAreaMinBlobDistance(id, 20.0);
-		rmSetAreaMaxBlobDistance(id, 20.0);
-		/*    rmSetAreaCoherence(id, 0.0); */
-
-		rmSetAreaBaseHeight(id, 2.0);
-
-		rmSetAreaSmoothDistance(id, 10);
-		rmSetAreaHeightBlend(id, 2);
-
-		// Add constraints.
-		rmAddAreaConstraint(id, cornerOverlapConstraint);
-		rmAddAreaConstraint(id, playerEdgeConstraint);
-
-		// Set the location.
-		rmSetAreaLocPlayer(id, i);
-
-		// Set type.
-		rmSetAreaTerrainType(id, "GrassDirt25");
-
-		//island avoidance determination
-		rmAddAreaConstraint(id, islandConstraint);
+	if(cNonGaiaPlayers < 3) {
+		axisLength = getStandardMapDimInMeters(9600);
 	}
 
-	// Build up some bonus islands.
-	int bonusCount = cNumberNonGaiaPlayers + cNumberNonGaiaPlayers / 2 + 2; // num players plus some extra
-	for (i = 0; < bonusCount) {
-		int bonusIslandID = rmCreateArea("bonus island" + i);
-		rmSetAreaSize(bonusIslandID, rmAreaTilesToFraction(1000), rmAreaTilesToFraction(2000));
-		rmSetAreaTerrainType(bonusIslandID, "GrassDirt25");
-		rmSetAreaWarnFailure(bonusIslandID, false);
-		/*      rmAddAreaConstraint(bonusIslandID, playerEdgeConstraint); */
-		rmAddAreaConstraint(bonusIslandID, islandConstraint);
-		rmAddAreaToClass(bonusIslandID, classIsland);
-		rmAddAreaToClass(bonusIslandID, classBonusIsland);
+	// Set water type.
+	rmSetSeaType("Greek River");
 
-		rmSetAreaCoherence(bonusIslandID, 0.25);
+	// Initialize map.
+	initializeMap("Water", axisLength);
 
-		rmSetAreaSmoothDistance(bonusIslandID, 12);
-		rmSetAreaHeightBlend(bonusIslandID, 2);
+	// Player placement.
+	float frac = placePlayersInCircle(0.40, 0.44);
 
+	// Control areas.
+	int classCenter = initializeCenter();
+	int classCorner = initializeCorners();
+	int classSplit = initializeSplit();
+	int classCenterline = initializeCenterline();
+
+	// Classes.
+	int classSettlementArea = rmDefineClass("settlement area");
+	int classConnection = rmDefineClass("connection");
+	int classPlayer = rmDefineClass("player");
+	int classPlayerCore = rmDefineClass("player core");
+	int classIsland = rmDefineClass("island");
+	int classStartingSettlement = rmDefineClass("starting settlement");
+	int classForest = rmDefineClass("forest");
+
+	// Global constraints.
+	// General.
+	int avoidAll = createTypeDistConstraint("All", 7.0);
+	int avoidEdge = createSymmetricBoxConstraint(rmXTilesToFraction(4), rmZTilesToFraction(4));
+	int avoidCenter = createClassDistConstraint(classCenter, 1.0);
+	int avoidCorner = createClassDistConstraint(classCorner, 1.0);
+	int avoidCenterline = createClassDistConstraint(classCenterline, 1.0);
+	int shortAvoidPlayer = createClassDistConstraint(classPlayer, 1.0);
+	int farAvoidPlayer = createClassDistConstraint(classPlayer, 20.0);
+	int avoidConnection = createClassDistConstraint(classConnection, 1.0);
+	int avoidIsland = createClassDistConstraint(classIsland, 20.0);
+	int avoidPlayerCore = createClassDistConstraint(classPlayerCore, 1.0);
+
+	// Different generation for non-1v1.
+	if(cNonGaiaPlayers > 2) {
+		avoidPlayerCore = createClassDistConstraint(classPlayerCore, 70.0);
+	}
+
+	// Settlements.
+	int shortAvoidSettlement = createTypeDistConstraint("AbstractSettlement", 15.0);
+	int mediumAvoidSettlement = createTypeDistConstraint("AbstractSettlement", 20.0);
+	int farAvoidSettlement = createTypeDistConstraint("AbstractSettlement", 25.0);
+
+	// Terrain.
+	int shortAvoidImpassableLand = createTerrainDistConstraint("Land", false, 5.0);
+	int mediumAvoidImpassableLand = createTerrainDistConstraint("Land", false, 10.0);
+	int farAvoidImpassableLand = createTerrainDistConstraint("Land", false, 15.0);
+	int nearShore = createTerrainMaxDistConstraint("Water", true, 6.0);
+
+	// Gold.
+	float avoidGoldDist = 40.0;
+
+	int shortAvoidGold = createTypeDistConstraint("Gold", 10.0);
+	int farAvoidGold = createTypeDistConstraint("Gold", avoidGoldDist);
+
+	// Food.
+	float avoidHuntDist = 35.0;
+
+	int avoidHuntable = createTypeDistConstraint("Huntable", avoidHuntDist);
+	int avoidHerdable = createTypeDistConstraint("Herdable", 30.0);
+	int avoidFood = createTypeDistConstraint("Food", 20.0);
+	int avoidPredator = createTypeDistConstraint("AnimalPredator", 40.0);
+
+	// Loosen constraints for anything but 1v1 as player areas become very small.
+	if(cNonGaiaPlayers > 2) { // 4 players is also problematic.
+		avoidHuntDist = 30.0;
+
+		avoidHuntable = createTypeDistConstraint("Huntable", avoidHuntDist);
+		avoidHerdable = createTypeDistConstraint("Herdable", 20.0);
+		avoidPredator = createTypeDistConstraint("AnimalPredator", 20.0);
+	}
+
+	// Forest.
+	int avoidForest = createClassDistConstraint(classForest, 20.0);
+	int forestAvoidStartingSettlement = createClassDistConstraint(classStartingSettlement, 20.0);
+	int treeAvoidSettlement = createTypeDistConstraint("AbstractSettlement", 13.0);
+
+	// Relics.
+	int avoidRelic = createTypeDistConstraint("Relic", 70.0);
+
+	// Buildings.
+	int avoidBuildings = createTypeDistConstraint("Building", 22.5);
+	int avoidTowerLOS = createTypeDistConstraint("Tower", 35.0);
+	int avoidTower = createTypeDistConstraint("Tower", 20.0 + (45.0 - 100.0 * frac));
+
+	// Embellishment.
+	int embellishmentAvoidAll = createTypeDistConstraint("All", 3.0);
+
+	// Define simple objects.
+	// Starting settlement.
+	int startingSettlementID = rmCreateObjectDef("starting settlement");
+	rmAddObjectDefItem(startingSettlementID, "Settlement Level 1", 1, 0.0);
+	rmAddObjectDefToClass(startingSettlementID, classStartingSettlement);
+
+	// Towers.
+	int startingTowerID = rmCreateObjectDef("starting tower");
+	rmAddObjectDefItem(startingTowerID, "Tower", 1, 0.0);
+	setObjectDefDistance(startingTowerID, 23.0, 27.0);
+	rmAddObjectDefConstraint(startingTowerID, avoidTower);
+	// rmAddObjectDefConstraint(startingTowerID, avoidEdge);
+	rmAddObjectDefConstraint(startingTowerID, shortAvoidImpassableLand);
+
+	// Starting hunt.
+	int startingHuntID = createObjectDefVerify("starting hunt");
+	addObjectDefItemVerify(startingHuntID, "Aurochs", rmRandInt(10, 12), 5.0);
+	setObjectDefDistance(startingHuntID, 23.0, 27.0);
+	rmAddObjectDefConstraint(startingHuntID, avoidAll);
+	rmAddObjectDefConstraint(startingHuntID, avoidEdge);
+	rmAddObjectDefConstraint(startingHuntID, mediumAvoidImpassableLand);
+	rmAddObjectDefConstraint(startingHuntID, createTypeDistConstraint("Huntable", 30.0));
+
+	// Starting herdables.
+	int startingHerdablesID = createObjectDefVerify("starting herdables");
+	addObjectDefItemVerify(startingHerdablesID, "Pig", rmRandInt(0, 2), 2.0);
+	setObjectDefDistance(startingHerdablesID, 20.0, 30.0);
+	rmAddObjectDefConstraint(startingHerdablesID, avoidAll);
+	rmAddObjectDefConstraint(startingHerdablesID, avoidEdge);
+	rmAddObjectDefConstraint(startingHerdablesID, shortAvoidImpassableLand);
+
+	// Straggler trees.
+	int stragglerTreeID = rmCreateObjectDef("straggler tree");
+	rmAddObjectDefItem(stragglerTreeID, "Oak", 1, 0.0);
+	setObjectDefDistance(stragglerTreeID, 13.0, 14.0); // 13.0/13.0 doesn't place towards the upper X axis when using rmPlaceObjectDefPerPlayer().
+	rmAddObjectDefConstraint(stragglerTreeID, avoidAll);
+
+	// Medium herdables.
+	int mediumHerdablesID = createObjectDefVerify("medium herdables");
+	addObjectDefItemVerify(mediumHerdablesID, "Pig", rmRandInt(2, 3), 4.0);
+	setObjectDefDistance(mediumHerdablesID, 50.0, 70.0);
+	rmAddObjectDefConstraint(mediumHerdablesID, avoidAll);
+	rmAddObjectDefConstraint(mediumHerdablesID, avoidEdge);
+	rmAddObjectDefConstraint(mediumHerdablesID, avoidIsland);
+	rmAddObjectDefConstraint(mediumHerdablesID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(mediumHerdablesID, avoidTowerLOS);
+	rmAddObjectDefConstraint(mediumHerdablesID, createClassDistConstraint(classStartingSettlement, 50.0));
+	rmAddObjectDefConstraint(mediumHerdablesID, avoidHerdable);
+
+	// Far herdables.
+	int farHerdablesID = createObjectDefVerify("far herdables");
+	addObjectDefItemVerify(farHerdablesID, "Pig", rmRandInt(1, 2), 4.0);
+	rmAddObjectDefConstraint(farHerdablesID, avoidAll);
+	rmAddObjectDefConstraint(farHerdablesID, avoidEdge);
+	rmAddObjectDefConstraint(farHerdablesID, shortAvoidPlayer);
+	rmAddObjectDefConstraint(farHerdablesID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(farHerdablesID, createClassDistConstraint(classStartingSettlement, 70.0));
+	rmAddObjectDefConstraint(farHerdablesID, avoidHerdable);
+
+	// Far cranes (near water/island), don't verify.
+	int farAurochsID = createObjectDefVerify("far aurochs", cDebugMode >= cDebugFull);
+	addObjectDefItemVerify(farAurochsID, "Aurochs", rmRandInt(10, 12), 5.0);
+	rmAddObjectDefConstraint(farAurochsID, avoidAll);
+	rmAddObjectDefConstraint(farAurochsID, avoidEdge);
+	rmAddObjectDefConstraint(farAurochsID, createTerrainDistConstraint("Land", false, 1.0));
+	rmAddObjectDefConstraint(farAurochsID, nearShore);
+	rmAddObjectDefConstraint(farAurochsID, avoidIsland);
+	rmAddObjectDefConstraint(farAurochsID, avoidHuntable);
+	rmAddObjectDefConstraint(farAurochsID, createClassDistConstraint(classStartingSettlement, 70.0));
+
+	// Far predators 1 (player islands).
+	int farPredators1ID = createObjectDefVerify("far predators 1");
+	if(randChance()) {
+		addObjectDefItemVerify(farPredators1ID, "Bear", 2, 20.0);
+	} else {
+		addObjectDefItemVerify(farPredators1ID, "Bear", 1, 0.0);
+	}
+	rmAddObjectDefConstraint(farPredators1ID, avoidAll);
+	rmAddObjectDefConstraint(farPredators1ID, avoidEdge);
+	rmAddObjectDefConstraint(farPredators1ID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(farPredators1ID, avoidIsland);
+	rmAddObjectDefConstraint(farPredators1ID, createClassDistConstraint(classStartingSettlement, 70.0));
+	rmAddObjectDefConstraint(farPredators1ID, mediumAvoidSettlement);
+	// rmAddObjectDefConstraint(farPredators1ID, avoidFood);
+	rmAddObjectDefConstraint(farPredators1ID, avoidPredator);
+
+	// Far predators 2 (center islands).
+	int farPredators2ID = createObjectDefVerify("far predators 2");
+	addObjectDefItemVerify(farPredators2ID, "Bear", 1, 0.0);
+	rmAddObjectDefConstraint(farPredators2ID, avoidAll);
+	rmAddObjectDefConstraint(farPredators2ID, avoidEdge);
+	rmAddObjectDefConstraint(farPredators2ID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(farPredators2ID, shortAvoidPlayer);
+	rmAddObjectDefConstraint(farPredators2ID, createClassDistConstraint(classStartingSettlement, 70.0));
+	rmAddObjectDefConstraint(farPredators2ID, mediumAvoidSettlement);
+	// rmAddObjectDefConstraint(farPredators2ID, avoidFood);
+	rmAddObjectDefConstraint(farPredators2ID, avoidPredator);
+
+	// Far predators 3 (near water).
+	int farPredators3ID = createObjectDefVerify("far predators 3");
+	addObjectDefItemVerify(farPredators3ID, "Bear", 1, 0.0);
+	rmAddObjectDefConstraint(farPredators3ID, avoidAll);
+	rmAddObjectDefConstraint(farPredators3ID, avoidEdge);
+	rmAddObjectDefConstraint(farPredators3ID, nearShore);
+	rmAddObjectDefConstraint(farPredators3ID, avoidIsland);
+	rmAddObjectDefConstraint(farPredators3ID, createClassDistConstraint(classStartingSettlement, 70.0));
+	rmAddObjectDefConstraint(farPredators3ID, mediumAvoidSettlement);
+	// rmAddObjectDefConstraint(farPredators3ID, avoidFood);
+	rmAddObjectDefConstraint(farPredators3ID, avoidPredator);
+
+	// Other objects.
+	// Relics.
+	int relicID = rmCreateObjectDef("relic");
+	rmAddObjectDefItem(relicID, "Relic", 4, 20.0);
+	rmAddObjectDefConstraint(relicID, avoidAll);
+	rmAddObjectDefConstraint(relicID, avoidEdge);
+	rmAddObjectDefConstraint(relicID, avoidCorner);
+	rmAddObjectDefConstraint(relicID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(relicID, createClassDistConstraint(classStartingSettlement, 70.0));
+	rmAddObjectDefConstraint(relicID, avoidRelic);
+
+	// Random tree 1.
+	int randomTree1ID = rmCreateObjectDef("random tree 1");
+	rmAddObjectDefItem(randomTree1ID, "Oak", 1, 0.0);
+	setObjectDefDistanceToMax(randomTree1ID);
+	rmAddObjectDefConstraint(randomTree1ID, avoidAll);
+	rmAddObjectDefConstraint(randomTree1ID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(randomTree1ID, forestAvoidStartingSettlement);
+	rmAddObjectDefConstraint(randomTree1ID, treeAvoidSettlement);
+
+	// Random tree 2.
+	int randomTree2ID = rmCreateObjectDef("random tree 2");
+	rmAddObjectDefItem(randomTree2ID, "Oak", 1, 0.0);
+	setObjectDefDistanceToMax(randomTree2ID);
+	rmAddObjectDefConstraint(randomTree2ID, avoidAll);
+	rmAddObjectDefConstraint(randomTree2ID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(randomTree2ID, forestAvoidStartingSettlement);
+	rmAddObjectDefConstraint(randomTree2ID, treeAvoidSettlement);
+
+	progress(0.1);
+
+	// Connections.
+	// Define shallows.
+	int shallowsID = rmCreateConnection("shallows");
+	rmSetConnectionType(shallowsID, cConnectAreas, false);
+	rmSetConnectionWidth(shallowsID, 20.0, 2);
+	rmAddConnectionTerrainReplacement(shallowsID, "RiverGrassyC", "GrassB");
+	// rmSetConnectionCoherence(shallowsID, 1.0);
+	rmSetConnectionBaseHeight(shallowsID, 2.0);
+	rmSetConnectionHeightBlend(shallowsID, 2);
+	rmSetConnectionSmoothDistance(shallowsID, 3);
+	rmAddConnectionToClass(shallowsID, classConnection);
+	rmSetConnectionWarnFailure(shallowsID, false);
+
+	// Define extra shallows.
+	int extraShallowsID = rmCreateConnection("extra shallows");
+	rmSetConnectionType(extraShallowsID, cConnectAreas, false);
+	rmSetConnectionWidth(extraShallowsID, 10.0, 2);
+	rmAddConnectionTerrainReplacement(extraShallowsID, "RiverGrassyC", "GrassB");
+	// rmSetConnectionCoherence(extraShallowsID, 1.0);
+	rmSetConnectionBaseHeight(extraShallowsID, 2.0);
+	rmSetConnectionHeightBlend(extraShallowsID, 2);
+	rmSetConnectionSmoothDistance(extraShallowsID, 3);
+	rmSetConnectionPositionVariance(extraShallowsID, -1.0);
+	rmAddConnectionStartConstraint(extraShallowsID, avoidPlayerCore);
+	rmAddConnectionEndConstraint(extraShallowsID, avoidPlayerCore);
+	rmAddConnectionToClass(extraShallowsID, classConnection);
+	rmSetConnectionWarnFailure(extraShallowsID, false);
+
+	// Define team shallows.
+	int teamShallowsID = rmCreateConnection("team shallows");
+	rmSetConnectionType(teamShallowsID, cConnectAllies, false);
+	rmSetConnectionWidth(teamShallowsID, 16.0, 2);
+	rmAddConnectionTerrainReplacement(teamShallowsID, "RiverGrassyC", "GrassB");
+	// rmSetConnectionCoherence(teamShallowsID, 1.0);
+	rmSetConnectionBaseHeight(teamShallowsID, 2.0);
+	rmSetConnectionHeightBlend(teamShallowsID, 2);
+	rmSetConnectionSmoothDistance(teamShallowsID, 3);
+	rmAddConnectionToClass(teamShallowsID, classConnection);
+	rmSetConnectionWarnFailure(teamShallowsID, false);
+
+	// Define 3rd settlement connections.
+	for(i = 1; < cPlayers) {
+		int connectionID = rmCreateConnection("settlement connection " + i);
+		rmSetConnectionType(connectionID, cConnectAreas, false, 1.0);
+		rmSetConnectionWidth(connectionID, 16.0, 2);
+		rmAddConnectionTerrainReplacement(connectionID, "RiverGrassyC", "GrassB");
+		rmSetConnectionBaseHeight(connectionID, 2.0);
+		rmSetConnectionHeightBlend(connectionID, 2);
+		rmSetConnectionSmoothDistance(connectionID, 3.0);
+		rmAddConnectionToClass(connectionID, classConnection);
+		rmSetConnectionWarnFailure(connectionID, false);
+
+		// Store in array.
+		setConnectionID(i, connectionID);
+	}
+
+	// Set up fake player areas.
+	for(i = 1; < cPlayers) {
+		int fakePlayerAreaID = rmCreateArea("fake player area " + i);
+		if(cNonGaiaPlayers < 3) {
+			rmSetAreaSize(fakePlayerAreaID, rmAreaTilesToFraction(3000));
+		} else {
+			rmSetAreaSize(fakePlayerAreaID, rmAreaTilesToFraction(200));
+		}
+		rmSetAreaLocPlayer(fakePlayerAreaID, getPlayer(i));
+		//rmSetAreaTerrainType(fakePlayerAreaID, "GrassA");
+		rmSetAreaCoherence(fakePlayerAreaID, 1.0);
+		//rmSetAreaBaseHeight(fakePlayerAreaID, 2.0);
+		rmSetAreaHeightBlend(fakePlayerAreaID, 2);
+		rmAddAreaToClass(fakePlayerAreaID, classPlayerCore);
+		rmSetAreaWarnFailure(fakePlayerAreaID, false);
+		rmBuildArea(fakePlayerAreaID);
+	}
+
+	// Center.
+	int bonusIslandID = 0;
+	int numBonusIsland = 4;
+
+	float islandEdgeDist = rmXTilesToFraction(20);
+
+	if(cNonGaiaPlayers > 2) {
+		islandEdgeDist = rmXTilesToFraction(30);
+		numBonusIsland = 0;
+	}
+
+	int islandAvoidEdge = createSymmetricBoxConstraint(islandEdgeDist, islandEdgeDist);
+
+	// 1v1.
+	for(i = 0; < numBonusIsland) {
+		float randX = rmRandFloat(0.325, 0.675);
+		float randZ = rmRandFloat(0.325, 0.675);
+
+		for(j = 0; < 2) {
+			bonusIslandID = rmCreateArea("bonus island " + j + " " + i);
+			rmSetAreaSize(bonusIslandID, rmAreaTilesToFraction(3000));
+			if(j == 0) {
+				rmSetAreaLocation(bonusIslandID, randX, randZ);
+			} else if(j == 1) {
+				rmSetAreaLocation(bonusIslandID, 1.0 - randX, 1.0 - randZ);
+			}
+			rmSetAreaTerrainType(bonusIslandID, "GrassA");
+			rmAddAreaTerrainLayer(bonusIslandID, "GrassB", 0, 6);
+			rmSetAreaCoherence(bonusIslandID, 1.0);
+			rmSetAreaBaseHeight(bonusIslandID, 2.0);
+			rmSetAreaHeightBlend(bonusIslandID, 2);
+			rmSetAreaSmoothDistance(bonusIslandID, 12);
+			rmAddAreaToClass(bonusIslandID, classIsland);
+			rmAddAreaConstraint(bonusIslandID, avoidPlayerCore);
+			rmAddAreaConstraint(bonusIslandID, islandAvoidEdge);
+			rmAddConnectionArea(extraShallowsID, bonusIslandID);
+			rmAddConnectionArea(shallowsID, bonusIslandID);
+			rmSetAreaWarnFailure(bonusIslandID, false);
+			rmBuildArea(bonusIslandID);
+		}
+	}
+
+	// Anything but 1v1.
+	if(cNonGaiaPlayers > 2) {
+		bonusIslandID = rmCreateArea("center bonus island");
+		rmSetAreaSize(bonusIslandID, rmAreaTilesToFraction(3500 * cNonGaiaPlayers));
+		rmSetAreaLocation(bonusIslandID, 0.5, 0.5);
+		rmSetAreaTerrainType(bonusIslandID, "GrassA");
+		rmAddAreaTerrainLayer(bonusIslandID, "GrassB", 0, 6);
+		rmSetAreaCoherence(bonusIslandID, 1.0);
 		rmSetAreaBaseHeight(bonusIslandID, 2.0);
+		rmSetAreaHeightBlend(bonusIslandID, 2);
+		rmSetAreaSmoothDistance(bonusIslandID, 12);
+		rmAddAreaToClass(bonusIslandID, classIsland);
+		rmAddAreaConstraint(bonusIslandID, avoidPlayerCore);
+		rmAddAreaConstraint(bonusIslandID, islandAvoidEdge);
+		rmAddConnectionArea(extraShallowsID, bonusIslandID);
+		rmAddConnectionArea(shallowsID, bonusIslandID);
+		rmSetAreaWarnFailure(bonusIslandID, false);
+		rmBuildArea(bonusIslandID);
+	}
 
+	// Set up player areas.
+	for(i = 1; < cPlayers) {
+		int playerAreaID = rmCreateArea("player area " + i);
+		rmSetAreaSize(playerAreaID, 1.0);
+		rmSetAreaLocPlayer(playerAreaID, getPlayer(i));
+		rmSetAreaTerrainType(playerAreaID, "GrassA");
+		rmAddAreaTerrainLayer(playerAreaID, "GrassB", 0, 12);
+		rmSetAreaCoherence(playerAreaID, 0.6);
+		rmSetAreaBaseHeight(playerAreaID, 2.0);
+		rmSetAreaHeightBlend(playerAreaID, 2);
+		rmSetAreaSmoothDistance(playerAreaID, 10);
+		rmAddAreaToClass(playerAreaID, classPlayer);
+		rmAddAreaConstraint(playerAreaID, avoidIsland);
+		rmAddAreaConstraint(playerAreaID, farAvoidPlayer);
+		rmSetAreaWarnFailure(playerAreaID, false);
+	}
+
+	/*
+	 * Add the previously defined areas in a new order to the connection.
+	 * The reason we do this is because connections are always built from 1 (blue) -> 2 (red) -> 3 (green), regardless of their team/position.
+	 * This is the main reason why Marsh has such a random center - it depends on how the players are teamed/placed.
+	*/
+	int currPlayer = 0;
+
+	for(i = 1; < cPlayers) {
+		int nextPlayer = INF;
+		int nextPlayerID = -1;
+
+		for(j = 1; < cPlayers) {
+			int tempPlayer = getPlayer(j);
+
+			if(tempPlayer < nextPlayer && tempPlayer > currPlayer) {
+				nextPlayer = tempPlayer;
+				nextPlayerID = j;
+			}
+		}
+
+		int tempPlayerAreaID = rmAreaID("player area " + nextPlayerID);
+
+		rmAddConnectionArea(shallowsID, tempPlayerAreaID);
+		rmAddConnectionArea(extraShallowsID, tempPlayerAreaID);
+		rmAddConnectionArea(getConnectionID(nextPlayerID), tempPlayerAreaID);
+
+		currPlayer = nextPlayer;
 	}
 
 	rmBuildAllAreas();
 
-	for (i = 1; < cNumberPlayers * 10) {
-		// Beautification sub area.
-		int id3 = rmCreateArea("Grass patch" + i);
-		rmSetAreaSize(id3, rmAreaTilesToFraction(10), rmAreaTilesToFraction(50));
-		rmSetAreaTerrainType(id3, "GrassDirt75");
-		rmSetAreaMinBlobs(id3, 1);
-		rmSetAreaMaxBlobs(id3, 5);
-		rmSetAreaWarnFailure(id3, false);
-		rmSetAreaMinBlobDistance(id3, 16.0);
-		rmSetAreaMaxBlobDistance(id3, 40.0);
-		rmSetAreaCoherence(id3, 0.0);
-		rmAddAreaConstraint(id3, shortAvoidImpassableLand);
-		rmBuildArea(id3);
+	// Rebuild center.
+	int fakeCenterID = rmCreateArea("fake center");
+	rmSetAreaSize(fakeCenterID, 0.5);
+	// rmSetAreaTerrainType(fakeCenterID, "SnowA");
+	rmSetAreaLocation(fakeCenterID, 0.5, 0.5);
+	rmAddAreaConstraint(fakeCenterID, shortAvoidImpassableLand);
+	rmAddAreaConstraint(fakeCenterID, shortAvoidPlayer);
+	rmSetAreaWarnFailure(fakeCenterID, false);
+	rmBuildArea(fakeCenterID);
+
+	// Build connections.
+	rmBuildConnection(teamShallowsID);
+	rmBuildConnection(shallowsID);
+
+	if(cNonGaiaPlayers < 3) {
+		rmBuildConnection(extraShallowsID);
+	// Don't do this - I don't think this 2v2 variation is any good.
+	// } else if(cNonGaiaPlayers < 5) {
+		// if(randChance()) {
+			// rmBuildConnection(extraShallowsID);
+		// }
 	}
 
-	// Place stuff.
-	// TC
-	rmPlaceObjectDefPerPlayer(startingSettlementID, true);
+	progress(0.2);
 
-	// Settlements.
-	for (i = 1; < cNumberPlayers) {
-		rmPlaceObjectDefInArea(farSettlementID, 0, rmAreaID("player" + i), 1);
-		rmPlaceObjectDefInArea(bonusSettlementID, 0, rmAreaID("bonus island" + i), 1);
+	// Beautification.
+	int beautificationID = 0;
+
+	for(i = 0; < 50 * cPlayers) {
+		beautificationID = rmCreateArea("beautification 1 " + i);
+		rmSetAreaSize(beautificationID, rmAreaTilesToFraction(20), rmAreaTilesToFraction(40));
+		rmSetAreaTerrainType(beautificationID, "GrassDirt50");
+		rmSetAreaMinBlobs(beautificationID, 1);
+		rmSetAreaMaxBlobs(beautificationID, 5);
+		rmSetAreaMinBlobDistance(beautificationID, 16.0);
+		rmSetAreaMaxBlobDistance(beautificationID, 40.0);
+		rmAddAreaConstraint(beautificationID, shortAvoidImpassableLand);
+		rmSetAreaWarnFailure(beautificationID, false);
+		rmBuildArea(beautificationID);
 	}
 
-	// Text
-	rmSetStatusText("", 0.40);
+	for(i = 0; < 15 * cPlayers) {
+		beautificationID = rmCreateArea("beautification 2 " + i);
+		rmSetAreaSize(beautificationID, rmAreaTilesToFraction(10), rmAreaTilesToFraction(50));
+		rmSetAreaTerrainType(beautificationID, "GrassDirt25");
+		rmSetAreaMinBlobs(beautificationID, 1);
+		rmSetAreaMaxBlobs(beautificationID, 5);
+		rmSetAreaMinBlobDistance(beautificationID, 16.0);
+		rmSetAreaMaxBlobDistance(beautificationID, 40.0);
+		rmAddAreaConstraint(beautificationID, shortAvoidImpassableLand);
+		rmSetAreaWarnFailure(beautificationID, false);
+		rmBuildArea(beautificationID);
+	}
+
+	// Starting settlement.
+	placeObjectAtPlayerLocs(startingSettlementID, true);
 
 	// Towers.
-	rmPlaceObjectDefPerPlayer(startingTowerID, true, 4);
+	placeAndStoreObjectAtPlayerLocs(startingTowerID, true, 4, 23.0, 27.0, true); // Last parameter: Square placement.
+
+	progress(0.3);
+
+	// Settlements.
+	int settlementID = rmCreateObjectDef("settlements");
+	rmAddObjectDefItem(settlementID, "Settlement", 1, 0.0);
+
+	addFairLocConstraint(avoidTowerLOS);
+
+	// Close settlement.
+	if(cNonGaiaPlayers < 9) {
+		enableFairLocTwoPlayerCheck();
+		addFairLocConstraint(mediumAvoidImpassableLand);
+		addFairLocConstraint(avoidIsland);
+		addFairLoc(65.0, 80.0, false, true, 40.0, 20.0, 20.0);
+	} else {
+		addFairLocConstraint(shortAvoidImpassableLand);
+		addFairLoc(45.0, 80.0, false, true, 40.0, 12.0, 12.0);
+	}
+
+	placeObjectAtNewFairLocs(settlementID, false, "close settlement");
+
+	progress(0.4);
+
+	// Try 4 times.
+	int numFairLocTries = 4;
+
+	for(i = 0; < numFairLocTries) {
+		// Far settlement.
+		addFairLocConstraint(shortAvoidPlayer);
+
+		if(cNonGaiaPlayers < 3) {
+			addFairLocConstraint(farAvoidImpassableLand);
+		} else {
+			addFairLocConstraint(mediumAvoidImpassableLand); // Consider using farAvoidImpassableLand here.
+			addFairLocConstraint(avoidConnection);
+		}
+
+		enableFairLocTwoPlayerCheck();
+
+		// Use 70.0 as low value. This is not actually possible, but favors lower values.
+		if(cNonGaiaPlayers < 3) {
+			addFairLoc(70.0, 125.0, true, true, 80.0 - 5.0 * i, 12.0, 12.0);
+		} else if(cNonGaiaPlayers < 5) {
+			addFairLoc(70.0, 115.0 + 5.0 * i, true, true, 70.0 - 5.0 * i, 12.0, 12.0, false, gameHasTwoEqualTeams() && i < 2);
+		} else if(cNonGaiaPlayers < 7) {
+			// 100.0 creates better variations by not pulling in the forward settlement too much.
+			addFairLoc(100.0, 135.0 + 5.0 * i, true, true, 70.0 - 5.0 * i, 12.0, 12.0, false, gameHasTwoEqualTeams() && i < 2);
+		} else if(cNonGaiaPlayers < 9) {
+			addFairLoc(70.0, 145.0 + 5.0 * i, true, true, 65.0 - 5.0 * i, 12.0, 12.0);
+		} else {
+			// Do whatever here.
+			addFairLoc(70.0, 200.0, true, true, 65.0 - 5.0 * i, 12.0, 12.0);
+		}
+
+		if(createFairLocs("far settlement " + i, i == (numFairLocTries - 1))) { // Only log last try.
+			break;
+		}
+
+		resetFairLocs();
+	}
+
+	progress(0.5);
+
+	// Build center ponds.
+	if(cNonGaiaPlayers > 5) {
+		fairLocAreasToClass(classSettlementArea);
+
+		int pondAvoidSettlement = createClassDistConstraint(classSettlementArea, 45.0);
+
+		int numPondTries = cNonGaiaPlayers;
+		float pondSize = rmAreaTilesToFraction(500); // Don't make them too big or they may block settlements despite the area constraint (why though?).
+
+		for(i = 0; < numPondTries) {
+			int pondID = rmCreateArea("pond " + i);
+			rmSetAreaSize(pondID, pondSize);
+			rmSetAreaWaterType(pondID, "Greek River");
+			rmSetAreaBaseHeight(pondID, 1.0);
+			rmSetAreaSmoothDistance(pondID, 5);
+			rmSetAreaHeightBlend(pondID, 1);
+			rmAddAreaConstraint(pondID, shortAvoidPlayer);
+			rmAddAreaConstraint(pondID, farAvoidImpassableLand);
+			rmAddAreaConstraint(pondID, pondAvoidSettlement);
+			rmSetAreaWarnFailure(pondID, false);
+		}
+
+		rmBuildAllAreas();
+	}
+
+	// Create areas and place settlements.
+	if(cNonGaiaPlayers > 2) {
+		for(i = 1; < cPlayers) {
+			int settlementAreaID = rmCreateArea("far settlement area " + i);
+			rmSetAreaLocation(settlementAreaID, getFairLocX(1, i), getFairLocZ(1, i));
+			rmSetAreaWarnFailure(settlementAreaID, false);
+			rmBuildArea(settlementAreaID);
+
+			// Add area to connection and build.
+			rmAddConnectionArea(getConnectionID(i), settlementAreaID);
+			rmBuildConnection(getConnectionID(i));
+		}
+	}
+
+	placeObjectAtFairLoc(settlementID);
+
+	resetFairLocs();
+
+	// Elevation.
+	int elevationID = 0;
+
+	for(i = 0; < 15 * cNonGaiaPlayers) {
+		elevationID = rmCreateArea("elevation 1 " + i);
+		rmSetAreaSize(elevationID, rmAreaTilesToFraction(20), rmAreaTilesToFraction(80));
+		if(randChance(0.7)) {
+			rmSetAreaTerrainType(elevationID, "GrassB");
+		}
+		rmSetAreaBaseHeight(elevationID, rmRandFloat(2.0, 4.0));
+		rmSetAreaHeightBlend(elevationID, 1);
+		rmSetAreaMinBlobs(elevationID, 1);
+		rmSetAreaMaxBlobs(elevationID, 3);
+		rmSetAreaMinBlobDistance(elevationID, 16.0);
+		rmSetAreaMaxBlobDistance(elevationID, 40.0);
+		rmAddAreaConstraint(elevationID, avoidBuildings);
+		rmAddAreaConstraint(elevationID, mediumAvoidImpassableLand);
+		rmSetAreaWarnFailure(elevationID, false);
+		rmBuildArea(elevationID);
+	}
+
+	progress(0.6);
+
+	// Gold.
+	int numMediumGold = 0;
+	int numFarGold = 0;
+	int numBonusGold = 0;
+	int mediumGoldID = -1;
+	int farGoldID = -1;
+	int bonusGoldID = -1;
+
+	if(cNonGaiaPlayers < 3) {
+		// 1v1 gold.
+		float goldFloat = rmRandFloat(0.0, 1.0);
+
+		if(goldFloat < 1.0 / 3.0) {
+			numMediumGold = 2;
+			numFarGold = 1;
+		} else if(goldFloat < 2.0 / 3.0) {
+			numMediumGold = 1;
+			numFarGold = 2;
+		} else {
+			numMediumGold = 1;
+			numFarGold = 1;
+		}
+
+		// Medium gold.
+		mediumGoldID = createObjectDefVerify("medium gold");
+		addObjectDefItemVerify(mediumGoldID, "Gold Mine", 1, 0.0);
+		setObjectDefDistance(mediumGoldID, 50.0, 50.0 + 20.0 * numMediumGold);
+		rmAddObjectDefConstraint(mediumGoldID, avoidAll);
+		rmAddObjectDefConstraint(mediumGoldID, avoidEdge);
+		// rmAddObjectDefConstraint(mediumGoldID, avoidCorner);
+		rmAddObjectDefConstraint(mediumGoldID, avoidTowerLOS);
+		rmAddObjectDefConstraint(mediumGoldID, avoidIsland);
+		rmAddObjectDefConstraint(mediumGoldID, mediumAvoidImpassableLand);
+		rmAddObjectDefConstraint(mediumGoldID, farAvoidGold);
+		// rmAddObjectDefConstraint(mediumGoldID, avoidConnection);
+		rmAddObjectDefConstraint(mediumGoldID, createClassDistConstraint(classStartingSettlement, 50.0));
+		if(numMediumGold == 1) {
+			rmAddObjectDefConstraint(mediumGoldID, mediumAvoidSettlement);
+		} else {
+			rmAddObjectDefConstraint(mediumGoldID, shortAvoidSettlement);
+		}
+
+		placeObjectAtPlayerLocs(mediumGoldID, false, numMediumGold);
+
+		// Far gold.
+		farGoldID = createObjectDefVerify("far gold");
+		addObjectDefItemVerify(farGoldID, "Gold Mine", 1, 0.0);
+		rmAddObjectDefConstraint(farGoldID, avoidAll);
+		rmAddObjectDefConstraint(farGoldID, avoidEdge);
+		// rmAddObjectDefConstraint(farGoldID, avoidCorner);
+		rmAddObjectDefConstraint(farGoldID, shortAvoidImpassableLand);
+		rmAddObjectDefConstraint(farGoldID, avoidIsland);
+		rmAddObjectDefConstraint(farGoldID, createClassDistConstraint(classStartingSettlement, 110.0));
+		rmAddObjectDefConstraint(farGoldID, mediumAvoidSettlement);
+		rmAddObjectDefConstraint(farGoldID, farAvoidGold);
+
+		for(i = 1; < cPlayers) {
+			placeObjectDefInArea(farGoldID, 0, rmAreaID("player area " + i), numFarGold);
+		}
+
+		// Bonus gold.
+		numBonusGold = rmRandInt(1, 2);
+
+		bonusGoldID = createObjectDefVerify("bonus gold");
+		addObjectDefItemVerify(bonusGoldID, "Gold Mine", 1, 0.0);
+		rmAddObjectDefConstraint(bonusGoldID, avoidAll);
+		rmAddObjectDefConstraint(bonusGoldID, farAvoidPlayer);
+		rmAddObjectDefConstraint(bonusGoldID, shortAvoidImpassableLand);
+		rmAddObjectDefConstraint(bonusGoldID, mediumAvoidSettlement);
+		rmAddObjectDefConstraint(bonusGoldID, farAvoidGold);
+		rmAddObjectDefConstraint(bonusGoldID, createClassDistConstraint(classCenterline, 10.0));
+		rmAddObjectDefConstraint(bonusGoldID, createClassDistConstraint(classStartingSettlement, 80.0));
+
+		placeObjectInPlayerSplits(bonusGoldID, false, numBonusGold);
+	} else {
+		// Teamgame gold: 1 medium, 1-2 bonus randomly in team area.
+
+		// Medium gold.
+		numMediumGold = 1;
+
+		mediumGoldID = createObjectDefVerify("medium gold");
+		addObjectDefItemVerify(mediumGoldID, "Gold Mine", 1, 0.0);
+		rmSetObjectDefMinDistance(mediumGoldID, 50.0);
+		rmSetObjectDefMaxDistance(mediumGoldID, 65.0);
+		rmAddObjectDefConstraint(mediumGoldID, avoidAll);
+		rmAddObjectDefConstraint(mediumGoldID, avoidEdge);
+		rmAddObjectDefConstraint(mediumGoldID, avoidTowerLOS);
+		rmAddObjectDefConstraint(mediumGoldID, shortAvoidImpassableLand);
+		rmAddObjectDefConstraint(mediumGoldID, avoidConnection);
+		rmAddObjectDefConstraint(mediumGoldID, createClassDistConstraint(classIsland, 40.0));
+		rmAddObjectDefConstraint(mediumGoldID, createClassDistConstraint(classStartingSettlement, 50.0));
+		rmAddObjectDefConstraint(mediumGoldID, shortAvoidSettlement);
+		rmAddObjectDefConstraint(mediumGoldID, farAvoidGold);
+
+		placeObjectAtPlayerLocs(mediumGoldID, false, numMediumGold);
+
+		// Far gold.
+		if(randChance(2.0 / 3.0)) {
+			numFarGold = 1;
+		} else {
+			numFarGold = 2;
+		}
+
+		farGoldID = createObjectDefVerify("far gold");
+		addObjectDefItemVerify(farGoldID, "Gold Mine", 1, 0.0);
+		rmAddObjectDefConstraint(farGoldID, avoidAll);
+		rmAddObjectDefConstraint(farGoldID, avoidEdge);
+		rmAddObjectDefConstraint(farGoldID, shortAvoidImpassableLand);
+		rmAddObjectDefConstraint(farGoldID, avoidConnection);
+		rmAddObjectDefConstraint(farGoldID, avoidTowerLOS);
+		rmAddObjectDefConstraint(farGoldID, avoidIsland);
+		rmAddObjectDefConstraint(farGoldID, createClassDistConstraint(classStartingSettlement, 60.0));
+		rmAddObjectDefConstraint(farGoldID, shortAvoidSettlement);
+		rmAddObjectDefConstraint(farGoldID, farAvoidGold);
+
+		for(i = 1; < cPlayers) {
+			placeObjectDefInArea(farGoldID, 0, rmAreaID("player area " + i), numFarGold);
+		}
+
+		// Bonus gold.
+		numBonusGold = rmRandInt(1, 2);
+
+		bonusGoldID = createObjectDefVerify("bonus gold");
+		addObjectDefItemVerify(bonusGoldID, "Gold Mine", 1, 0.0);
+		rmAddObjectDefConstraint(bonusGoldID, avoidAll);
+		rmAddObjectDefConstraint(bonusGoldID, shortAvoidImpassableLand);
+		// rmAddObjectDefConstraint(bonusGoldID, islandAvoidEdge);
+		rmAddObjectDefConstraint(bonusGoldID, shortAvoidPlayer);
+		rmAddObjectDefConstraint(bonusGoldID, shortAvoidSettlement);
+		rmAddObjectDefConstraint(bonusGoldID, createClassDistConstraint(classStartingSettlement, 80.0));
+		rmAddObjectDefConstraint(bonusGoldID, farAvoidGold);
+
+		placeObjectInPlayerSplits(bonusGoldID, false, numBonusGold);
+	}
+
+	// Starting gold near one of the towers (set last parameter to true to use square placement).
+	storeObjectDefItem("Gold Mine", 1, 0.0);
+	storeObjectConstraint(createTypeDistConstraint("Tower", rmRandFloat(8.0, 10.0))); // Don't get too close.
+	// storeObjectConstraint(avoidAll);
+	storeObjectConstraint(avoidEdge);
+	storeObjectConstraint(shortAvoidImpassableLand);
+	storeObjectConstraint(farAvoidGold);
+
+	placeStoredObjectNearStoredLocs(4, false, 24.0, 25.0, 12.5);
+
+	resetObjectStorage();
+
+	progress(0.7);
+
+	// Food.
+	// Close hunt.
+	bool huntInStartingLOS = randChance(2.0 / 3.0);
+	float closeHuntFloat = rmRandFloat(0.0, 1.0);
+
+	if(closeHuntFloat < 0.3) {
+		storeObjectDefItem("Elk", 6, 5.0);
+	} else {
+		storeObjectDefItem("Elk", 8, 5.0);
+	}
+
+	// Place outside of starting LOS if randomized, fall back to starting LOS if placement fails.
+	if(huntInStartingLOS == false) {
+		addSimLocConstraint(avoidAll);
+		addSimLocConstraint(avoidEdge);
+		addSimLocConstraint(avoidIsland);
+		addSimLocConstraint(shortAvoidImpassableLand);
+		// addSimLocConstraint(shortAvoidGold);
+		addSimLocConstraint(avoidTowerLOS);
+
+		addSimLoc(45.0, 55.0, avoidHuntDist, 0.0, 0.0, false, false, true);
+
+		enableSimLocTwoPlayerCheck();
+
+		// Fall back to LOS placement if this should happen to fail.
+		if(placeObjectAtNewSimLocs(createObjectFromStorage("close hunt"), false, "close hunt", false) == false) {
+			huntInStartingLOS = true;
+		}
+	}
+
+	// If we have hunt in starting LOS, we want to force it within tower ranges so we know it's within LOS.
+	if(huntInStartingLOS) {
+		storeObjectConstraint(createTypeDistConstraint("Tower", rmRandFloat(8.0, 15.0)));
+		storeObjectConstraint(avoidAll);
+		storeObjectConstraint(avoidEdge);
+		storeObjectConstraint(shortAvoidImpassableLand);
+		// storeObjectConstraint(shortAvoidGold);
+
+		placeStoredObjectNearStoredLocs(4, false, 30.0, 32.5, 20.0, true); // Square placement for variance.
+	}
+
+	// Medium hunt.
+	int numMediumHunt = rmRandInt(9, 11);
+
+	// 50% Chance for first, 40% chance for second, 10% chance for both.
+	float mediumHuntFloat = rmRandFloat(0.0, 1.0);
+
+	float mediumHunt1MinDist = rmRandFloat(50.0, 70.0);
+	float mediumHunt1MaxDist = mediumHunt1MinDist + 15.0;
+
+	// Medium hunt 1.
+	int mediumHunt1ID = createObjectDefVerify("medium hunt 1");
+	setObjectDefDistance(mediumHunt1ID, mediumHunt1MinDist, mediumHunt1MaxDist);
+	rmAddObjectDefConstraint(mediumHunt1ID, avoidAll);
+	rmAddObjectDefConstraint(mediumHunt1ID, avoidEdge);
+	rmAddObjectDefConstraint(mediumHunt1ID, avoidIsland);
+	rmAddObjectDefConstraint(mediumHunt1ID, avoidConnection);
+	rmAddObjectDefConstraint(mediumHunt1ID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(mediumHunt1ID, createClassDistConstraint(classStartingSettlement, mediumHunt1MinDist));
+	rmAddObjectDefConstraint(mediumHunt1ID, createTypeDistConstraint("AbstractSettlement", 10.0));
+	rmAddObjectDefConstraint(mediumHunt1ID, avoidHuntable);
+	rmAddObjectDefConstraint(mediumHunt1ID, avoidTowerLOS);
+
+	// Medium hunt 2.
+	int mediumHunt2ID = createObjectDefVerify("medium hunt 2");
+
+	if(randChance()) {
+		addObjectDefItemVerify(mediumHunt1ID, "Caribou", numMediumHunt, 4.0);
+		addObjectDefItemVerify(mediumHunt2ID, "Elk", numMediumHunt, 4.0);
+	} else {
+		addObjectDefItemVerify(mediumHunt2ID, "Caribou", numMediumHunt, 4.0);
+		addObjectDefItemVerify(mediumHunt1ID, "Elk", numMediumHunt, 4.0);
+	}
+
+	if(mediumHuntFloat < 0.9) {
+		placeObjectAtPlayerLocs(mediumHunt1ID);
+	} else {
+		placeObjectAtPlayerLocs(mediumHunt1ID);
+
+		// Place second one atomically in case it fails.
+		addSimLocConstraint(avoidAll);
+		addSimLocConstraint(avoidEdge);
+		addSimLocConstraint(avoidIsland);
+		addSimLocConstraint(avoidConnection);
+		addSimLocConstraint(shortAvoidImpassableLand);
+		addSimLocConstraint(createClassDistConstraint(classStartingSettlement, 50.0));
+		addSimLocConstraint(createTypeDistConstraint("AbstractSettlement", 10.0));
+		addSimLocConstraint(createTypeDistConstraint("Huntable", 20.0));
+		addSimLocConstraint(avoidTowerLOS);
+
+		enableSimLocTwoPlayerCheck();
+
+		addSimLoc(50.0, 90.0, avoidHuntDist, 0.0, 0.0, false, false, true);
+
+		placeObjectAtNewSimLocs(mediumHunt2ID, false, "extra medium hunt 2", false);
+	}
+
+	// Player bonus hunt.
+	float playerBonusHuntFloat = rmRandFloat(0.0, 1.0);
+
+	int playerBonusHuntID = createObjectDefVerify("player bonus hunt");
+	if(playerBonusHuntFloat < 0.5) {
+		addObjectDefItemVerify(playerBonusHuntID, "Aurochs", 2, 2.0);
+	} else if(playerBonusHuntFloat < 0.75) {
+		addObjectDefItemVerify(playerBonusHuntID, "Elk", rmRandInt(3, 4), 2.0);
+	} else {
+		addObjectDefItemVerify(playerBonusHuntID, "Elk", rmRandInt(3, 5), 2.0);
+	}
+
+	rmAddObjectDefConstraint(playerBonusHuntID, avoidAll);
+	rmAddObjectDefConstraint(playerBonusHuntID, avoidEdge);
+	rmAddObjectDefConstraint(playerBonusHuntID, avoidIsland);
+	rmAddObjectDefConstraint(playerBonusHuntID, avoidConnection);
+	rmAddObjectDefConstraint(playerBonusHuntID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(playerBonusHuntID, createClassDistConstraint(classStartingSettlement, 75.0));
+	rmAddObjectDefConstraint(playerBonusHuntID, avoidHuntable);
+
+	// Place normally (anywhere in player area).
+	for(i = 1; < cPlayers) {
+		placeObjectDefInArea(playerBonusHuntID, 0, rmAreaID("player area " + i));
+	}
+
+	// Center hunt.
+	int numBonusHunt1 = 1;
+	int numBonusHunt2 = 1;
+	int bonusHuntAvoidHuntable = avoidHuntable; // Adjust this for 1v1 if it causes problems.
+
+	if(cNonGaiaPlayers < 3) {
+		if(randChance()) {
+			numBonusHunt1 = rmRandInt(1, 2);
+			numBonusHunt2 = 3 - numBonusHunt1;
+			bonusHuntAvoidHuntable = createTypeDistConstraint("Huntable", 40.0);
+		} else {
+			numBonusHunt1 = 2;
+			numBonusHunt2 = 2;
+			bonusHuntAvoidHuntable = createTypeDistConstraint("Huntable", 30.0);
+		}
+	}
+
+	// Center hunt 1.
+	float centerHunt1Float = rmRandFloat(0.0, 1.0);
+
+	int centerHunt1ID = createObjectDefVerify("center hunt 1");
+	if(centerHunt1Float < 0.5) {
+		addObjectDefItemVerify(centerHunt1ID, "Aurochs", 2, 2.0);
+	} else if(centerHunt1Float < 0.75) {
+		addObjectDefItemVerify(centerHunt1ID, "Water Buffalo", rmRandInt(5, 6), 4.0);
+		if(randChance()) {
+			addObjectDefItemVerify(centerHunt1ID, "Elk", rmRandInt(2, 4), 4.0);
+		}
+	} else {
+		addObjectDefItemVerify(centerHunt1ID, "Caribou", rmRandInt(6, 9), 2.0);
+	}
+
+	rmAddObjectDefConstraint(centerHunt1ID, avoidAll);
+	rmAddObjectDefConstraint(centerHunt1ID, shortAvoidSettlement);
+	rmAddObjectDefConstraint(centerHunt1ID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(centerHunt1ID, createClassDistConstraint(classStartingSettlement, 60.0));
+	rmAddObjectDefConstraint(centerHunt1ID, bonusHuntAvoidHuntable);
+	rmAddObjectDefConstraint(centerHunt1ID, farAvoidPlayer);
+
+	placeObjectInPlayerSplits(centerHunt1ID, false, numBonusHunt1);
+
+	// Center hunt 2.
+	float centerHunt2Float = rmRandFloat(0.0, 1.0);
+
+	int centerHunt2ID = createObjectDefVerify("center hunt 2");
+	if(centerHunt2Float < 0.5) {
+		addObjectDefItemVerify(centerHunt2ID, "Elk", 3, 2.0);
+	} else if(centerHunt2Float < 0.75) {
+		addObjectDefItemVerify(centerHunt2ID, "Elk", rmRandInt(4, 6), 4.0);
+		if(randChance()) {
+			addObjectDefItemVerify(centerHunt2ID, "Aurochs", rmRandInt(2, 4), 4.0);
+		}
+	} else {
+		addObjectDefItemVerify(centerHunt2ID, "Boar", rmRandInt(6, 8), 2.0);
+	}
+
+	rmAddObjectDefConstraint(centerHunt2ID, avoidAll);
+	rmAddObjectDefConstraint(centerHunt2ID, shortAvoidSettlement);
+	rmAddObjectDefConstraint(centerHunt2ID, shortAvoidImpassableLand);
+	rmAddObjectDefConstraint(centerHunt2ID, createClassDistConstraint(classStartingSettlement, 60.0));
+	rmAddObjectDefConstraint(centerHunt2ID, bonusHuntAvoidHuntable);
+	rmAddObjectDefConstraint(centerHunt2ID, farAvoidPlayer);
+
+	placeObjectInPlayerSplits(centerHunt2ID, false, numBonusHunt2);
+
+	// Other food.
+	// Starting food, two for each player location.
+	placeObjectAtPlayerLocs(startingHuntID);
+	placeObjectAtPlayerLocs(startingHuntID);
+
+	// Far aurochs.
+	for(i = 1; < cPlayers) {
+		// Into player areas.
+		placeObjectDefInArea(farAurochsID, 0, rmAreaID("player area " + i));
+	}
+
+	// Center contains a lot of things, place remaining food before forests.
+	// Predators.
+	for(i = 1; < cPlayers) {
+		// Into player areas.
+		placeObjectDefInArea(farPredators3ID, 0, rmAreaID("player area " + i), 2);
+	}
+
+	for(i = 1; < cPlayers) {
+		// Into player areas.
+		placeObjectDefInArea(farPredators1ID, 0, rmAreaID("player area " + i));
+	}
+
+	// Regularily place predators 2 (avoid player).
+	placeObjectInPlayerSplits(farPredators2ID, false);
+
+	// Medium herdables.
+	placeObjectAtPlayerLocs(mediumHerdablesID);
+
+	// Far herdables.
+	placeObjectInPlayerSplits(farHerdablesID, false, rmRandInt(1, 2));
+
+	progress(0.8);
+
+	// Player forest.
+	int numPlayerForests = 5;
+
+	for(i = 1; < cPlayers) {
+		int playerForestAreaID = rmCreateArea("player forest area " + i);
+		rmSetAreaSize(playerForestAreaID, rmAreaTilesToFraction(2200));
+		rmSetAreaLocPlayer(playerForestAreaID, getPlayer(i));
+		rmSetAreaCoherence(playerForestAreaID, 1.0);
+		rmSetAreaWarnFailure(playerForestAreaID, false);
+		rmBuildArea(playerForestAreaID);
+
+		for(j = 0; < numPlayerForests) {
+			int playerForestID = rmCreateArea("player forest " + i + " " + j, playerForestAreaID);
+			rmSetAreaSize(playerForestID, rmAreaTilesToFraction(50), rmAreaTilesToFraction(100));
+			if(randChance(0.8)) {
+				rmSetAreaForestType(playerForestID, "Mixed Oak Forest");
+			} else {
+				rmSetAreaForestType(playerForestID, "Oak Forest");
+			}
+			rmSetAreaMinBlobs(playerForestID, 2);
+			rmSetAreaMaxBlobs(playerForestID, 4);
+			rmSetAreaMinBlobDistance(playerForestID, 16.0);
+			rmSetAreaMaxBlobDistance(playerForestID, 20.0);
+			rmAddAreaToClass(playerForestID, classForest);
+			rmAddAreaConstraint(playerForestID, avoidAll);
+			rmAddAreaConstraint(playerForestID, avoidForest);
+			rmAddAreaConstraint(playerForestID, forestAvoidStartingSettlement);
+			rmAddAreaConstraint(playerForestID, shortAvoidImpassableLand);
+			rmSetAreaWarnFailure(playerForestID, false);
+			rmBuildArea(playerForestID);
+		}
+	}
+
+	// Other forest.
+	int numRegularForests = 30 - numPlayerForests;
+
+	int forestFailCount = 0;
+
+	for(i = 0; < numRegularForests * cNonGaiaPlayers) {
+		int forestID = rmCreateArea("forest " + i);
+		rmSetAreaSize(forestID, rmAreaTilesToFraction(200), rmAreaTilesToFraction(300));
+		if(randChance(0.8)) {
+			rmSetAreaForestType(forestID, "Mixed Oak Forest");
+		} else {
+			rmSetAreaForestType(forestID, "Oak Forest");
+		}
+		rmSetAreaMinBlobs(forestID, 3);
+		rmSetAreaMaxBlobs(forestID, 7);
+		rmSetAreaMinBlobDistance(forestID, 16.0);
+		rmSetAreaMaxBlobDistance(forestID, 20.0);
+		rmAddAreaToClass(forestID, classForest);
+		rmAddAreaConstraint(forestID, avoidAll);
+		rmAddAreaConstraint(forestID, forestAvoidStartingSettlement);
+		rmAddAreaConstraint(forestID, avoidForest);
+		rmAddAreaConstraint(forestID, shortAvoidImpassableLand);
+		rmSetAreaWarnFailure(forestID, false);
+
+		if(rmBuildArea(forestID) == false) {
+			forestFailCount++;
+
+			if(forestFailCount == 5) {
+				break;
+			}
+		} else {
+			forestFailCount = 0;
+		}
+	}
+
+	progress(0.9);
+
+	// Starting herdables.
+	placeObjectAtPlayerLocs(startingHerdablesID, true);
 
 	// Straggler trees.
-	rmPlaceObjectDefPerPlayer(stragglerTreeID, false, 3);
+	placeObjectAtPlayerLocs(stragglerTreeID, false, rmRandInt(2, 5));
 
-	// Gold
-	rmPlaceObjectDefPerPlayer(startingGoldID, false);
-
-	// Pigs
-	rmPlaceObjectDefPerPlayer(closePigsID, true);
-
-	rmPlaceObjectDefPerPlayer(closeChickensID, true);
-
-	// player fish
-	rmPlaceObjectDefPerPlayer(playerFishID, false);
-
-	// water buffalo.
-	rmPlaceObjectDefPerPlayer(closeWaterBuffaloID, false);
-
-	// Medium things....
-	// Gold
-	rmPlaceObjectDefPerPlayer(mediumGoldID, false);
-
-	for (i = 1; < cNumberPlayers)
-	rmPlaceObjectDefAtLoc(mediumPigsID, 0, rmPlayerLocXFraction(i), rmPlayerLocZFraction(i), 2);
-
-	// Far things.
-	// Gold, 2 in player lands, 1 on bonus islands
-	for (i = 1; < cNumberPlayers)
-	rmPlaceObjectDefInRandomAreaOfClass(farGoldID, i, classBonusIsland);
-
-	//      rmPlaceObjectDefInArea(farGoldID, 0, rmAreaID("player"+i), 2);
-	for (i = 1; < cNumberPlayers)
-	rmPlaceObjectDefInRandomAreaOfClass(bonusGoldID, i, classBonusIsland);
-
-	// Hawks
-	rmPlaceObjectDefPerPlayer(farhawkID, false, 2);
-
-	// Relics
-	for (i = 1; < cNumberPlayers)
-	rmPlaceObjectDefInArea(relicID, 0, rmAreaID("player" + i));
-
-	// Pigs
-	for (i = 1; < cNumberPlayers)
-	rmPlaceObjectDefInArea(farPigsID, 0, rmAreaID("player" + i));
-
-	// Bonus huntable.
-	for (i = 1; < cNumberPlayers)
-	rmPlaceObjectDefInArea(bonusHuntableID, 0, rmAreaID("player" + i));
-
-	// Predators
-	for (i = 1; < cNumberPlayers)
-	rmPlaceObjectDefInArea(farPredatorID, 0, rmAreaID("player" + i));
+	// Relics.
+	for(i = 1; < cPlayers) {
+		// Into player areas.
+		placeObjectDefInArea(relicID, 0, rmAreaID("player area " + i));
+	}
 
 	// Random trees.
-	rmPlaceObjectDefAtLoc(randomTreeID, 0, 0.5, 0.5, 10 * cNumberNonGaiaPlayers);
+	placeObjectAtPlayerLocs(randomTree1ID, false, 5);
+	placeObjectAtPlayerLocs(randomTree2ID, false, 2);
 
-	int fishID = rmCreateObjectDef("fish");
-	rmAddObjectDefItem(fishID, "fish - mahi", 3, 9.0);
-	rmSetObjectDefMinDistance(fishID, 0.0);
-	rmSetObjectDefMaxDistance(fishID, rmXFractionToMeters(0.5));
-	rmAddObjectDefConstraint(fishID, fishVsFishID);
-	rmAddObjectDefConstraint(fishID, fishLand);
-	/* if(cNumberNonGaiaPlayers < 8) */
-	rmPlaceObjectDefAtLoc(fishID, 0, 0.5, 0.5, 20 * cNumberNonGaiaPlayers);
-	/*   else
-	  rmPlaceObjectDefAtLoc(fishID, 0, 0.5, 0.5, 6*cNumberNonGaiaPlayers); */
+	// Embellishment.
+	// Bushes.
+	int bush1ID = rmCreateObjectDef("bush 1");
+	rmAddObjectDefItem(bush1ID, "Bush", 4, 4.0);
+	rmSetObjectDefMinDistance(bush1ID);
+	rmAddObjectDefConstraint(bush1ID, embellishmentAvoidAll);
+	rmAddObjectDefConstraint(bush1ID, farAvoidImpassableLand);
+	rmPlaceObjectDefAtLoc(bush1ID, 0, 0.5, 0.5, 10 * cNonGaiaPlayers);
 
-	int sharkLand = rmCreateTerrainDistanceConstraint("shark land", "land", true, 20.0);
-	int sharkVsSharkID = rmCreateTypeDistanceConstraint("shark v shark", "shark", 20.0);
-	int sharkVsSharkID2 = rmCreateTypeDistanceConstraint("shark v orca", "orca", 20.0);
-	int sharkVsSharkID3 = rmCreateTypeDistanceConstraint("shark v whale", "whale", 20.0);
-	int sharkID = rmCreateObjectDef("shark");
-	if (rmRandFloat(0, 1) < 0.33) rmAddObjectDefItem(sharkID, "shark", 1, 0.0);
-	else if (rmRandFloat(0, 1) < 0.5) rmAddObjectDefItem(sharkID, "whale", 1, 0.0);
-	else rmAddObjectDefItem(sharkID, "orca", 1, 0.0);
-	rmSetObjectDefMinDistance(sharkID, 0.0);
-	rmSetObjectDefMaxDistance(sharkID, rmXFractionToMeters(0.5));
-	/*   rmAddObjectDefConstraint(sharkID, fishVsFishID); */
-	rmAddObjectDefConstraint(sharkID, sharkLand);
-	rmAddObjectDefConstraint(sharkID, playerEdgeConstraint);
-	rmAddObjectDefConstraint(sharkID, sharkVsSharkID);
-	rmAddObjectDefConstraint(sharkID, sharkVsSharkID2);
-	rmAddObjectDefConstraint(sharkID, sharkVsSharkID3);
-	rmPlaceObjectDefAtLoc(sharkID, 0, 0.5, 0.5, cNumberNonGaiaPlayers * 0.5);
+	int bush2ID = rmCreateObjectDef("bush 2");
+	rmAddObjectDefItem(bush2ID, "Bush", 3, 2.0);
+	rmAddObjectDefItem(bush2ID, "Rock Granite Small", 1, 2.0);
+	setObjectDefDistanceToMax(bush2ID);
+	rmAddObjectDefConstraint(bush2ID, embellishmentAvoidAll);
+	rmAddObjectDefConstraint(bush2ID, farAvoidImpassableLand);
+	rmPlaceObjectDefAtLoc(bush2ID, 0, 0.5, 0.5, 10 * cNonGaiaPlayers);
 
-	// Text
-	rmSetStatusText("", 0.60);
+	// Rocks.
+	int rock1ID = rmCreateObjectDef("rock small");
+	rmAddObjectDefItem(rock1ID, "Rock Granite Small", 3, 2.0);
+	rmAddObjectDefItem(rock1ID, "Rock Limestone Sprite", 4, 3.0);
+	setObjectDefDistanceToMax(rock1ID);
+	rmAddObjectDefConstraint(rock1ID, embellishmentAvoidAll);
+	rmAddObjectDefConstraint(rock1ID, farAvoidImpassableLand);
+	rmPlaceObjectDefAtLoc(rock1ID, 0, 0.5, 0.5, 5 * cNonGaiaPlayers);
 
-	int avoidBuildings = rmCreateTypeDistanceConstraint("avoid buildings", "Building", 5.0);
-	int classForest = rmDefineClass("forest");
-	int forestObjConstraint = rmCreateTypeDistanceConstraint("forest obj", "all", 6.0);
-	int forestConstraint = rmCreateClassDistanceConstraint("forest v forest", rmClassID("forest"), 25.0);
-	int forestSettleConstraint = rmCreateClassDistanceConstraint("forest settle", rmClassID("starting settlement"), 15.0);
-	int forestTerrain = rmCreateTerrainDistanceConstraint("forest terrain", "Land", false, 3.0);
+	int rock2ID = rmCreateObjectDef("rock sprite");
+	rmAddObjectDefItem(rock2ID, "Rock Granite Small", 1, 0.0);
+	setObjectDefDistanceToMax(rock2ID);
+	rmAddObjectDefConstraint(rock2ID, embellishmentAvoidAll);
+	rmAddObjectDefConstraint(rock2ID, farAvoidImpassableLand);
+	rmPlaceObjectDefAtLoc(rock2ID, 0, 0.5, 0.5, 10 * cNonGaiaPlayers);
 
-	// Player forests
-	int failCount = 0;
-	for (i = 1; < cNumberPlayers) {
-		failCount = 0;
-		int forestCount = rmRandInt(5, 8);
-		for (j = 0; < forestCount) {
-			int forestID = rmCreateArea("player" + i + "forest" + j, rmAreaID("player" + i));
-			rmSetAreaSize(forestID, rmAreaTilesToFraction(25), rmAreaTilesToFraction(100));
-			rmSetAreaWarnFailure(forestID, false);
-			rmSetAreaForestType(forestID, "palm forest");
-			rmAddAreaConstraint(forestID, forestSettleConstraint);
-			rmAddAreaConstraint(forestID, forestObjConstraint);
-			rmAddAreaConstraint(forestID, forestConstraint);
-			rmAddAreaConstraint(forestID, forestTerrain);
-			rmAddAreaToClass(forestID, classForest);
+	// Skeletons.
+	int skeletonID = rmCreateObjectDef("skeleton");
+	rmAddObjectDefItem(skeletonID, "Skeleton Animal", 1, 0.0);
+	setObjectDefDistanceToMax(skeletonID);
+	rmAddObjectDefConstraint(skeletonID, embellishmentAvoidAll);
+	rmAddObjectDefConstraint(skeletonID, farAvoidImpassableLand);
+	rmPlaceObjectDefAtLoc(skeletonID, 0, 0.5, 0.5, 3 * cNonGaiaPlayers);
 
-			rmSetAreaMinBlobs(forestID, 1);
-			rmSetAreaMaxBlobs(forestID, 5);
-			rmSetAreaMinBlobDistance(forestID, 16.0);
-			rmSetAreaMaxBlobDistance(forestID, 40.0);
-			rmSetAreaCoherence(forestID, 0.0);
+	// Water embellishment.
+	int lilly1ID = rmCreateObjectDef("lilly 1");
+	rmAddObjectDefItem(lilly1ID, "Water Lilly", 1, 0.0);
+	setObjectDefDistanceToMax(lilly1ID);
+	rmAddObjectDefConstraint(lilly1ID, embellishmentAvoidAll);
+	rmPlaceObjectDefAtLoc(lilly1ID, 0, 0.5, 0.5, 5 * cNonGaiaPlayers);
 
-			if (rmBuildArea(forestID) == false) {
-				// Stop trying once we fail 3 times in a row.
-				failCount++;
-				if (failCount == 3) break;
-			}
-			else failCount = 0;
-		}
+	int lilly2ID = rmCreateObjectDef("lilly 2");
+	rmAddObjectDefItem(lilly2ID, "Water Lilly", 4, 2.0);
+	setObjectDefDistanceToMax(lilly2ID);
+	rmAddObjectDefConstraint(lilly2ID, embellishmentAvoidAll);
+	rmPlaceObjectDefAtLoc(lilly2ID, 0, 0.5, 0.5, 5 * cNonGaiaPlayers);
+
+	int waterEmbellishmentID = rmCreateObjectDef("water embellishment");
+	rmAddObjectDefItem(waterEmbellishmentID, "Water Decoration", 3, 6.0);
+	setObjectDefDistanceToMax(waterEmbellishmentID);
+	rmAddObjectDefConstraint(waterEmbellishmentID, embellishmentAvoidAll);
+	rmPlaceObjectDefAtLoc(waterEmbellishmentID, 0, 0.5, 0.5, 10 * cNonGaiaPlayers);
+
+	// Birds.
+	int birdsID = rmCreateObjectDef("birds");
+	rmAddObjectDefItem(birdsID, "Hawk", 1, 0.0);
+	setObjectDefDistanceToMax(birdsID);
+	rmPlaceObjectDefAtLoc(birdsID, 0, 0.5, 0.5, 2 * cNonGaiaPlayers);
+
+	// Check the resources that could not be checked/verified yet.
+	for(i = 1; < cPlayers) {
+		addProtoPlacementCheck("Settlement Level 1", 1, i);
+		addProtoPlacementCheck("Tower", 4, i);
 	}
+	addProtoPlacementCheck("Gold Mine", cNonGaiaPlayers, 0);
+	addProtoPlacementCheck("Settlement", 2 * cNonGaiaPlayers, 0);
 
-	// Text
-	rmSetStatusText("", 0.80);
-
-	// Random island forests.
-	int forestConstraint2 = rmCreateClassDistanceConstraint("forest v forest2", rmClassID("forest"), 10.0);
-	for (i = 0; < bonusCount) {
-		forestCount = rmRandInt(2, 3);
-		for (j = 0; < forestCount) {
-			forestID = rmCreateArea("bonus" + i + "forest" + j, rmAreaID("bonus island" + i));
-			rmSetAreaSize(forestID, rmAreaTilesToFraction(25), rmAreaTilesToFraction(100));
-			rmSetAreaWarnFailure(forestID, false);
-			rmSetAreaForestType(forestID, "palm forest");
-			rmAddAreaConstraint(forestID, forestSettleConstraint);
-			rmAddAreaConstraint(forestID, forestObjConstraint);
-			rmAddAreaConstraint(forestID, forestConstraint2);
-			rmAddAreaConstraint(forestID, forestTerrain);
-			rmAddAreaToClass(forestID, classForest);
-			rmSetAreaWarnFailure(forestID, false);
-
-			rmSetAreaMinBlobs(forestID, 1);
-			rmSetAreaMaxBlobs(forestID, 5);
-			rmSetAreaMinBlobDistance(forestID, 16.0);
-			rmSetAreaMaxBlobDistance(forestID, 40.0);
-			rmSetAreaCoherence(forestID, 0.0);
-
-			rmBuildArea(forestID);
-		}
-	}
-
-	// Grass
-	int avoidAll = rmCreateTypeDistanceConstraint("avoid all", "all", 6.0);
-	int avoidGrass = rmCreateTypeDistanceConstraint("avoid grass", "grass", 12.0);
-	int avoidRock = rmCreateTypeDistanceConstraint("avoid rock", "rock limestone sprite", 8.0);
-	int grassID = rmCreateObjectDef("grass");
-	rmAddObjectDefItem(grassID, "grass", 3, 4.0);
-	rmSetObjectDefMinDistance(grassID, 0.0);
-	rmSetObjectDefMaxDistance(grassID, rmXFractionToMeters(0.5));
-	rmAddObjectDefConstraint(grassID, avoidGrass);
-	rmAddObjectDefConstraint(grassID, avoidImpassableLand);
-	rmPlaceObjectDefAtLoc(grassID, 0, 0.5, 0.5, 5 * cNumberNonGaiaPlayers);
-
-	int rockID2 = rmCreateObjectDef("rock group");
-	rmAddObjectDefItem(rockID2, "rock limestone sprite", 3, 2.0);
-	rmSetObjectDefMinDistance(rockID2, 0.0);
-	rmSetObjectDefMaxDistance(rockID2, rmXFractionToMeters(0.5));
-	rmAddObjectDefConstraint(rockID2, avoidAll);
-	rmAddObjectDefConstraint(rockID2, avoidImpassableLand);
-	rmAddObjectDefConstraint(rockID2, avoidRock);
-	rmPlaceObjectDefAtLoc(rockID2, 0, 0.5, 0.5, 3 * cNumberNonGaiaPlayers);
-
-	// RM X Finalize.
+	// Finalize RM X.
 	rmxFinalize();
 
-	// Text
-	rmSetStatusText("", 1.0);
-
+	progress(1.0);
 }
