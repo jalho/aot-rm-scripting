@@ -4,7 +4,7 @@ if [ -z ${MAP_DIR_PATH+x} ];
   then echo "Absolute path to AoT map directory is missing. Aborting!" && exit 1;
 fi
 if [ -d "$MAP_DIR_PATH" ];
-  then echo "Directory $MAP_DIR_PATH exists.";
+  then echo "Putting map script files to '$MAP_DIR_PATH'.";
   else echo "Directory '$MAP_DIR_PATH' does not exist. Aborting!" && exit 1;
 fi
 
@@ -27,3 +27,5 @@ sed -i $SED_ARG_DATE build/*
 # copy build to game directory
 cp build/script.xs "$MAP_DIR_PATH"/$SCRIPT_CHECKSUM.xs
 cp build/label.xml "$MAP_DIR_PATH"/$SCRIPT_CHECKSUM.xml
+
+echo "Done. Filenames start with $SCRIPT_CHECKSUM_SHORT."
