@@ -1,10 +1,10 @@
 # get checksum of current script
-SCRIPT_CHECKSUM=$(sha1sum script.xs | awk '{print $1}')
+SCRIPT_CHECKSUM=$(sha1sum src/script.xs | awk '{print $1}')
 
 # make copies for substituting placeholders with the hash
 mkdir -p build
-cp script.xs build/script.xs
-cp label.xml build/label.xml
+cp src/script.xs build/script.xs
+cp src/label.xml build/label.xml
 
 # substitute the placeholders in the copies
 SED_ARG="s/BUILD_ID_PLACEHOLDER/$SCRIPT_CHECKSUM/g"
