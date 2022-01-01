@@ -1,18 +1,28 @@
 /*
-** BIG ASS SAVANNAH
+** Big Ass Savannah
 ** Raudus
-** Last edit: 23/09/2021
+** Last edit: 01/01/2022 (checksum 2778f990)
 **
 ** Based on SAVANNAH by RebelsRising
 */
 
 include "rmx 5-0-0.xs";
 
+/** Placeholder text is to be substituted in the script that moves the map to RM2. */
+void injectVersionMsg() {
+	code("rule _build_checksum_msg");
+	code("{");
+	code("trChatSend(0, \"<color=0.12,0.71,0.38>Big Ass Savannah, version 01/01/2022 (checksum 2778f990).</color>\");");
+	code("xsDisableRule(\"_build_checksum_msg\");");
+	code("}");
+}
+
 void main() {
 	progress(0.0);
 
 	// Initial map setup.
-	rmxInit("Savannah");
+	rmxInit("Big Ass Savannah");
+	injectVersionMsg();
 
 	// Set size.
 	int axisLength = getStandardMapDimInMeters();
