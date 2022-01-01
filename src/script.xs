@@ -1,5 +1,5 @@
 /*
-** BIG ASS SAVANNAH
+** SED_MAP_NAME
 ** Raudus
 ** Last edit: SED_DATE (checksum SED_CHECKSUM_SHORT)
 **
@@ -12,7 +12,7 @@ include "rmx 5-0-0.xs";
 void injectVersionMsg() {
 	code("rule _build_checksum_msg");
 	code("{");
-	code("trChatSend(0, \"<color=0.0,0.5,0.6>Version SED_DATE (checksum SED_CHECKSUM_SHORT).</color>\");");
+	code("trChatSend(0, \"<color=0.0,0.5,0.6>SED_MAP_NAME, version SED_DATE (checksum SED_CHECKSUM_SHORT).</color>\");");
 	code("xsDisableRule(\"_build_checksum_msg\");");
 	code("}");
 }
@@ -21,7 +21,7 @@ void main() {
 	progress(0.0);
 
 	// Initial map setup.
-	rmxInit("Big Ass Savannah");
+	rmxInit("SED_MAP_NAME");
 	injectVersionMsg();
 
 	// Set size.
