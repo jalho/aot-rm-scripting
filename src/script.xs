@@ -1,7 +1,7 @@
 /*
 ** BIG ASS SAVANNAH
 ** Raudus
-** Last edit: 23/09/2021
+** Last edit: SED_DATE (checksum SED_CHECKSUM_SHORT)
 **
 ** Based on SAVANNAH by RebelsRising
 */
