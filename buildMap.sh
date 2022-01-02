@@ -19,7 +19,10 @@ MAP_TARGET_PATH=$2
 SCRIPT_SRC="maps/$MAP_SRC_DIR/src/script.xs"
 LABEL_SRC="maps/$MAP_SRC_DIR/src/label.xml"
 
-echo -e "Map src dir: $CYAN$MAP_SRC_DIR$NOCOLOR."
+if [ -d maps/$MAP_SRC_DIR ];
+  then echo -e "Map src dir: $CYAN$MAP_SRC_DIR$NOCOLOR.";
+  else echo "Path doesn't exist: maps/$MAP_SRC_DIR" && exit 1;
+fi;
 
 # validate target path; must exist
 if [ -d "$MAP_TARGET_PATH" ];
@@ -50,7 +53,7 @@ sed -i "$SED_ARG_DATE" maps/$MAP_SRC_DIR/build/*
 sed -i "$SED_ARG_MAP_NAME" maps/$MAP_SRC_DIR/build/*
 
 # copy build to game directory
-OUT_FILENAME=$(echo "$MAP_NAME-$CURRENT_DATE-SHA-$SCRIPT_CHECKSUM_SHORT" | sed -r s/[\ \/\\]//g) # remove all " ", "/" and "\" from filename
+OUT_FILENAME=$(echo "$MAP_NAME-$SCRIPT_CHECKSUM_SHORT" | sed -r s/[\ \/\\]//g) # remove all " ", "/" and "\" from filename
 echo -e "Using filename $CYAN$OUT_FILENAME$NOCOLOR (.xml and .xs)."
 cp maps/$MAP_SRC_DIR/build/script.xs "$MAP_TARGET_PATH"/$OUT_FILENAME.xs
 cp maps/$MAP_SRC_DIR/build/label.xml "$MAP_TARGET_PATH"/$OUT_FILENAME.xml
