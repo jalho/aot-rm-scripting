@@ -1,0 +1,6 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<mapinfo
+  detailsText = "Islands but they're lonely. Version SED_DATE (checksum SED_CHECKSUM_SHORT)."
+  imagepath = "ui\ui map islands 256x256"
+  displayName = "SED_MAP_NAME"
+/>

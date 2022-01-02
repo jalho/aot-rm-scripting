@@ -1,7 +1,7 @@
 /*
 ** Lonely Islands
 ** Raudus
-** Last edit: 01/01/2022 (checksum cd6360e1)
+** Last edit: SED_DATE (checksum SED_CHECKSUM_SHORT)
 **
 ** Based on "Islands" (ESO).
 */
@@ -11,7 +11,7 @@ include "rmx 5-0-0.xs";
 void injectVersionMsg() {
 	code("rule _build_checksum_msg");
 	code("{");
-	code("trChatSend(0, \"<color=0.12,0.71,0.38>Lonely Islands, version 01/01/2022 (checksum cd6360e1).</color>\");");
+	code("trChatSend(0, \"<color=0.12,0.71,0.38>SED_MAP_NAME, version SED_DATE (checksum SED_CHECKSUM_SHORT).</color>\");");
 	code("xsDisableRule(\"_build_checksum_msg\");");
 	code("}");
 }
@@ -22,7 +22,7 @@ void main() {
 	rmSetStatusText("", 0.01);
 
 	// RM X Setup.
-	rmxInit("Lonely Islands", false, false, false);
+	rmxInit("SED_MAP_NAME", false, false, false);
 	injectVersionMsg();
 
 	// Set size.

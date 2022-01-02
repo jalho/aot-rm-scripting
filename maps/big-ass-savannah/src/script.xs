@@ -1,7 +1,7 @@
 /*
 ** Big Ass Savannah
 ** Raudus
-** Last edit: 01/01/2022 (checksum 2778f990)
+** Last edit: SED_DATE (checksum SED_CHECKSUM_SHORT)
 **
 ** Based on SAVANNAH by RebelsRising
 */
@@ -12,7 +12,7 @@ include "rmx 5-0-0.xs";
 void injectVersionMsg() {
 	code("rule _build_checksum_msg");
 	code("{");
-	code("trChatSend(0, \"<color=0.12,0.71,0.38>Big Ass Savannah, version 01/01/2022 (checksum 2778f990).</color>\");");
+	code("trChatSend(0, \"<color=0.12,0.71,0.38>SED_MAP_NAME, version SED_DATE (checksum SED_CHECKSUM_SHORT).</color>\");");
 	code("xsDisableRule(\"_build_checksum_msg\");");
 	code("}");
 }
@@ -21,7 +21,7 @@ void main() {
 	progress(0.0);
 
 	// Initial map setup.
-	rmxInit("Big Ass Savannah");
+	rmxInit("SED_MAP_NAME");
 	injectVersionMsg();
 
 	// Set size.

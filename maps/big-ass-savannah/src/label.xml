@@ -1,0 +1,6 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<mapinfo
+  detailsText = "Savannah but real big. Version SED_DATE (checksum SED_CHECKSUM_SHORT)."
+  imagepath = "ui\ui map savannah 256x256"
+  displayName = "SED_MAP_NAME"
+/>
