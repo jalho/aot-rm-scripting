@@ -1,6 +1,6 @@
 # aot-rm-scripting
 
-AoT random map scripting.
+[AoT](https://en.wikipedia.org/wiki/Age_of_Mythology:_The_Titans) random map scripting.
 
 ## Development workflow
 
